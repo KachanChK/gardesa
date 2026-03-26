@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --color-verde: #5ADB40;
+    --color-verde-2: #48AF33;
+    --color-verde-3: #368326;
+    --color-azul: #479AF6;
+    --color-laranja: #EF7D00;
+    --color-azul-escuro: #261F31;
+    --color-preto: #141414;
+    --color-branco: #F3F3F3;
+
+    --font-sans: 'DM Sans', sans-serif;
+    --font-marca: 'Josefin Sans', sans-serif;
+}
+
+body {
+    background-color: var(--color-branco);
+    color: var(--color-preto);
+}

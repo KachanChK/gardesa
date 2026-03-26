@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gardesa</title>
+    <link rel="stylesheet" href="/css/output.css" />
+</head>
+
+<body class="font-sans">
+    <header class="bg-branco border-b border-[#BABABA] shadow-sm">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+            <span class="text-3xl font-marca text-verde-3 font-semibold">
+                gardesa
+            </span>
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#recursos"
+                    class="text-sm lg:text-base font-medium text-preto hover:bg-[#dddddd] rounded-full px-[10px] py-[5px]">Recursos</a>
+                <a href="#precos"
+                    class="text-sm lg:text-base font-medium text-preto hover:bg-[#dddddd] rounded-full px-[10px] py-[5px]">Preços</a>
+                <a href="#faq"
+                    class="text-sm lg:text-base font-medium text-preto hover:bg-[#dddddd] rounded-full px-[10px] py-[5px]">FAQ</a>
+            </nav>
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="/login"
+                    class="text-base lg:text-xl font-medium hover:bg-[#dddddd] rounded-full px-4 py-1.5 cursor-not-allowed">
+                    Acessar
+                </a>
+                <a href="/cadastro"
+                    class="text-sm lg:text-base bg-verde hover:bg-verde-2 text-white font-semibold rounded-full px-5 py-2 shadow-md shadow-verde/40 cursor-not-allowed">
+                    Criar conta
+                </a>
+            </div>
+            <a href="/login"
+                class="sm:hidden text-sm bg-verde hover:bg-verde-2 text-white font-semibold rounded-full px-5 py-2 shadow-md shadow-verde/40 cursor-not-allowed">
+                <span>Acessar</span>
+            </a>
+        </div>
+    </header>
+    <section class="bg-branco">
+        <div class="max-w-6xl mx-auto px-6 py-12 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+                <!-- Esquerda -->
+                <div class="flex flex-col gap-6">
+
+                    <!-- Badge -->
+                    <div
+                        class="inline-flex items-center gap-2 border border-[#bababa] rounded-full px-3.5 py-1.5 w-fit shadow-sm">
+                        <img src="/img/profile_pictures.png" alt="Fotos de perfil" class="w-10 h-5 object-cover" />
+                        <span class="text-xs text-preto/70">
+                            Usado por paisagistas em todos o brasil
+                        </span>
+                    </div>
+
+                    <!-- Título -->
+                    <h1 class="text-4xl sm:text-5xl font-bold text-preto leading-[1.1]">
+                        Tecnologia feita<br />
+                        para <span class="text-verde italic">paisagistas</span>.
+                    </h1>
+
+                    <!-- Subtítulo -->
+                    <p class="text-lg sm:text-2xl font-light text-preto/70 leading-relaxed max-w-md">
+                        Menos planilhas, menos trabalho.<br />
+                        Mais tempo criando projetos incríveis.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-wrap items-center gap-4">
+                        <a href="/cadastro"
+                            class="inline-flex items-center gap-2 bg-verde hover:bg-verde-2 text-white text-xs sm:text-base font-semibold rounded-full px-4 py-2.5 shadow-md shadow-verde-2/40">
+                            Começar agora
+                            <img src="/img/icons/arrow-up-right.svg" alt="Seta para cima"
+                                class="w-4 h-4 md:w-6 md:h-6 object-cover" />
+
+                        </a>
+                        <a href="#recursos"
+                            class="text-sm sm:text-base font-medium text-preto hover:bg-[#dddddd] rounded-full px-4 py-2.5">
+                            Explorar recursos
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- Direita — imagem -->
+                <div class="w-full hidden lg:block aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
+                    <img src="/img/foto_hero.png" alt="Ambiente verde com jacuzzi" class="w-full h-full object-cover" />
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <section id="waitlist" class="bg-branco">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="bg-branco border border-[#bababa] rounded-2xl px-8 py-10 flex flex-col items-center gap-6">
+                <div class="text-center">
+                    <h2 class="text-xl sm:text-3xl font-bold text-preto">Entre na lista de espera</h2>
+                    <p class="mt-2 text-xs sm:text-sm font-light text-preto/60 max-w-sm mx-auto">
+                        Seja um dos primeiros a ter acesso no lançamento.<br /> Garanta seus
+                        <span class="font-medium text-preto">7 dias grátis</span> do plano pago.
+                    </p>
+                </div>
+
+                <% if (typeof waitlistSucesso !=='undefined' && waitlistSucesso) { %>
+                    <div class="bg-[#f0fdf0] border border-verde-2/30 rounded-full px-6 py-3">
+                        <p class="text-sm font-medium text-verde">Inscrição confirmada! Em breve enviaremos
+                            atualizações para você!</p>
+                    </div>
+                    <% } else { %>
+                        <form action="/waitlist" method="POST" class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                            <input type="email" name="email" placeholder="burle.marx@email.com" required
+                                class="h-11 px-4 rounded-full border border-verde bg-[#f6f6f6] text-sm text-preto placeholder:text-preto/40 outline-none focus:border-verde-3 transition-colors flex-1" />
+                            <button type="submit"
+                                class="bg-verde hover:bg-verde-2 text-white font-semibold rounded-full px-6 h-11 shadow-md shadow-verde-2/40 flex items-center justify-center gap-2 whitespace-nowrap transition-colors">
+                                Quero me inscrever
+                            </button>
+                        </form>
+                        <% if (typeof waitlistErro !=='undefined' && waitlistErro) { %>
+                            <p class="text-sm text-red-500 -mt-3">
+                                <%= waitlistErro %>
+                            </p>
+                            <% } %>
+                                <% } %>
+
+                                    <!-- Contagem -->
+                                    <% if (typeof waitlistCount !=='undefined' && waitlistCount !==null) { %>
+                                        <p class="text-xs font-medium text-preto">
+                                            <span class="font-semibold">
+                                                <%= (waitlistCount + 70).toLocaleString('pt-BR') %>
+                                            </span> paisagistas já se inscreveram.
+                                        </p>
+                                        <% } %>
+
+
+
+            </div>
+        </div>
+    </section>
+    <section id="recursos" class="py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-2xl font-bold text-preto mb-6">O que a Gardesa oferece para você:</h2>
+
+            <!-- Features ativas -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-2">
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/file-text.svg" alt="Orçamentos" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Orçamentos</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Crie orçamentos profissionais e
+                        personalizados em minutos - exporte para PDF.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/users.svg" alt="Gestão de clientes" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Gestão de clientes</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Cadastre uma vez e nunca preencha os mesmos
+                        dados de novo.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/sparkles.svg" alt="IA Integrada" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">IA Integrada</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Preenche o orçamento, sugere prazos e
+                        calcula os valores automaticamente.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/building.svg" alt="Perfil da empresa" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Perfil da empresa</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Preencha os dados uma única vez. Eles
+                        aparecem em todos os seus documentos, sem copia e cola.</p>
+                </div>
+
+            </div>
+
+            <!-- Features em breve -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/receipt-text.svg" alt="Contratos" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Contratos</span>
+                        <span
+                            class="ml-auto text-[11px] font-semibold text-preto border border-verde-escuro rounded-full px-2 py-0.5">Em
+                            breve</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Explore modelos de contratos e personalize
+                        conforme suas necessidades.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/handshake.svg" alt="Comunidade" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Comunidade</span>
+                        <span
+                            class="ml-auto text-[11px] font-semibold text-preto border border-verde-escuro rounded-full px-2 py-0.5">Em
+                            breve</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Conecte-se com outros profissionais e
+                        compartilhe seus conhecimentos.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/boxes.svg" alt="Fornecedores" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Fornecedores</span>
+                        <span
+                            class="ml-auto text-[11px] font-semibold text-preto border border-verde-escuro rounded-full px-2 py-0.5">Em
+                            breve</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Entre em contato com os melhores
+                        fornecedores da sua região com apenas um clique.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/icons/render.svg" alt="IA Integrada" class="w-5 h-5 flex-shrink-0" />
+                        <span class="text-base font-semibold text-preto">Renders</span>
+                        <span
+                            class="ml-auto text-[11px] font-semibold text-preto border border-verde-escuro rounded-full px-2 py-0.5">Em
+                            breve</span>
+                    </div>
+                    <p class="text-sm font-light text-preto leading-relaxed">Crie renders realistas com IA e feche mais projetos.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <section class="relative bg-branco py-12 overflow-hidden">
+
+        <!-- Fundo de bolinhas -->
+        <div class="absolute inset-0 opacity-30 pointer-events-none hidden md:block" aria-hidden="true">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="dots" x="0" y="0" width="21" height="21" patternUnits="userSpaceOnUse">
+                        <circle cx="3" cy="3" r="1.5" fill="#2ED218" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#dots)" />
+            </svg>
+        </div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-6">
+
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-preto">
+                    Simplifique <span class="text-verde italic">seu fluxo</span> de trabalho
+                </h2>
+                <p class="mt-4 text-base sm:text-xl max-w-[600px] font-light text-preto mx-auto leading-relaxed">
+                    Tudo o que você precisa para gerenciar seus projetos de paisagismo,
+                    desde o primeiro contato até a fatura final.
+                </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
+
+                <!-- Ilustração papers -->
+                <div class="w-72 h-56 md:w-60 md:h-60 lg:w-96 lg:h-80 flex-shrink-0">
+                    <img src="/img/papers.svg" alt="Ilustração de documentos" class="w-full h-full object-contain" />
+                </div>
+
+                <!-- Seta -->
+                <div class="flex items-center justify-center flex-shrink-0 rotate-90 md:rotate-0">
+                    <img src="/img/icons/arrow-big-right.svg" alt="">
+                </div>
+
+                <!-- Dashboard image -->
+                <div class="flex-1 max-w-md w-full aspect-[16/10] rounded-2xl bg-[#d0d0d0] shadow-md overflow-hidden">
+                    <img src="/img/dashboard_image.png" alt="Dashboard da Gardesa"
+                        class="w-full h-full object-cover object-center" />
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="precos" class="bg-branco py-20">
+        <div class="max-w-6xl mx-auto px-6">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h2 class="text-xl sm:text-4xl font-bold text-preto">
+                    Preços <span class="relative inline-block">
+                        <span class="relative z-10">simples e transparentes</span>
+                        <span class="absolute inset-0 -inset-x-1 bg-verde/30 rounded-sm" aria-hidden="true"></span>
+                    </span>
+                </h2>
+                <p class="mt-3 text-base sm:text-2xl font-light text-preto">
+                    Comece grátis, assine quando fizer sentido para você.<br />
+                    <span class="underline">Cancele quando quiser.</span>
+                </p>
+            </div>
+
+            <!-- Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+                <!-- Gratuito -->
+                <div class="relative rounded-2xl border border-black/25 bg-white p-6 flex flex-col gap-6 min-h-[450px]">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-preto">Gratuito</h3>
+                        <p class="text-sm font-light text-preto/50 mt-0.5 leading-snug">
+                            Assine quando quiser. <span class="underline underline-offset-2">Ganhe 7 dias do plano
+                                mensal gratuitamente.</span>
+                        </p>
+                    </div>
+                    <div class="flex items-end gap-1">
+                        <span class="text-4xl font-bold text-preto">R$0</span>
+                    </div>
+                    <ul class="flex flex-col gap-2 flex-1">
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Crie 2 orçamentos por mês</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Até 5 clientes cadastrados</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Layouts de orçamentos
+                                limitados</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Exporte em PDF</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-red-400 mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Exporte para Excel e Docx</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-red-400 mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Acesso restrito a novas
+                                funcionalidades</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <a href="/cadastro"
+                            class="w-full bg-preto hover:bg-preto/80 text-white font-semibold rounded-full h-11 flex items-center justify-center gap-2 transition-colors">
+                            <span class="text-sm">Começar agora</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Plano Mensal (destaque) -->
+                <div
+                    class="relative rounded-2xl border border-verde bg-white shadow-lg shadow-verde/10 p-6 flex flex-col gap-6 min-h-[450px]">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span
+                            class="bg-verde text-white text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap">Mais
+                            escolhido!</span>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-preto">Plano Mensal</h3>
+                        <p class="text-sm font-light text-preto/50 mt-0.5 leading-snug">Desfrute de todas
+                            funcionalidades.</p>
+                    </div>
+                    <div class="flex items-end gap-1">
+                        <span class="text-4xl font-bold text-preto">R$19,90</span>
+                        <span class="text-sm font-light text-preto/50 mb-1">/mês</span>
+                    </div>
+                    <ul class="flex flex-col gap-2 flex-1">
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Orçamentos ilimitados</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Cadastro de clientes
+                                ilimitados</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Acesso a todos layouts de
+                                orçamento</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Exporte em PDF, Excel e Docx</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Acesso a todas novas
+                                funcionalidades</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <a href="/cadastro"
+                            class="w-full bg-verde hover:bg-verde-2 text-white font-semibold rounded-full h-11 flex items-center justify-center gap-2 shadow-md shadow-verde/40 transition-colors">
+                            <span class="text-sm">Escolher plano</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Plano Anual -->
+                <div class="relative rounded-2xl border border-black/25 bg-white p-6 flex flex-col gap-6 min-h-[450px]">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-preto">Plano Anual</h3>
+                        <p class="text-sm font-light text-preto/50 mt-0.5 leading-snug">
+                            Todos recursos do plano mensal com <span class="underline underline-offset-2">dois meses de
+                                desconto.</span>
+                        </p>
+                    </div>
+                    <div class="flex items-end gap-1">
+                        <span class="text-4xl font-bold text-preto">R$16,50</span>
+                        <span class="text-sm font-light text-preto/50 mb-1">/mês</span>
+                    </div>
+                    <ul class="flex flex-col gap-2 flex-1">
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Tudo do plano mensal</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">2 meses grátis (economia de
+                                R$39,80)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Acesso antecipado a novas
+                                funcionalidades</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="text-verde mt-0.5 flex-shrink-0" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span class="text-sm font-light text-preto leading-snug">Suporte prioritário</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <a href="/cadastro"
+                            class="w-full bg-preto hover:bg-preto/80 text-white font-semibold rounded-full h-11 flex items-center justify-center gap-2 transition-colors">
+                            <span class="text-sm">Escolher plano</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-no-repeat"
+            style="background-image: url('/img/cta_background.png'); background-position: 70% center;"></div>
+        <div class="absolute inset-0 bg-preto/60"></div>
+        <div class="relative z-10 max-w-6xl mx-auto px-6 py-28 flex flex-col items-start gap-6">
+            <h2 class="text-2xl sm:text-4xl md:text-4xl font-bold text-branco max-w-lg leading-tight">
+                Se você chegou até aqui, a Gardesa é para você!
+            </h2>
+            <p class="text-sm sm:text-xl font-light text-branco/70">Comece gratuitamente hoje mesmo.</p>
+            <a href="/cadastro"
+                class="inline-flex items-center gap-2 bg-verde hover:bg-verde-2 text-lg text-branco font-semibold rounded-full px-8 py-3 shadow-md shadow-verde/40 transition-colors">
+                Começar agora
+                <img src="/img/icons/arrow-up-right.svg" alt="Seta para cima"
+                    class="w-4 h-4 md:w-6 md:h-6 object-cover" />
+            </a>
+        </div>
+    </section>
+    <section id="faq" class="bg-branco py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+
+                <!-- Esquerda -->
+                <div class="flex flex-col gap-10">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-preto leading-tight">
+                        Tem alguma dúvida?<br />Estamos aqui para ajudar.
+                    </h2>
+                    <div class="flex flex-col sm:flex-row lg:flex-col gap-4">
+                        <div class="flex items-center gap-3 p-4 border border-preto/50 w-full max-w-[400px]">
+                            <img src="/img/icons/headset.svg" alt="Suporte" class="w-6 h-6 flex-shrink-0" />
+                            <div>
+                                <p class="text-sm font-semibold text-preto">Suporte humanizado</p>
+                                <p class="text-xs font-light text-preto/80 mt-0.5">Seg. a sex. das 08h00 às 18h00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 border border-preto/50 w-full max-w-[400px]">
+                            <img src="/img/icons/search.svg" alt="Centro de ajuda" class="w-6 h-6 flex-shrink-0" />
+                            <div>
+                                <p class="text-sm font-semibold text-preto">Centro de ajuda</p>
+                                <p class="text-xs font-light text-preto/80 mt-0.5">Assista tutoriais</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direita — Accordion -->
+                <div id="faq-list">
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">Como faço para usar?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            É muito simples! Crie sua conta gratuitamente, preencha os dados da sua empresa uma única
+                            vez e comece a criar orçamentos profissionais em minutos. Não é necessário nenhum
+                            conhecimento técnico.
+                        </div>
+                    </div>
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">Preciso instalar algum programa?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            Não! A Gardesa é uma plataforma 100% online. Basta acessar pelo navegador de qualquer
+                            dispositivo com acesso a internet.
+                        </div>
+                    </div>
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">Meus dados e os dos meus clientes estão
+                                seguros?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            Sim. Todos os dados são criptografados e armazenados com segurança. Nunca compartilhamos
+                            suas informações com terceiros.
+                        </div>
+                    </div>
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">Quais formas de pagamento são aceitas?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            Aceitamos cartão de crédito, débito e PIX. O pagamento é processado de forma segura através
+                            da nossa plataforma de pagamentos.
+                        </div>
+                    </div>
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">Posso cancelar quando quiser?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            Sim, sem burocracia. Você pode cancelar sua assinatura a qualquer momento sem precisar
+                            entrar em contato com o suporte.
+                        </div>
+                    </div>
+
+                    <div class="faq-item border-b border-black/25 py-4">
+                        <button onclick="toggleFaq(this)"
+                            class="w-full flex items-center justify-between gap-4 text-left">
+                            <span class="text-sm font-medium text-preto">O que acontece quando atinjo o limite do plano
+                                gratuito?</span>
+                            <span class="faq-icon flex-shrink-0 text-verde-escuro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer hidden mt-3 text-sm font-light text-preto leading-relaxed pr-8">
+                            Você receberá uma notificação quando estiver próximo do limite. Poderá continuar acessando
+                            os orçamentos já criados e escolher um plano pago para criar novos.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-preto text-white">
+        <div class="max-w-6xl mx-auto px-6 py-14">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+                <!-- Brand -->
+                <div class="lg:col-span-2 flex flex-col gap-4">
+                    <span class="text-3xl font-marca text-verde-3 font-semibold">
+                        gardesa
+                    </span>
+                    <p class="text-xs font-light text-white/25 mt-4">©2026 Gardesa. Todos os direitos reservados.</p>
+                </div>
+
+                <!-- Produto -->
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-sm font-semibold text-white">Produto</h4>
+                    <ul class="flex flex-col gap-2">
+                        <li><a href="#recursos"
+                                class="text-sm font-light text-white/40 hover:text-white transition-colors">Recursos</a>
+                        </li>
+                        <li><a href="#precos"
+                                class="text-sm font-light text-white/40 hover:text-white transition-colors">Preços</a>
+                        </li>
+                        <li><a href="#faq"
+                                class="text-sm font-light text-white/40 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Suporte -->
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-sm font-semibold text-white">Suporte</h4>
+                    <ul class="flex flex-col gap-2">
+                        <li><a href="/"
+                                class="text-sm font-light text-white/40 hover:text-white transition-colors">Centro de
+                                ajuda</a></li>
+                        <li><a href="/"
+                                class="text-sm font-light text-white/40 hover:text-white transition-colors">Termos de
+                                uso</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleFaq(btn) {
+            const item = btn.closest('.faq-item')
+            const answer = item.querySelector('.faq-answer')
+            const icon = item.querySelector('.faq-icon')
+            const isOpen = !answer.classList.contains('hidden')
+
+            // Fecha todos
+            document.querySelectorAll('.faq-item').forEach(el => {
+                el.querySelector('.faq-answer').classList.add('hidden')
+                el.querySelector('.faq-icon').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+            })
+
+            // Abre o clicado (se estava fechado)
+            if (!isOpen) {
+                answer.classList.remove('hidden')
+                icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+            }
+        }
+    </script>
+</body>
+
+</html>
