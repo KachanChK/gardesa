@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, '../public')))
 
 // Template engine
 app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', path.join(__dirname, '../src/views'))
 
 // Rota principal — busca contagem da waitlist
 app.get('/', async (req, res) => {
