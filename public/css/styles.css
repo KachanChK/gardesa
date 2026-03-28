@@ -1,4 +1,140 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+
+/* Black */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Black.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-BlackItalic.woff2') format('woff2');
+    font-weight: 900;
+    font-style: italic;
+}
+
+/* ExtraBold */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-ExtraBoldItalic.woff2') format('woff2');
+    font-weight: 800;
+    font-style: italic;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-BoldItalic.woff2') format('woff2');
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* SemiBold */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-SemiBoldItalic.woff2') format('woff2');
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Medium */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-MediumItalic.woff2') format('woff2');
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* Regular */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Italic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* Light */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-LightItalic.woff2') format('woff2');
+    font-weight: 300;
+    font-style: italic;
+}
+
+/* ExtraLight */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-ExtraLightItalic.woff2') format('woff2');
+    font-weight: 200;
+    font-style: italic;
+}
+
+/* Thin */
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NeulisAlt';
+    src: url('../fonts/NeulisAlt-ThinItalic.woff2') format('woff2');
+    font-weight: 100;
+    font-style: italic;
+}
+
 @import "tailwindcss";
 
 @theme {
@@ -11,8 +147,8 @@
     --color-preto: #141414;
     --color-branco: #F3F3F3;
 
-    --font-sans: 'DM Sans', sans-serif;
-    --font-marca: 'Josefin Sans', sans-serif;
+    --font-sans: 'NeulisAlt', sans-serif;
+    --font-marca: 'NeulisAlt', sans-serif;
 }
 
 body {
