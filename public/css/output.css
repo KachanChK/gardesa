@@ -1,5 +1,4 @@
 /*! tailwindcss v4.2.2 | MIT License | https://tailwindcss.com */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
 @layer properties;
 @font-face {
   font-family: 'NeulisAlt';
@@ -350,6 +349,9 @@
   }
   .mx-auto {
     margin-inline: auto;
+  }
+  .my-12 {
+    margin-block: calc(var(--spacing) * 12);
   }
   .-mt-3 {
     margin-top: calc(var(--spacing) * -3);
@@ -866,9 +868,6 @@
   .text-verde {
     color: var(--color-verde);
   }
-  .text-verde-3 {
-    color: var(--color-verde-3);
-  }
   .text-white {
     color: var(--color-white);
   }
@@ -1146,12 +1145,6 @@
     @media (width >= 64rem) {
       font-size: var(--text-base);
       line-height: var(--tw-leading, var(--text-base--line-height));
-    }
-  }
-  .lg\:text-xl {
-    @media (width >= 64rem) {
-      font-size: var(--text-xl);
-      line-height: var(--tw-leading, var(--text-xl--line-height));
     }
   }
 }
