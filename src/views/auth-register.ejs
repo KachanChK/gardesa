@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar Conta | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+</head>
+
+<body class="font-sans auth-page-background">
+    <div class="min-h-screen auth-dot-grid">
+        <header class="border-b border-black/10 backdrop-blur-sm">
+            <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+                <a href="/" class="text-3xl font-marca text-verde">gardesa</a>
+            </div>
+        </header>
+
+        <main class="max-w-2xl mx-auto px-6 py-10 sm:py-14">
+            <div class="gap-6 lg:gap-8 items-stretch">
+                <section class="rounded-[32px] border border-black/10 bg-branco px-6 py-7 sm:px-8 sm:py-9 shadow-xl shadow-black/5">
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-semibold text-preto">Criar conta</h2>
+                    </div>
+
+                    <% if (statusMessage) { %>
+                        <div class="mt-6 rounded-3xl border border-verde/30 bg-verde/10 px-4 py-3 text-sm text-verde-3">
+                            <%= statusMessage %>
+                        </div>
+                    <% } %>
+
+                    <% if (authError) { %>
+                        <div class="mt-4 rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                            <%= authError %>
+                        </div>
+                    <% } %>
+
+                    <% if (!supabasePublicEnabled) { %>
+                        <div class="mt-4 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                            Configure `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY` no servidor para habilitar o Google e o login por senha.
+                        </div>
+                    <% } %>
+
+                    <div class="mt-7">
+                        <a href="/auth/google?mode=register&next=<%= encodeURIComponent(nextPath) %>"
+                            class="w-full h-12 rounded-full border border-black/10 bg-white hover:bg-black/5 text-preto font-semibold flex items-center justify-center gap-3 transition-colors">
+                            <img src="/img/icons/icons8-google.svg" alt="Google icon" width="22" height="22">
+                            Cadastrar com Google
+                        </a>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-4">
+                        <div class="h-px flex-1 bg-black/10"></div>
+                        <span class="text-xs uppercase tracking-[0.18em] text-preto/35">ou</span>
+                        <div class="h-px flex-1 bg-black/10"></div>
+                    </div>
+
+                    <form action="/auth/cadastro" method="POST" novalidate class="mt-6 space-y-4">
+                        <input type="hidden" name="next" value="<%= nextPath %>" />
+
+                        <div>
+                            <label for="name" class="text-sm font-medium text-preto">Nome</label>
+                            <input id="name" name="name" type="text" autocomplete="name" required
+                                value="<%= values.name ?? '' %>"
+                                class="mt-2 w-full h-12 rounded-2xl border border-black/10 bg-white px-4 text-preto outline-none focus:border-verde-2 transition-colors" />
+                            <% if (fieldErrors.name?.length) { %>
+                                <p class="mt-2 text-sm text-red-500"><%= fieldErrors.name[0] %></p>
+                            <% } %>
+                        </div>
+
+                        <div>
+                            <label for="email" class="text-sm font-medium text-preto">E-mail</label>
+                            <input id="email" name="email" type="email" autocomplete="email" required
+                                value="<%= values.email ?? '' %>"
+                                class="mt-2 w-full h-12 rounded-2xl border border-black/10 bg-white px-4 text-preto outline-none focus:border-verde-2 transition-colors" />
+                            <% if (fieldErrors.email?.length) { %>
+                                <p class="mt-2 text-sm text-red-500"><%= fieldErrors.email[0] %></p>
+                            <% } %>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="password" class="text-sm font-medium text-preto">Senha</label>
+                                <div class="relative mt-2">
+                                    <input id="password" name="password" type="password" autocomplete="new-password" required
+                                        value="<%= values.password ?? '' %>"
+                                        class="w-full h-12 rounded-2xl border border-black/10 bg-white px-4 pr-14 text-preto outline-none focus:border-verde-2 transition-colors" />
+                                    <button type="button" data-toggle-password data-target-input="password"
+                                        class="absolute inset-y-0 right-0 flex items-center gap-2 px-4 text-preto/45 hover:text-preto transition-colors">
+                                        <span class="sr-only" data-password-toggle-label>Mostrar senha</span>
+                                        <span data-icon-visible>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M2.1 12a11 11 0 0 1 19.8 0 11 11 0 0 1-19.8 0Z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </span>
+                                        <span data-icon-hidden class="hidden">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="m3 3 18 18" />
+                                                <path d="M10.6 10.7a3 3 0 0 0 4.2 4.2" />
+                                                <path d="M9.4 5.5A10.7 10.7 0 0 1 12 5.2c5 0 9.3 3 10.9 6.8a11.8 11.8 0 0 1-2.4 3.7" />
+                                                <path d="M6.6 6.7A11.8 11.8 0 0 0 1.1 12c1.6 3.8 5.9 6.8 10.9 6.8a10.7 10.7 0 0 0 5.1-1.2" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                                <% if (fieldErrors.password?.length) { %>
+                                    <p class="mt-2 text-sm text-red-500"><%= fieldErrors.password[0] %></p>
+                                <% } %>
+                            </div>
+
+                            <div>
+                                <label for="confirmPassword" class="text-sm font-medium text-preto">Confirmar senha</label>
+                                <div class="relative mt-2">
+                                    <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required
+                                        value="<%= values.confirmPassword ?? '' %>"
+                                        class="w-full h-12 rounded-2xl border border-black/10 bg-white px-4 pr-14 text-preto outline-none focus:border-verde-2 transition-colors" />
+                                    <button type="button" data-toggle-password data-target-input="confirmPassword"
+                                        class="absolute inset-y-0 right-0 flex items-center gap-2 px-4 text-preto/45 hover:text-preto transition-colors">
+                                        <span class="sr-only" data-password-toggle-label>Mostrar senha</span>
+                                        <span data-icon-visible>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M2.1 12a11 11 0 0 1 19.8 0 11 11 0 0 1-19.8 0Z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </span>
+                                        <span data-icon-hidden class="hidden">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="m3 3 18 18" />
+                                                <path d="M10.6 10.7a3 3 0 0 0 4.2 4.2" />
+                                                <path d="M9.4 5.5A10.7 10.7 0 0 1 12 5.2c5 0 9.3 3 10.9 6.8a11.8 11.8 0 0 1-2.4 3.7" />
+                                                <path d="M6.6 6.7A11.8 11.8 0 0 0 1.1 12c1.6 3.8 5.9 6.8 10.9 6.8a10.7 10.7 0 0 0 5.1-1.2" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                                <% if (fieldErrors.confirmPassword?.length) { %>
+                                    <p class="mt-2 text-sm text-red-500"><%= fieldErrors.confirmPassword[0] %></p>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="px-4 py-4 text-sm text-preto/60">
+                            Sua senha precisa ter no minimo 6 caracteres, pelo menos uma letra maiuscula, um numero e um caractere especial.
+                        </div>
+
+                        <button type="submit"
+                            class="w-full h-12 rounded-full bg-verde hover:bg-verde-2 text-white font-semibold shadow-md shadow-verde/30 transition-colors">
+                            Criar conta com e-mail
+                        </button>
+                    </form>
+
+                    <div class="py-4 px-1">
+                        <p class="text-sm text-preto/70">
+                            Já tem uma conta?
+                            <a href="/auth/login?next=<%= encodeURIComponent(nextPath) %>"
+                                class="font-semibold text-verde-3 hover:text-verde transition-colors">
+                                Entre aqui
+                            </a>
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="/js/auth.js" defer></script>
+</body>
+
+</html>

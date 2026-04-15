@@ -153,3 +153,34 @@ body {
     background-color: var(--color-branco);
     color: var(--color-preto);
 }
+
+.hero-cta-background {
+    background-image: url('/img/cta_background.png');
+    background-position: 70% center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.auth-page-background {
+    background:
+        radial-gradient(circle at top right, rgba(90, 219, 64, 0.16), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(20, 20, 20, 0.08), transparent 32%),
+        var(--color-branco);
+}
+
+.auth-dot-grid {
+    background-image: radial-gradient(rgba(72, 175, 51, 0.18) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+.auth-panel-glow::after {
+    content: '';
+    position: absolute;
+    inset: auto -60px -80px auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 9999px;
+    background: rgba(90, 219, 64, 0.14);
+    filter: blur(30px);
+    pointer-events: none;
+}

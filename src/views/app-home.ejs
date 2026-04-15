@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %></title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+</head>
+
+<body class="font-sans auth-page-background">
+    <div class="min-h-screen auth-dot-grid">
+        <header class="border-b border-black/10 backdrop-blur-sm">
+            <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+                <a href="/" class="text-3xl font-marca text-verde">gardesa</a>
+                <form action="/auth/logout" method="POST">
+                    <button type="submit"
+                        class="text-sm font-semibold text-preto hover:bg-black/5 rounded-full px-4 py-2 transition-colors">
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-6 py-10 sm:py-14">
+            <section class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 lg:gap-8 items-stretch">
+                <div class="rounded-[32px] border border-black/10 bg-preto text-branco px-7 py-8 sm:px-9 sm:py-10">
+                    <span class="inline-flex items-center gap-2 border border-white/15 rounded-full px-3 py-1 text-xs text-white/70">
+                        Area autenticada
+                    </span>
+                    <h1 class="mt-6 text-3xl sm:text-5xl font-semibold leading-[1.05]">
+                        Seu acesso foi liberado com sucesso.
+                    </h1>
+                    <p class="mt-4 text-base sm:text-lg text-white/70 max-w-xl leading-relaxed">
+                        Esta e a pagina provisoria protegida. Ela so fica acessivel quando existe uma sessao valida no servidor.
+                    </p>
+
+                    <div class="mt-8 rounded-[28px] border border-white/10 bg-white/6 p-5">
+                        <p class="text-xs uppercase tracking-[0.2em] text-white/40">Proximos passos</p>
+                        <ul class="mt-4 space-y-3 text-sm text-white/75">
+                            <li>Conectar o restante da aplicacao a esta sessao.</li>
+                            <li>Adicionar o perfil do usuario e dados internos da plataforma.</li>
+                            <li>Expandir as rotas protegidas conforme o produto evoluir.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="rounded-[32px] border border-black/10 bg-branco px-6 py-7 sm:px-8 sm:py-9 shadow-xl shadow-black/5">
+                    <p class="text-sm font-medium text-preto/50">Usuario autenticado</p>
+                    <h2 class="mt-2 text-3xl font-semibold text-preto"><%= userName %></h2>
+                    <p class="mt-2 text-base text-preto/60"><%= userEmail %></p>
+
+                    <div class="mt-8 grid gap-4">
+                        <div class="rounded-3xl border border-black/8 bg-white px-5 py-4">
+                            <p class="text-xs uppercase tracking-[0.18em] text-preto/35">Status da sessao</p>
+                            <p class="mt-2 text-sm text-preto/70">Persistente ate logout, com renovacao automatica usando refresh token.</p>
+                        </div>
+                        <div class="rounded-3xl border border-black/8 bg-white px-5 py-4">
+                            <p class="text-xs uppercase tracking-[0.18em] text-preto/35">Login social</p>
+                            <p class="mt-2 text-sm text-preto/70">Google funcionando via Supabase OAuth com sincronizacao da sessao no servidor.</p>
+                        </div>
+                        <div class="rounded-3xl border border-black/8 bg-white px-5 py-4">
+                            <p class="text-xs uppercase tracking-[0.18em] text-preto/35">Login por senha</p>
+                            <p class="mt-2 text-sm text-preto/70">Cadastro e autenticacao validados no servidor antes do acesso.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conectando | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+</head>
+
+<body class="font-sans auth-page-background">
+    <div class="min-h-screen auth-dot-grid flex items-center justify-center px-6">
+        <div class="w-full max-w-xl rounded-[32px] border border-black/10 bg-branco p-8 sm:p-10 shadow-xl shadow-black/5 text-center">
+            <div class="mx-auto w-14 h-14 rounded-full bg-verde/15 flex items-center justify-center">
+                <div class="w-7 h-7 rounded-full border-[3px] border-verde border-t-transparent animate-spin"></div>
+            </div>
+
+            <h1 class="mt-6 text-3xl font-semibold text-verde-3">Conectando sua conta</h1>
+            <p class="mt-3 text-base text-preto/60 leading-relaxed">
+                Estamos validando sua autenticacao com seguranca e preparando seu acesso.
+            </p>
+
+            <% if (!supabasePublicEnabled) { %>
+                <div class="mt-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                    Configure `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY` para concluir o login com Google.
+                </div>
+            <% } %>
+
+            <a href="/auth/login?status=google-failed&next=<%= encodeURIComponent(nextPath) %>"
+                class="mt-8 inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-preto hover:bg-black/5 transition-colors">
+                Voltar para o login
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
