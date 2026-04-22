@@ -50,6 +50,10 @@ app.get('/', async (req, res) => {
   }
 })
 
+app.get('/inicio', (_req, res) => {
+  res.render('inicio')
+})
+
 // Rotas
 app.use(waitlistRouter)
 
