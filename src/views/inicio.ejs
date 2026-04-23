@@ -39,17 +39,18 @@
 
     <aside id="dashboard-sidebar"
         class="fixed inset-y-0 -left-[260px] z-50 flex w-[260px] flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 md:left-0 md:shadow-none">
-        <div class="flex h-[68px] items-center gap-3 border-b border-[#e2e2e2] px-5">
-            <span data-sidebar-label class="text-2xl text-verde font-regular leading-none">gardesa</span>
+        <div id="sidebar-brand"
+            class="flex h-[68px] items-center justify-start border-b border-[#e2e2e2] px-5 transition-all duration-300">
+            <img id="sidebar-brand-icon" src="/img/icons/logo_gardesa.svg" alt="Ícone Gardesa" class="hidden size-7" />
+            <span id="sidebar-brand-text" data-sidebar-label class="text-2xl leading-none text-verde">gardesa</span>
         </div>
 
         <nav class="flex flex-1 flex-col gap-1 px-3 py-5" aria-label="Navegação principal">
             <% navItems.forEach((item) => { %>
                 <a href="<%= item.href %>" data-nav-link
-                    class="group flex h-11 items-center justify-start gap-3 rounded-[8px] px-3 text-sm font-medium transition-colors <%= item.active ? 'bg-[#d1fac8] text-[#2ed218]' : 'text-preto/70 hover:bg-[#f3f3f3] hover:text-preto' %>"
+                    class="group flex h-11 items-center justify-start gap-3 rounded-[8px] px-3 text-sm font-medium transition-colors <%= item.active ? 'bg-[#d1fac8] text-[#2ed218]' : 'text-preto hover:bg-[#f3f3f3]' %>"
                     aria-current="<%= item.active ? 'page' : 'false' %>">
-                    <span
-                        class="flex size-8 shrink-0 items-center justify-center rounded-[8px] <%= item.active ? 'bg-white/70' : 'bg-transparent' %>">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
                         <img src="<%= item.icon %>" alt="" class="<%= item.iconSize %> object-contain" />
                     </span>
                     <span data-sidebar-label class="truncate"><%= item.label %></span>
@@ -74,15 +75,13 @@
             class="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-[#e2e2e2] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
             <div class="flex min-w-0 items-center gap-4">
                 <button id="sidebar-toggle" type="button"
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e2e2e2] bg-white text-preto transition-colors hover:bg-[#f3f3f3]"
+                    class="flex size-10 shrink-0 items-center justify-center rounded-full text-preto transition-colors hover:bg-[#f3f3f3]"
                     aria-label="Abrir ou fechar menu lateral">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" />
-                    </svg>
+                    <img src="/img/icons/panel-left-stroke-rounded.svg" alt="Visão Sidebar" class="size-6">
                 </button>
                 <div class="h-7 w-px bg-[#e2e2e2]"></div>
                 <div class="min-w-0">
+                    <p class="text-xs font-light leading-none text-preto/50">Dashboard</p>
                     <h1 class="mt-1 truncate text-lg font-semibold leading-none text-preto"><%= currentPage %></h1>
                 </div>
             </div>
@@ -95,7 +94,7 @@
                 </div>
             </section>
 
-            <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo">
+            <section class="hidden md:grid md:grid-cols-2 md:gap-4 xl:grid-cols-4" aria-label="Resumo">
                 <% metrics.forEach((metric) => { %>
                     <article class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm">
                         <div class="flex items-start justify-between gap-4">
@@ -122,10 +121,10 @@
                     </a>
                 </div>
 
-                <div class="w-full overflow-x-auto">
-                    <div class="min-w-[860px]">
+                <div class="hidden w-full overflow-x-auto md:block">
+                    <div class="min-w-[1080px]">
                         <div
-                            class="grid h-11 grid-cols-[330px_170px_120px_105px_130px_80px] items-center bg-[#d1fac8] px-5 text-sm font-medium text-preto">
+                            class="grid h-11 grid-cols-[minmax(380px,1.9fr)_minmax(220px,1fr)_150px_130px_130px_96px] items-center bg-[#d1fac8] px-6 text-sm font-medium text-preto">
                             <span>Nome</span>
                             <span>Cliente</span>
                             <span>Valor</span>
@@ -136,16 +135,16 @@
 
                         <% recentBudgets.forEach((budget) => { %>
                             <div
-                                class="grid min-h-[60px] grid-cols-[330px_170px_120px_105px_130px_80px] items-center border-b border-[#e2e2e2] px-5 text-sm text-preto last:border-b-0">
-                                <p class="truncate pr-5 font-medium"><%= budget.name %></p>
-                                <p class="truncate pr-3 font-normal"><%= budget.client %></p>
+                                class="grid min-h-[68px] grid-cols-[minmax(380px,1.9fr)_minmax(220px,1fr)_150px_130px_130px_96px] items-center border-b border-[#e2e2e2] px-6 text-sm text-preto last:border-b-0">
+                                <p class="truncate pr-10 font-medium"><%= budget.name %></p>
+                                <p class="truncate pr-8 font-normal"><%= budget.client %></p>
                                 <p class="font-normal"><%= budget.value %></p>
                                 <p class="font-normal"><%= budget.createdAt %></p>
                                 <span
                                     class="flex h-[22px] w-[96px] items-center justify-center rounded-full bg-[rgba(168,165,172,0.6)] text-xs font-medium leading-none text-white shadow-[1px_1px_4px_0px_rgba(0,0,0,0.18)]">
                                     <%= budget.status %>
                                 </span>
-                                <div class="flex items-center justify-end gap-4">
+                                <div class="flex items-center justify-end gap-4 justify-self-end">
                                     <a href="#" aria-label="Baixar orçamento" class="transition-opacity hover:opacity-70">
                                         <img src="/img/icons/download_icon.svg" alt="" class="size-5" />
                                     </a>
@@ -156,6 +155,47 @@
                             </div>
                         <% }) %>
                     </div>
+                </div>
+
+                <div class="flex flex-col divide-y divide-[#e2e2e2] md:hidden">
+                    <% recentBudgets.forEach((budget) => { %>
+                        <article class="flex flex-col gap-4 px-4 py-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-sm font-semibold text-preto"><%= budget.name %></h3>
+                                    <p class="mt-1 text-sm font-light text-preto/60"><%= budget.client %></p>
+                                </div>
+                                <span
+                                    class="flex h-[22px] shrink-0 items-center justify-center rounded-full bg-[rgba(168,165,172,0.6)] px-3 text-xs font-medium leading-none text-white shadow-[1px_1px_4px_0px_rgba(0,0,0,0.18)]">
+                                    <%= budget.status %>
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                                <div>
+                                    <p class="text-xs font-light uppercase tracking-[0.02em] text-preto/50">Valor</p>
+                                    <p class="mt-1 font-medium text-preto"><%= budget.value %></p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-light uppercase tracking-[0.02em] text-preto/50">Criado</p>
+                                    <p class="mt-1 font-medium text-preto"><%= budget.createdAt %></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-4">
+                                <a href="#"
+                                    class="inline-flex h-9 items-center justify-center rounded-full border border-[#e2e2e2] px-3 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]"
+                                    aria-label="Baixar orçamento">
+                                    <img src="/img/icons/download_icon.svg" alt="" class="size-4" />
+                                </a>
+                                <a href="#"
+                                    class="inline-flex h-9 items-center justify-center rounded-full border border-[#e2e2e2] px-3 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]"
+                                    aria-label="Deletar orçamento">
+                                    <img src="/img/icons/deletar_icon.svg" alt="" class="size-4" />
+                                </a>
+                            </div>
+                        </article>
+                    <% }) %>
                 </div>
             </section>
         </main>
@@ -168,6 +208,9 @@
         const toggle = document.getElementById('sidebar-toggle')
         const labels = document.querySelectorAll('[data-sidebar-label]')
         const navLinks = document.querySelectorAll('[data-nav-link]')
+        const brand = document.getElementById('sidebar-brand')
+        const brandText = document.getElementById('sidebar-brand-text')
+        const brandIcon = document.getElementById('sidebar-brand-icon')
         let collapsed = false
 
         function isDesktop() {
@@ -190,6 +233,14 @@
             labels.forEach((label) => {
                 label.classList.toggle('md:hidden', collapsed)
             })
+
+            brand.classList.toggle('md:justify-center', collapsed)
+            brand.classList.toggle('md:px-0', collapsed)
+            brand.classList.toggle('md:justify-start', !collapsed)
+            brand.classList.toggle('md:px-5', !collapsed)
+            brandText.classList.toggle('md:hidden', collapsed)
+            brandIcon.classList.toggle('hidden', !collapsed)
+            brandIcon.classList.toggle('md:hidden', !collapsed)
 
             navLinks.forEach((link) => {
                 link.classList.toggle('md:justify-center', collapsed)
@@ -216,6 +267,10 @@
                 setCollapsed(false)
             }
         })
+
+        if (isDesktop()) {
+            setCollapsed(false)
+        }
     </script>
 </body>
 
