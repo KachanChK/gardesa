@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orçamentos | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
+    <script src="/js/orcamentos.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-branco font-sans text-preto antialiased">
+    <%
+        const currentPage = 'Orçamentos'
+        const navItems = [
+            { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/inicio', iconSize: 'size-5' },
+            { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: true, href: '/orcamentos', iconSize: 'size-5' },
+            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '#clientes', iconSize: 'size-5' },
+            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '#empresa', iconSize: 'size-5' }
+        ]
+    %>
+
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
+    <%- include('partials/dashboard-sidebar', { navItems }) %>
+
+    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[260px]">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
+
+        <main class="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+            <section data-budget-list-view class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4 px-1 xl:flex-row xl:items-center xl:justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold leading-tight text-preto">Todos os orçamentos</h2>
+                    </div>
+
+                    <div class="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+                        <label class="relative block w-full xl:w-[420px]">
+                            <span class="sr-only">Buscar orçamento</span>
+                            <img src="/img/icons/search.svg" alt="" class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 opacity-50" />
+                            <input type="search" data-budget-search
+                                class="h-11 w-full rounded-full border border-[#e2e2e2] bg-white pl-11 pr-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="Buscar por nome ou cliente" />
+                        </label>
+
+                        <button type="button" data-open-new-budget
+                            class="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-md shadow-verde/25 transition-colors hover:bg-verde-2 lg:w-auto cursor-pointer">
+                            <img src="/img/icons/plus_white.svg" alt="" class="size-5" />
+                            Novo orçamento
+                        </button>
+                    </div>
+                </div>
+
+                <section class="rounded-[8px] border border-[#e2e2e2] bg-white shadow-sm">
+                    <div class="hidden min-[1100px]:block">
+                        <div class="w-full">
+                            <div
+                                class="grid h-11 grid-cols-[72px_minmax(220px,1.55fr)_minmax(180px,1fr)_minmax(170px,0.92fr)_112px_148px_128px] items-center bg-[#d1fac8] px-6 text-sm font-medium text-preto max-[1424px]:grid-cols-[72px_minmax(220px,1.55fr)_minmax(170px,1fr)_minmax(160px,0.9fr)_148px_128px] max-[1220px]:grid-cols-[72px_minmax(220px,1.6fr)_minmax(150px,0.95fr)_minmax(156px,0.85fr)_128px]">
+                                <span>ID</span>
+                                <span>Nome</span>
+                                <span>Cliente</span>
+                                <span>Valor</span>
+                                <span class="max-[1424px]:hidden">Atualizado</span>
+                                <span class="max-[1220px]:hidden">Status</span>
+                                <span aria-hidden="true"></span>
+                            </div>
+
+                            <div data-budget-table class="divide-y divide-[#e2e2e2]"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col divide-y divide-[#e2e2e2] min-[1100px]:hidden" data-budget-mobile-list></div>
+
+                    <div data-budget-empty class="hidden px-5 py-12 text-center">
+                        <div class="mx-auto flex max-w-md flex-col items-center gap-4">
+                            <div class="flex size-14 items-center justify-center rounded-full bg-[#f2f8ef]">
+                                <img src="/img/icons/orcamentos_default.svg" alt="" class="size-6" />
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold text-preto">Nenhum orçamento encontrado</h4>
+                                <p class="mt-2 text-sm font-light leading-relaxed text-preto/60">
+                                    Ajuste a busca ou crie um novo orçamento para começar a preencher o fluxo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section data-budget-editor-view class="hidden flex-col gap-6">
+                <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                    <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                        <div class="flex flex-wrap items-start gap-3">
+                            <div>
+                                <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Editor de orçamento</p>
+                                <h3 class="mt-2 text-2xl font-semibold leading-tight text-preto" data-editor-title>
+                                    Novo orçamento
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span data-save-indicator
+                                class="inline-flex h-10 items-center justify-center rounded-full bg-[#f2f8ef] px-4 text-sm font-medium text-verde-2">
+                                Salvo
+                            </span>
+                            <button type="button" data-open-preview
+                                class="inline-flex gap-2 h-10 items-center justify-center rounded-full border border-[#e2e2e2] px-4 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                                <img src="/img/icons/olho_black.svg" alt="" class="size-4" />
+                                Visualizar
+                            </button>
+                            <button type="button" data-export-pdf
+                                class="inline-flex gap-2 h-10 items-center justify-center rounded-full bg-azul px-5 text-sm font-semibold text-white transition-colors hover:bg-azul/85 cursor-pointer">
+                                <img src="/img/icons/download_white.svg" alt="" class="size-4" />
+                                Exportar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div data-expired-banner
+                        class="mt-5 hidden rounded-[8px] border border-[#f4d3af] bg-[#fff1df] px-4 py-4 text-sm font-medium leading-relaxed text-preto">
+                        Este orçamento está com a validade vencida. Revise as condições antes de enviar ao cliente.
+                    </div>
+                </section>
+
+                <div class="mt-2 flex flex-col gap-6">
+                    <div class="flex flex-col gap-6">
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                            <div class="flex flex-col gap-2">
+                                <h4 class="text-xl font-semibold text-preto">Cabeçalho do orçamento</h4>
+                            </div>
+
+                            <div class="mt-6 grid gap-5 xl:grid-cols-2">
+                                <div class="flex flex-col gap-5">
+                                    <label class="flex flex-col gap-2">
+                                        <span class="text-sm font-medium text-preto">Título do orçamento</span>
+                                        <input type="text" data-budget-name maxlength="50"
+                                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                            placeholder="Ex: Jardim residencial - Família Santos" />
+                                    </label>
+
+                                    <div class="flex flex-col gap-2">
+                                        <span class="text-sm font-medium text-preto">Cliente</span>
+                                        <div class="relative">
+                                            <input type="text" data-editor-client-search autocomplete="off"
+                                                class="h-12 w-full cursor-pointer rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] pl-4 pr-12 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                                placeholder="Selecione ou busque um cliente" />
+                                            <span class="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center">
+                                                <img src="/img/icons/seta_baixo.svg" alt="" class="size-4 opacity-60" />
+                                            </span>
+                                            <div data-editor-client-results
+                                                class="absolute left-0 top-[calc(100%+8px)] z-20 hidden w-full rounded-[16px] border border-[#e2e2e2] bg-white p-2 shadow-[0_18px_40px_rgba(20,20,20,0.12)]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <label class="flex flex-col gap-2">
+                                    <span class="text-sm font-medium text-preto">Descrição</span>
+                                    <textarea data-budget-description rows="5" maxlength="400"
+                                        class="min-h-[120px] rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-3 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                        placeholder="Descreva o escopo, contexto do projeto ou informações relevantes para o PDF."></textarea>
+                                </label>
+                            </div>
+                        </section>
+
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                    <h4 class="mt-2 text-xl font-semibold text-preto">Itens do orçamento</h4>
+                                    <p class="mt-2 text-sm font-light leading-relaxed text-preto/60">
+                                        Adicione, remova e reordene os itens por arrastar e soltar. O mesmo ordenamento será usado no PDF.
+                                    </p>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button type="button" data-add-item
+                                        class="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-verde px-4 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                                        <img src="/img/icons/plus_white.svg" alt="" class="size-5" />
+                                        Adicionar item
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div data-items-empty class="mt-6 hidden rounded-[8px] border border-dashed border-[#d7d7d7] bg-[#fbfbfb] px-5 py-8 text-center">
+                                <p class="text-base font-medium text-preto">Nenhum item adicionado ainda.</p>
+                            </div>
+
+                            <div data-item-list class="mt-6 flex flex-col gap-4"></div>
+                        </section>
+
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                            <div class="flex flex-col gap-6">
+                                <div>
+                                    <h4 class="mt-2 text-xl font-semibold text-preto">Valor total e visibilidade no PDF</h4>
+                                    <p class="mt-2 text-sm font-light leading-relaxed text-preto/60">
+                                        O total é calculado automaticamente, mas pode ser ajustado manualmente sem alterar os subtotais individuais.
+                                    </p>
+                                </div>
+
+                                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                                    <div class="flex h-full flex-col rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-5">
+                                        <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Total calculado</p>
+                                        <p class="mt-3 min-w-0 break-words text-[clamp(1.5rem,5vw,1.875rem)] font-semibold leading-tight text-preto"
+                                            data-computed-total>
+                                            R$ 0,00
+                                        </p>
+                                    </div>
+
+                                    <div class="flex h-full flex-col rounded-[8px] border border-[#e2e2e2] bg-[#f2f8ef] p-5">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Total exibido</p>
+                                                <div class="mt-3 rounded-[8px] border border-[#dce6d7] bg-white px-4 py-3 shadow-sm">
+                                                    <input type="text" inputmode="decimal" data-effective-total
+                                                        class="w-full min-w-0 border-0 bg-transparent p-0 text-[clamp(1.5rem,5vw,1.875rem)] font-semibold leading-tight text-preto outline-none placeholder:text-preto/45"
+                                                        value="R$ 0,00" aria-label="Valor total exibido" />
+                                                </div>
+                                            </div>
+                                            <button type="button" data-reset-total
+                                                class="hidden inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-[#dce6d7] bg-white text-verde-2 transition-colors hover:bg-[#f3f3f3]"
+                                                aria-label="Restaurar valor automático">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                    <path d="M7.5 6H4.5V3" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M4.75 6.25C5.96 4.57 7.93 3.5 10.15 3.5C13.86 3.5 16.88 6.44 16.88 10.08C16.88 13.72 13.86 16.66 10.15 16.66C7.18 16.66 4.66 14.78 3.77 12.17" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p class="mt-2 text-xs font-light leading-relaxed text-preto/60">
+                                            Clique no valor para editar o total exibido.
+                                        </p>
+                                        <p data-total-override-badge class="mt-4 hidden text-xs font-medium uppercase tracking-[0.16em] text-verde-2">
+                                            Total personalizado ativo
+                                        </p>
+                                    </div>
+
+                                    <div class="flex h-full flex-col rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-5 sm:col-span-2 xl:col-span-1">
+                                        <div class="flex h-full items-start justify-between gap-4 rounded-[8px] border border-[#e2e2e2] bg-white px-4 py-4">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-preto">Mostrar valores no PDF</p>
+                                                <p class="mt-1 text-sm font-light leading-relaxed text-preto/60">
+                                                    Quando desativado, o PDF oculta os subtotais dos itens e mantém apenas o total final.
+                                                </p>
+                                            </div>
+                                            <button type="button" data-toggle-values
+                                                class="relative inline-flex h-7 w-13 shrink-0 items-center self-start rounded-full bg-[#d9d9d9] transition-colors">
+                                                <span data-toggle-values-thumb
+                                                    class="inline-block size-5 translate-x-1 rounded-full bg-white shadow-sm transition-transform"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                            <div class="flex flex-col gap-2">
+                                <h4 class="text-xl font-semibold text-preto">Pagamento e validade</h4>
+                            </div>
+
+                            <div class="mt-6 grid gap-5 xl:grid-cols-[240px_minmax(0,1fr)]">
+                                <label class="flex flex-col gap-2">
+                                    <span class="text-sm font-medium text-preto">Validade do orçamento</span>
+                                    <input type="date" data-budget-validity
+                                        class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde" />
+                                </label>
+
+                                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-5">
+                                    <p class="text-sm font-medium text-preto">Formas de pagamento</p>
+                                    <div data-payment-options class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+                                    <div data-other-payment-wrapper class="mt-4 hidden">
+                                        <label class="flex flex-col gap-2">
+                                            <span class="text-sm font-medium text-preto">Outro meio de pagamento</span>
+                                            <input type="text" data-other-payment maxlength="20"
+                                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-white px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                                placeholder="Descreva a forma de pagamento" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label class="mt-5 flex flex-col gap-2">
+                                <span class="text-sm font-medium text-preto">Condições de pagamento</span>
+                                <textarea data-payment-conditions rows="4" maxlength="250"
+                                    class="min-h-[110px] rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-3 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                    placeholder="Ex: 50% na assinatura, 50% na entrega."></textarea>
+                            </label>
+                        </section>
+
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6">
+                            <div class="flex flex-col gap-2">
+                                <h4 class="text-xl font-semibold text-preto">Observações gerais</h4>
+                            </div>
+
+                            <label class="mt-6 flex flex-col gap-2">
+                                <span class="text-sm font-medium text-preto">Observações adicionais</span>
+                                <textarea data-budget-observations rows="5" maxlength="250"
+                                    class="min-h-[140px] rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-3 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                    placeholder="Ex: garantias, prazo de execução, itens não inclusos ou cuidados específicos."></textarea>
+                            </label>
+                        </section>
+                    </div>
+
+                    <aside class="hidden flex-col gap-6">
+                        <section class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-medium uppercase tracking-[0.18em] text-preto/45">Resumo rápido</p>
+                                    <h4 class="mt-2 text-xl font-semibold text-preto">Status do orçamento</h4>
+                                </div>
+                                <span data-summary-status-badge
+                                    class="inline-flex h-8 items-center justify-center rounded-full bg-[#f0f0f0] px-4 text-xs font-medium text-preto">
+                                    Rascunho
+                                </span>
+                            </div>
+
+                            <div class="mt-5 grid gap-4">
+                                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-4">
+                                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Cliente</p>
+                                    <p class="mt-2 text-lg font-semibold text-preto" data-summary-client>Não selecionado</p>
+                                </div>
+                                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-4">
+                                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Itens</p>
+                                    <p class="mt-2 text-lg font-semibold text-preto" data-summary-items>0 itens</p>
+                                </div>
+                                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-4">
+                                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Valor final</p>
+                                    <p class="mt-2 text-lg font-semibold text-preto" data-summary-total>R$ 0,00</p>
+                                </div>
+                                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-4">
+                                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto/45">Validade</p>
+                                    <p class="mt-2 text-lg font-semibold text-preto" data-summary-validity>Não informada</p>
+                                </div>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div data-new-budget-modal class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+        <div data-close-new-budget class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[600px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="flex items-start justify-between gap-4 border-b border-[#e2e2e2] px-6 py-5">
+                <div>
+                    <h3 class="mt-2 text-2xl font-semibold text-preto">Novo orçamento</h3>
+                </div>
+
+                <button type="button" data-close-new-budget
+                    class="inline-flex size-10 items-center justify-center rounded-full text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3] cursor-pointer">
+                    <img src="/img/icons/x_icon.svg" alt="Fechar" class="size-5">
+                </button>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="grid gap-5">
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">Título do orçamento</span>
+                        <input type="text" data-new-budget-name maxlength="50"
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Ex: Jardim residencial - Família Santos" />
+                    </label>
+
+                    <div class="grid gap-5">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-sm font-medium text-preto">Cliente</span>
+                            <div class="relative">
+                                <input type="text" data-new-budget-client-search autocomplete="off"
+                                    class="h-12 w-full cursor-pointer rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] pl-4 pr-12 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                    placeholder="Selecione ou busque um cliente" />
+                                <span class="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center">
+                                    <img src="/img/icons/seta_baixo.svg" alt="" class="size-4 opacity-60" />
+                                </span>
+                                <div data-new-budget-client-results
+                                    class="absolute left-0 top-[calc(100%+8px)] z-20 hidden w-full rounded-[16px] border border-[#e2e2e2] bg-white p-2 shadow-[0_18px_40px_rgba(20,20,20,0.12)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-new-budget
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Cancelar
+                </button>
+                <button type="button" data-create-budget
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                    Criar orçamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-new-client-modal class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+        <div data-close-new-client class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[680px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="flex items-start justify-between gap-4 border-b border-[#e2e2e2] px-6 py-5">
+                <div>
+                    <h3 class="mt-2 text-2xl font-semibold text-preto">Adicionar novo cliente</h3>
+                </div>
+
+                <button type="button" data-close-new-client
+                    class="inline-flex size-10 items-center justify-center rounded-full text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    ×
+                </button>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="grid gap-5 sm:grid-cols-2 sm:items-start">
+                    <label class="flex flex-col gap-2 sm:col-span-2">
+                        <span class="text-sm font-medium text-preto">Nome</span>
+                        <input type="text" data-new-client-name
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Nome completo ou razão social" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">E-mail</span>
+                        <input type="email" data-new-client-email
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="cliente@email.com" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">Telefone</span>
+                        <input type="text" data-new-client-phone
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="(11) 99999-9999" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">Endereço</span>
+                        <input type="text" data-new-client-address
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Rua, número, bairro, cidade e estado" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">CPF / CNPJ</span>
+                        <input type="text" data-new-client-document
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Documento do cliente" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-new-client
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Cancelar
+                </button>
+                <button type="button" data-save-new-client
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                    Salvar cliente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-export-warning-modal class="fixed inset-0 z-[76] hidden items-center justify-center p-4">
+        <div data-close-export-warning class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[620px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="border-b border-[#e2e2e2] px-6 py-5">
+                <h3 class="mt-2 text-2xl font-semibold text-preto">Campos importantes ainda não preenchidos</h3>
+                <p class="mt-2 text-sm font-light leading-relaxed text-preto/60">
+                    Você pode cancelar para revisar agora ou prosseguir mesmo assim com a exportação.
+                </p>
+            </div>
+
+            <div class="px-6 py-6">
+                <div data-export-warning-list class="flex flex-col gap-3"></div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-export-warning
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Revisar orçamento
+                </button>
+                <button type="button" data-confirm-export
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-preto px-5 text-sm font-semibold text-white transition-colors hover:bg-preto/85">
+                    Exportar mesmo assim
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-delete-budget-modal class="fixed inset-0 z-[77] hidden items-center justify-center p-4">
+        <div data-close-delete-budget class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[560px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="border-b border-[#e2e2e2] px-6 py-5">
+                <h3 class="mt-2 text-2xl font-semibold text-preto">Excluir orçamento?</h3>
+                <p class="mt-2 text-regular font-light leading-relaxed text-preto">
+                    Tem certeza que deseja excluir este orçamento? Esta ação não poderá ser desfeita.
+                </p>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-4">
+                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto">Este orçamento será excluido para sempre:</p>
+                    <p class="mt-2 text-base font-semibold text-preto" data-delete-budget-name>Orçamento</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-delete-budget
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Cancelar
+                </button>
+                <button type="button" data-confirm-delete-budget
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-[#c62828] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#b42318]">
+                    Deletar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-preview-drawer class="pointer-events-none fixed inset-0 z-[80] hidden">
+        <div data-close-preview class="absolute inset-0 bg-black/45 opacity-0 transition-opacity duration-200"></div>
+        <div data-preview-panel
+            class="absolute inset-y-0 right-0 flex w-full max-w-[980px] translate-x-full flex-col border-l border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)] transition-transform duration-300">
+            <div class="flex items-center justify-between gap-4 border-b border-[#e2e2e2] px-5 py-4">
+                <div>
+                    <h3 class="mt-2 text-2xl font-semibold text-preto">Preview do PDF</h3>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span data-preview-status
+                        class="inline-flex h-10 items-center justify-center rounded-full bg-[#f2f8ef] px-4 text-sm font-medium text-verde-2">
+                        Atualizando preview
+                    </span>
+                    <button type="button" data-close-preview
+                        class="inline-flex size-10 items-center justify-center rounded-full border border-[#e2e2e2] text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                        ×
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-hidden bg-[#edf1ea]">
+                <iframe data-preview-frame title="Preview do PDF" class="h-full w-full bg-[#edf1ea]"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.__ORCAMENTOS_SEED__ = <%- serializedSeed %>
+    </script>
+</body>
+
+</html>

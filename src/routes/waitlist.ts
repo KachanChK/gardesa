@@ -62,7 +62,7 @@ router.post('/waitlist', waitlistRateLimit, async (req, res) => {
 
     try {
         await resend.emails.send({
-            from: process.env.RESEND_FROM ?? 'Gardesa <waitlist@gardesa.com.br>',
+            from: 'Gardesa <waitlist@gardesa.com.br>',
             to: [email],
             subject: 'Você está na lista de espera da Gardesa!',
             html: buildConfirmationEmail(email)
