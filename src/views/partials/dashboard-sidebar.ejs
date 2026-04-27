@@ -1,0 +1,34 @@
+<aside id="dashboard-sidebar"
+    class="fixed inset-y-0 -left-[260px] z-50 flex w-[260px] flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 md:left-0 md:shadow-none">
+    <div id="sidebar-brand"
+        class="flex h-[68px] items-center justify-start border-b border-[#e2e2e2] px-5 transition-all duration-300">
+        <a class="flex items-center gap-3">
+            <img id="sidebar-brand-icon" src="/img/icons/logo_gardesa.svg" alt="Ícone Gardesa" class="hidden size-7" />
+            <span id="sidebar-brand-text" data-sidebar-label class="text-2xl leading-none text-verde">gardesa</span>
+        </a>
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-5" aria-label="Navegação principal">
+        <% navItems.forEach((item) => { %>
+            <a href="<%= item.href %>" data-nav-link
+                class="group flex h-11 items-center justify-start gap-3 rounded-[8px] px-3 text-sm font-medium transition-colors <%= item.active ? 'bg-[#d1fac8] text-[#2ed218]' : 'text-preto hover:bg-[#f3f3f3]' %>"
+                aria-current="<%= item.active ? 'page' : 'false' %>">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
+                    <img src="<%= item.active ? item.iconActive : item.iconDefault %>" alt="" class="<%= item.iconSize %> object-contain" />
+                </span>
+                <span data-sidebar-label class="truncate"><%= item.label %></span>
+            </a>
+        <% }) %>
+    </nav>
+
+    <div class="border-t border-[#e2e2e2] p-3">
+        <div data-nav-link class="flex h-12 items-center justify-start gap-3 rounded-[8px] px-3">
+            <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#bababa]/70 bg-[#d9d9d9]">
+                <span class="size-4 rounded-full bg-white/60"></span>
+            </span>
+            <div data-sidebar-label class="min-w-0">
+                <p class="truncate text-sm font-medium text-preto">Perfil</p>
+            </div>
+        </div>
+    </div>
+</aside>

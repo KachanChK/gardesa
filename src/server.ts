@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import waitlistRouter from './routes/waitlist'
+import orcamentosRouter from './routes/orcamentos'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -56,6 +57,7 @@ app.get('/inicio', (_req, res) => {
 
 // Rotas
 app.use(waitlistRouter)
+app.use(orcamentosRouter)
 
 // 404
 app.use((req, res) => {

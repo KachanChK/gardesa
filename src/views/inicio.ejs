@@ -7,6 +7,7 @@
     <title>Início | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
     <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
 </head>
 
 <body class="min-h-screen bg-branco font-sans text-preto antialiased">
@@ -21,10 +22,10 @@
         }))
 
         const navItems = [
-            { label: 'Início', icon: '/img/icons/inicio_icon.svg', active: true, href: '/inicio', iconSize: 'size-5' },
-            { label: 'Orçamentos', icon: '/img/icons/orcamentos_icon.svg', active: false, href: '#orcamentos', iconSize: 'size-5' },
-            { label: 'Clientes', icon: '/img/icons/clientes_icon.svg', active: false, href: '#clientes', iconSize: 'size-5' },
-            { label: 'Empresa', icon: '/img/icons/empresa_icon.svg', active: false, href: '#empresa', iconSize: 'size-5' }
+            { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: true, href: '/inicio', iconSize: 'size-5' },
+            { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: false, href: '/orcamentos', iconSize: 'size-5' },
+            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '#clientes', iconSize: 'size-5' },
+            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '#empresa', iconSize: 'size-5' }
         ]
 
         const metrics = [
@@ -36,56 +37,10 @@
     %>
 
     <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
-
-    <aside id="dashboard-sidebar"
-        class="fixed inset-y-0 -left-[260px] z-50 flex w-[260px] flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 md:left-0 md:shadow-none">
-        <div id="sidebar-brand"
-            class="flex h-[68px] items-center justify-start border-b border-[#e2e2e2] px-5 transition-all duration-300">
-            <img id="sidebar-brand-icon" src="/img/icons/logo_gardesa.svg" alt="Ícone Gardesa" class="hidden size-7" />
-            <span id="sidebar-brand-text" data-sidebar-label class="text-2xl leading-none text-verde">gardesa</span>
-        </div>
-
-        <nav class="flex flex-1 flex-col gap-1 px-3 py-5" aria-label="Navegação principal">
-            <% navItems.forEach((item) => { %>
-                <a href="<%= item.href %>" data-nav-link
-                    class="group flex h-11 items-center justify-start gap-3 rounded-[8px] px-3 text-sm font-medium transition-colors <%= item.active ? 'bg-[#d1fac8] text-[#2ed218]' : 'text-preto hover:bg-[#f3f3f3]' %>"
-                    aria-current="<%= item.active ? 'page' : 'false' %>">
-                    <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
-                        <img src="<%= item.icon %>" alt="" class="<%= item.iconSize %> object-contain" />
-                    </span>
-                    <span data-sidebar-label class="truncate"><%= item.label %></span>
-                </a>
-            <% }) %>
-        </nav>
-
-        <div class="border-t border-[#e2e2e2] p-3">
-            <div data-nav-link class="flex h-12 items-center justify-start gap-3 rounded-[8px] px-3">
-                <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#bababa]/70 bg-[#d9d9d9]">
-                    <span class="size-4 rounded-full bg-white/60"></span>
-                </span>
-                <div data-sidebar-label class="min-w-0">
-                    <p class="truncate text-sm font-medium text-preto">Perfil</p>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <%- include('partials/dashboard-sidebar', { navItems }) %>
 
     <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[260px]">
-        <header
-            class="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-[#e2e2e2] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
-            <div class="flex min-w-0 items-center gap-4">
-                <button id="sidebar-toggle" type="button"
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full text-preto transition-colors hover:bg-[#f3f3f3]"
-                    aria-label="Abrir ou fechar menu lateral">
-                    <img src="/img/icons/panel-left-stroke-rounded.svg" alt="Visão Sidebar" class="size-6">
-                </button>
-                <div class="h-7 w-px bg-[#e2e2e2]"></div>
-                <div class="min-w-0">
-                    <p class="text-xs font-light leading-none text-preto/50">Dashboard</p>
-                    <h1 class="mt-1 truncate text-lg font-semibold leading-none text-preto"><%= currentPage %></h1>
-                </div>
-            </div>
-        </header>
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
 
         <main class="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
             <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -115,7 +70,7 @@
                     <div>
                         <h2 class="text-xl font-semibold leading-tight text-preto">Orçamentos recentes</h2>
                     </div>
-                    <a href="#"
+                    <a href="/orcamentos"
                         class="inline-flex h-9 w-fit items-center justify-center rounded-full border border-[#e2e2e2] px-4 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
                         Ver todos
                     </a>
@@ -200,78 +155,6 @@
             </section>
         </main>
     </div>
-
-    <script>
-        const sidebar = document.getElementById('dashboard-sidebar')
-        const layout = document.getElementById('dashboard-layout')
-        const overlay = document.getElementById('sidebar-overlay')
-        const toggle = document.getElementById('sidebar-toggle')
-        const labels = document.querySelectorAll('[data-sidebar-label]')
-        const navLinks = document.querySelectorAll('[data-nav-link]')
-        const brand = document.getElementById('sidebar-brand')
-        const brandText = document.getElementById('sidebar-brand-text')
-        const brandIcon = document.getElementById('sidebar-brand-icon')
-        let collapsed = false
-
-        function isDesktop() {
-            return window.matchMedia('(min-width: 768px)').matches
-        }
-
-        function setMobileMenu(open) {
-            sidebar.classList.toggle('-left-[260px]', !open)
-            sidebar.classList.toggle('left-0', open)
-            overlay.classList.toggle('hidden', !open)
-        }
-
-        function setCollapsed(value) {
-            collapsed = value
-            sidebar.classList.toggle('w-[84px]', collapsed)
-            sidebar.classList.toggle('w-[260px]', !collapsed)
-            layout.classList.toggle('md:pl-[84px]', collapsed)
-            layout.classList.toggle('md:pl-[260px]', !collapsed)
-
-            labels.forEach((label) => {
-                label.classList.toggle('md:hidden', collapsed)
-            })
-
-            brand.classList.toggle('md:justify-center', collapsed)
-            brand.classList.toggle('md:px-0', collapsed)
-            brand.classList.toggle('md:justify-start', !collapsed)
-            brand.classList.toggle('md:px-5', !collapsed)
-            brandText.classList.toggle('md:hidden', collapsed)
-            brandIcon.classList.toggle('hidden', !collapsed)
-            brandIcon.classList.toggle('md:hidden', !collapsed)
-
-            navLinks.forEach((link) => {
-                link.classList.toggle('md:justify-center', collapsed)
-                link.classList.toggle('md:px-0', collapsed)
-                link.classList.toggle('md:justify-start', !collapsed)
-                link.classList.toggle('md:px-3', !collapsed)
-            })
-        }
-
-        toggle.addEventListener('click', () => {
-            if (isDesktop()) {
-                setCollapsed(!collapsed)
-            } else {
-                setMobileMenu(sidebar.classList.contains('-left-[260px]'))
-            }
-        })
-
-        overlay.addEventListener('click', () => setMobileMenu(false))
-
-        window.addEventListener('resize', () => {
-            if (isDesktop()) {
-                setMobileMenu(false)
-            } else {
-                setCollapsed(false)
-            }
-        })
-
-        if (isDesktop()) {
-            setCollapsed(false)
-        }
-    </script>
 </body>
 
 </html>
