@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clientes | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
+    <script src="/js/clientes-store.js" defer></script>
+    <script src="/js/clientes.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-branco font-sans text-preto antialiased">
+    <%
+        const currentPage = 'Clientes'
+        const navItems = [
+            { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/inicio', iconSize: 'size-5' },
+            { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: false, href: '/orcamentos', iconSize: 'size-5' },
+            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: true, href: '/clientes', iconSize: 'size-5' },
+            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '#empresa', iconSize: 'size-5' }
+        ]
+    %>
+
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
+    <%- include('partials/dashboard-sidebar', { navItems }) %>
+
+    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[260px]">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
+
+        <main class="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+            <section class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4 px-1 xl:flex-row xl:items-center xl:justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold leading-tight text-preto">Todos os clientes</h2>
+                    </div>
+
+                    <div class="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+                        <label class="relative block w-full xl:w-[420px]">
+                            <span class="sr-only">Buscar cliente</span>
+                            <img src="/img/icons/search.svg" alt="" class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 opacity-50" />
+                            <input type="search" data-client-search
+                                class="h-11 w-full rounded-full border border-[#e2e2e2] bg-white pl-11 pr-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="Buscar por nome" />
+                        </label>
+
+                        <button type="button" data-open-client-modal
+                            class="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-md shadow-verde/25 transition-colors hover:bg-verde-2 lg:w-auto cursor-pointer">
+                            <img src="/img/icons/plus_white.svg" alt="" class="size-5" />
+                            Cadastrar cliente
+                        </button>
+                    </div>
+                </div>
+
+                <section class="rounded-[8px] border border-[#e2e2e2] bg-white shadow-sm">
+                    <div class="hidden min-[1100px]:block">
+                        <div class="w-full">
+                            <div
+                                class="grid h-11 grid-cols-[86px_minmax(220px,1.35fr)_minmax(220px,1.2fr)_minmax(160px,0.8fr)_minmax(160px,0.8fr)_112px] items-center gap-x-3 bg-[#d1fac8] px-6 text-sm font-medium text-preto">
+                                <span aria-hidden="true"></span>
+                                <span>Nome</span>
+                                <span>Email</span>
+                                <span>Telefone</span>
+                                <span>CPF/CNPJ</span>
+                                <span aria-hidden="true"></span>
+                            </div>
+
+                            <div data-clients-table class="divide-y divide-[#e2e2e2]"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col divide-y divide-[#e2e2e2] min-[1100px]:hidden" data-clients-mobile-list></div>
+
+                    <div data-clients-pagination
+                        class="hidden flex-col gap-3 border-t border-[#e2e2e2] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                        <p data-clients-page-summary class="text-center text-sm font-light text-preto/60 sm:text-left"></p>
+
+                        <div class="flex items-center justify-center gap-3">
+                            <button type="button" data-clients-prev-page
+                                class="inline-flex size-10 items-center justify-center rounded-full border border-[#e2e2e2] bg-white transition-colors hover:bg-[#f3f3f3] disabled:cursor-not-allowed disabled:opacity-45"
+                                aria-label="Voltar página">
+                                <img src="/img/icons/seta_direita.svg" alt="" class="size-4" />
+                            </button>
+
+                            <span data-clients-page-indicator
+                                class="inline-flex h-10 min-w-[112px] items-center justify-center rounded-full bg-[#f2f8ef] px-4 text-sm font-semibold text-verde-2">
+                                Página 1 de 1
+                            </span>
+
+                            <button type="button" data-clients-next-page
+                                class="inline-flex size-10 items-center justify-center rounded-full border border-[#e2e2e2] bg-white transition-colors hover:bg-[#f3f3f3] disabled:cursor-not-allowed disabled:opacity-45"
+                                aria-label="Avançar página">
+                                <img src="/img/icons/seta_esquerda.svg" alt="" class="size-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div data-clients-empty class="hidden px-5 py-12 text-center">
+                        <div class="mx-auto flex max-w-md flex-col items-center gap-4">
+                            <div class="flex size-14 items-center justify-center rounded-full bg-[#f2f8ef]">
+                                <img src="/img/icons/clientes_default.svg" alt="" class="size-6" />
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold text-preto">Nenhum cliente encontrado</h4>
+                                <p class="mt-2 text-sm font-light leading-relaxed text-preto/60">
+                                    Ajuste a busca ou cadastre um novo cliente para começar.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div data-client-modal class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+        <div data-close-client-modal class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[680px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="flex items-start justify-between gap-4 border-b border-[#e2e2e2] px-6 py-5">
+                <div>
+                    <h3 class="mt-2 text-2xl font-semibold text-preto" data-client-modal-title>Cadastrar cliente</h3>
+                </div>
+
+                <button type="button" data-close-client-modal
+                    class="inline-flex size-10 items-center justify-center rounded-full text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3] cursor-pointer">
+                    <img src="/img/icons/x_icon.svg" alt="Fechar" class="size-5">
+                </button>
+            </div>
+
+            <div class="px-6 py-6">
+                <div data-client-form-error role="alert"
+                    class="mb-5 hidden rounded-[8px] border border-[#f0b4b4] bg-[#fff5f5] px-4 py-3 text-sm font-medium leading-relaxed text-[#c62828]">
+                    Informe o nome do cliente para concluir o cadastro.
+                </div>
+
+                <div class="grid gap-5 sm:grid-cols-2 sm:items-start">
+                    <label class="flex flex-col gap-2 sm:col-span-2">
+                        <span class="text-sm font-medium text-preto">Nome</span>
+                        <input type="text" data-client-name
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Nome completo ou razão social" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">E-mail</span>
+                        <input type="email" data-client-email
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="cliente@email.com" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">Telefone</span>
+                        <input type="text" data-client-phone
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="(11) 99999-9999" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">CPF / CNPJ</span>
+                        <input type="text" data-client-document
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Documento do cliente" />
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-preto">Endereço</span>
+                        <input type="text" data-client-address
+                            class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                            placeholder="Rua, número, bairro, cidade e estado" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-client-modal
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Cancelar
+                </button>
+                <button type="button" data-save-client
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-delete-client-modal class="fixed inset-0 z-[77] hidden items-center justify-center p-4">
+        <div data-close-delete-client class="absolute inset-0 bg-black/45"></div>
+        <div class="relative z-10 w-full max-w-[560px] rounded-[24px] border border-[#e2e2e2] bg-white shadow-[0_24px_80px_rgba(20,20,20,0.18)]">
+            <div class="border-b border-[#e2e2e2] px-6 py-5">
+                <h3 class="mt-2 text-2xl font-semibold text-preto">Excluir cliente?</h3>
+                <p class="mt-2 text-regular font-light leading-relaxed text-preto">
+                    Tem certeza que deseja excluir este cliente? Esta ação é irreversível e não poderá ser desfeita.
+                </p>
+            </div>
+
+            <div class="px-6 py-6">
+                <div class="rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-4">
+                    <p class="text-xs font-light uppercase tracking-[0.16em] text-preto">Este cliente será excluído para sempre:</p>
+                    <p class="mt-2 text-base font-semibold text-preto" data-delete-client-name>Cliente</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-[#e2e2e2] px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button" data-close-delete-client
+                    class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                    Cancelar
+                </button>
+                <button type="button" data-confirm-delete-client
+                    class="inline-flex h-11 items-center justify-center rounded-full bg-[#c62828] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#b42318]">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.__CLIENTES_SEED__ = <%- serializedSeed %>
+    </script>
+</body>
+
+</html>

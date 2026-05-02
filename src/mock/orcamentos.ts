@@ -109,6 +109,166 @@ export const budgetSeedPayload: BudgetSeedPayload = {
             phone: '(11) 4002-3200',
             address: 'Estrada da Serra, 875 - Itupeva - SP',
             document: '21.765.098/0001-44'
+        },
+        {
+            id: 5,
+            name: 'Lucas Almeida',
+            email: 'lucas.almeida@email.com',
+            phone: '(11) 98811-2233',
+            address: 'Rua das Palmeiras, 120 - Campinas - SP',
+            document: '321.654.987-00'
+        },
+        {
+            id: 6,
+            name: 'Mariana Costa',
+            email: 'mariana.costa@email.com',
+            phone: '(19) 99122-3344',
+            address: 'Av. Brasil, 455 - Paulínia - SP',
+            document: '456.789.123-11'
+        },
+        {
+            id: 7,
+            name: 'Empresa Soluções Tech LTDA',
+            email: 'contato@solucoestech.com.br',
+            phone: '(11) 3333-2211',
+            address: 'Rua Tecnológica, 999 - São Paulo - SP',
+            document: '12.345.678/0001-90'
+        },
+        {
+            id: 8,
+            name: 'Rafael Mendes',
+            email: 'rafael.mendes@email.com',
+            phone: '(19) 99887-6655',
+            address: 'Rua do Comércio, 210 - Sumaré - SP',
+            document: '852.963.741-22'
+        },
+        {
+            id: 9,
+            name: 'Juliana Ferreira',
+            email: 'juliana.ferreira@email.com',
+            phone: '(11) 97654-3322',
+            address: 'Rua das Acácias, 88 - Campinas - SP',
+            document: '159.753.486-33'
+        },
+        {
+            id: 10,
+            name: 'Condomínio Parque das Flores',
+            email: 'adm@parquedasflores.com.br',
+            phone: '(19) 3456-7788',
+            address: 'Av. Central, 1000 - Hortolândia - SP',
+            document: '98.765.432/0001-55'
+        },
+        {
+            id: 11,
+            name: 'Pedro Henrique Souza',
+            email: 'pedro.souza@email.com',
+            phone: '(11) 96543-2109',
+            address: 'Rua XV de Novembro, 45 - Campinas - SP',
+            document: '741.852.963-44'
+        },
+        {
+            id: 12,
+            name: 'Beatriz Lima',
+            email: 'beatriz.lima@email.com',
+            phone: '(19) 99221-3344',
+            address: 'Rua das Rosas, 300 - Americana - SP',
+            document: '963.258.147-55'
+        },
+        {
+            id: 13,
+            name: 'Grupo Nova Era',
+            email: 'contato@novaera.com.br',
+            phone: '(11) 4002-8922',
+            address: 'Av. Paulista, 1500 - São Paulo - SP',
+            document: '11.222.333/0001-66'
+        },
+        {
+            id: 14,
+            name: 'Gabriel Oliveira',
+            email: 'gabriel.oliveira@email.com',
+            phone: '(19) 97788-1122',
+            address: 'Rua das Oliveiras, 77 - Campinas - SP',
+            document: '357.159.258-66'
+        },
+        {
+            id: 15,
+            name: 'Fernanda Rocha',
+            email: 'fernanda.rocha@email.com',
+            phone: '(11) 98877-6655',
+            address: 'Rua do Sol, 10 - Vinhedo - SP',
+            document: '159.357.258-77'
+        },
+        {
+            id: 16,
+            name: 'Clínica Vida Saúde',
+            email: 'contato@vidasaude.com.br',
+            phone: '(19) 3232-4545',
+            address: 'Av. Saúde, 200 - Campinas - SP',
+            document: '22.333.444/0001-77'
+        },
+        {
+            id: 17,
+            name: 'Thiago Martins',
+            email: 'thiago.martins@email.com',
+            phone: '(11) 97444-5566',
+            address: 'Rua das Hortênsias, 150 - Jundiaí - SP',
+            document: '852.456.123-88'
+        },
+        {
+            id: 18,
+            name: 'Patrícia Gomes',
+            email: 'patricia.gomes@email.com',
+            phone: '(19) 99333-2211',
+            address: 'Rua Bela Vista, 60 - Campinas - SP',
+            document: '951.753.852-99'
+        },
+        {
+            id: 19,
+            name: 'Mercado Bom Preço',
+            email: 'contato@bombpreco.com.br',
+            phone: '(11) 3322-1100',
+            address: 'Rua Comercial, 500 - São Paulo - SP',
+            document: '33.444.555/0001-88'
+        },
+        {
+            id: 20,
+            name: 'André Carvalho',
+            email: 'andre.carvalho@email.com',
+            phone: '(19) 98899-7766',
+            address: 'Rua do Lago, 33 - Paulínia - SP',
+            document: '456.123.789-00'
+        },
+        {
+            id: 21,
+            name: 'Larissa Teixeira',
+            email: 'larissa.teixeira@email.com',
+            phone: '(11) 97711-2233',
+            address: 'Rua das Orquídeas, 80 - Campinas - SP',
+            document: '123.789.456-11'
+        },
+        {
+            id: 22,
+            name: 'Auto Peças Rápido LTDA',
+            email: 'vendas@autopecasrapido.com.br',
+            phone: '(19) 3555-6677',
+            address: 'Av. Industrial, 700 - Sumaré - SP',
+            document: '44.555.666/0001-99'
+        },
+        {
+            id: 23,
+            name: 'Bruno Ribeiro',
+            email: 'bruno.ribeiro@email.com',
+            phone: '(11) 96666-5544',
+            address: 'Rua das Nações, 120 - Campinas - SP',
+            document: '741.963.852-22'
+        },
+        {
+            id: 24,
+            name: 'Vanessa Duarte',
+            email: 'vanessa.duarte@email.com',
+            phone: '(19) 99911-2233',
+            address: 'Rua Primavera, 210 - Americana - SP',
+            document: '852.147.963-33'
         }
     ],
     budgets: [
