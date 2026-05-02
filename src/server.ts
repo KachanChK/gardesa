@@ -8,6 +8,7 @@ dotenv.config()
 import waitlistRouter from './routes/waitlist'
 import orcamentosRouter from './routes/orcamentos'
 import clientesRouter from './routes/clientes'
+import empresaRouter from './routes/empresa'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -19,8 +20,8 @@ app.use(helmet({ contentSecurityPolicy: false }))
 app.set('trust proxy', 1)
 
 // Parse de body e cookies
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(express.urlencoded({ extended: true, limit: '2mb' }))
+app.use(express.json({ limit: '2mb' }))
 app.use(cookieParser())
 
 // Arquivos estáticos
@@ -60,6 +61,7 @@ app.get('/inicio', (_req, res) => {
 app.use(waitlistRouter)
 app.use(orcamentosRouter)
 app.use(clientesRouter)
+app.use(empresaRouter)
 
 // 404
 app.use((req, res) => {

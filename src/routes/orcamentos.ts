@@ -10,6 +10,7 @@ import {
     type BudgetProfile,
     type PaymentMethodKey
 } from '../mock/orcamentos'
+import { isAllowedLogoSource, sanitizeCompanyProfile } from '../services/company-profile'
 
 const router = Router()
 
@@ -266,50 +267,55 @@ function resolveAssetSource(assetUrl: string, baseUrl: string): string {
         return ''
     }
 
-    if (
-        assetUrl.startsWith('data:') ||
-        assetUrl.startsWith('http://') ||
-        assetUrl.startsWith('https://')
-    ) {
+    if (!isAllowedLogoSource(assetUrl)) {
+        return ''
+    }
+
+    if (assetUrl.startsWith('data:image/png;base64,') || assetUrl.startsWith('data:image/jpeg;base64,')) {
         return assetUrl
     }
 
     if (assetUrl.startsWith('/')) {
-        const assetPath = path.join(__dirname, '../../public', assetUrl.replace(/^\//, ''))
+        const publicRelativePath = path.normalize(assetUrl.replace(/^\//, ''))
+
+        if (publicRelativePath.startsWith('..') || path.isAbsolute(publicRelativePath)) {
+            return ''
+        }
+
+        const assetPath = path.join(__dirname, '../../public', publicRelativePath)
 
         try {
             const fileBuffer = readFileSync(assetPath)
             const extension = path.extname(assetPath).toLowerCase()
             const mimeType =
-                extension === '.svg'
-                    ? 'image/svg+xml'
-                    : extension === '.png'
-                      ? 'image/png'
-                      : extension === '.jpg' || extension === '.jpeg'
-                        ? 'image/jpeg'
-                        : 'application/octet-stream'
+                extension === '.png'
+                    ? 'image/png'
+                    : extension === '.jpg' || extension === '.jpeg'
+                      ? 'image/jpeg'
+                      : 'application/octet-stream'
+
+            if (mimeType === 'application/octet-stream') {
+                return ''
+            }
 
             return `data:${mimeType};base64,${fileBuffer.toString('base64')}`
         } catch (error) {
-            console.error('[Orçamentos] Erro ao carregar asset do documento:', error)
+            console.error('[Orcamentos] Erro ao carregar asset do documento:', error)
         }
     }
 
-    return new URL(assetUrl, `${baseUrl}/`).toString()
+    return ''
 }
 
 function normalizeProfile(raw: unknown): BudgetProfile {
     const source = getRecord(raw)
     const defaults = budgetSeedPayload.profile
+    const companyProfile = sanitizeCompanyProfile(source)
+    const paymentMethods = normalizePaymentMethods(source.defaultPaymentMethods)
 
     return {
-        companyName: stringValue(source.companyName, defaults.companyName),
-        email: stringValue(source.email, defaults.email),
-        phone: stringValue(source.phone, defaults.phone),
-        cnpj: stringValue(source.cnpj, defaults.cnpj),
-        address: stringValue(source.address, defaults.address),
-        logoUrl: stringValue(source.logoUrl, defaults.logoUrl),
-        defaultPaymentMethods: defaults.defaultPaymentMethods,
+        ...companyProfile,
+        defaultPaymentMethods: paymentMethods.length ? paymentMethods : defaults.defaultPaymentMethods,
         defaultPaymentConditions: stringValue(
             source.defaultPaymentConditions,
             defaults.defaultPaymentConditions
