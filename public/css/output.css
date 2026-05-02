@@ -469,6 +469,9 @@
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
+  .mb-5 {
+    margin-bottom: calc(var(--spacing) * 5);
+  }
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
   }
@@ -706,6 +709,9 @@
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
   }
+  .min-w-\[112px\] {
+    min-width: 112px;
+  }
   .min-w-\[188px\] {
     min-width: 188px;
   }
@@ -770,6 +776,9 @@
   }
   .grid-cols-\[72px_minmax\(220px\,1\.55fr\)_minmax\(180px\,1fr\)_minmax\(170px\,0\.92fr\)_112px_148px_128px\] {
     grid-template-columns: 72px minmax(220px,1.55fr) minmax(180px,1fr) minmax(170px,0.92fr) 112px 148px 128px;
+  }
+  .grid-cols-\[86px_minmax\(220px\,1\.35fr\)_minmax\(220px\,1\.2fr\)_minmax\(160px\,0\.8fr\)_minmax\(160px\,0\.8fr\)_112px\] {
+    grid-template-columns: 86px minmax(220px,1.35fr) minmax(220px,1.2fr) minmax(160px,0.8fr) minmax(160px,0.8fr) 112px;
   }
   .grid-cols-\[minmax\(0\,1fr\)_minmax\(240px\,0\.95fr\)\] {
     grid-template-columns: minmax(0,1fr) minmax(240px,0.95fr);
@@ -1063,6 +1072,9 @@
   }
   .bg-\[\#fff1df\] {
     background-color: #fff1df;
+  }
+  .bg-\[\#fff5f5\] {
+    background-color: #fff5f5;
   }
   .bg-\[rgba\(168\,165\,172\,0\.6\)\] {
     background-color: rgba(168,165,172,0.6);
@@ -1435,6 +1447,12 @@
   .text-preto {
     color: var(--color-preto);
   }
+  .text-preto\/40 {
+    color: color-mix(in srgb, #141414 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-preto) 40%, transparent);
+    }
+  }
   .text-preto\/45 {
     color: color-mix(in srgb, #141414 45%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1785,6 +1803,16 @@
       --tw-ring-color: var(--color-verde);
     }
   }
+  .disabled\:cursor-not-allowed {
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+  .disabled\:opacity-45 {
+    &:disabled {
+      opacity: 45%;
+    }
+  }
   .max-\[1424px\]\:hidden {
     @media (width < 1424px) {
       display: none;
@@ -1873,6 +1901,11 @@
   .sm\:px-6 {
     @media (width >= 40rem) {
       padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+  .sm\:text-left {
+    @media (width >= 40rem) {
+      text-align: left;
     }
   }
   .sm\:text-2xl {

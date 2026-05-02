@@ -8,6 +8,7 @@
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
+    <script src="/js/clientes-store.js" defer></script>
     <script src="/js/orcamentos.js" defer></script>
 </head>
 
@@ -17,7 +18,7 @@
         const navItems = [
             { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/inicio', iconSize: 'size-5' },
             { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: true, href: '/orcamentos', iconSize: 'size-5' },
-            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '#clientes', iconSize: 'size-5' },
+            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '/clientes', iconSize: 'size-5' },
             { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '#empresa', iconSize: 'size-5' }
         ]
     %>
@@ -408,6 +409,11 @@
             </div>
 
             <div class="px-6 py-6">
+                <div data-new-client-form-error role="alert"
+                    class="mb-5 hidden rounded-[8px] border border-[#f0b4b4] bg-[#fff5f5] px-4 py-3 text-sm font-medium leading-relaxed text-[#c62828]">
+                    Informe o nome do cliente para concluir o cadastro.
+                </div>
+
                 <div class="grid gap-5 sm:grid-cols-2 sm:items-start">
                     <label class="flex flex-col gap-2 sm:col-span-2">
                         <span class="text-sm font-medium text-preto">Nome</span>

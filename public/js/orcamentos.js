@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return
     }
 
+    const clientStore = window.GardesaClientStore || null
+
     const STORAGE_KEYS = {
         profile: 'gardesa:orcamentos:profile:v1',
         clients: 'gardesa:orcamentos:clients:v1',
@@ -105,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBudgetNumber: document.querySelector('[data-next-budget-number]'),
         createBudgetButton: document.querySelector('[data-create-budget]'),
         newClientModal: document.querySelector('[data-new-client-modal]'),
+        newClientFormError: document.querySelector('[data-new-client-form-error]'),
         newClientCloseButtons: document.querySelectorAll('[data-close-new-client]'),
         newClientName: document.querySelector('[data-new-client-name]'),
         newClientEmail: document.querySelector('[data-new-client-email]'),
@@ -128,7 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const state = {
         profile: loadCollection(STORAGE_KEYS.profile, seed.profile),
-        clients: loadCollection(STORAGE_KEYS.clients, seed.clients),
+        clients: clientStore
+            ? clientStore.loadClients(seed.clients)
+            : loadCollection(STORAGE_KEYS.clients, seed.clients),
         budgets: normalizeBudgetCollection(loadCollection(STORAGE_KEYS.budgets, seed.budgets)),
         selectedBudgetId: null,
         filters: {
@@ -550,6 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
         elements.saveNewClientButton?.addEventListener('click', saveNewClient)
+        elements.newClientName?.addEventListener('input', () => {
+            if ((elements.newClientName?.value || '').trim()) {
+                hideNewClientFormError()
+            }
+        })
 
         elements.exportWarningCloseButtons.forEach((button) => {
             button.addEventListener('click', closeExportWarningModal)
@@ -1261,8 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!filteredClients.length) {
-            help.textContent =
-                'Nenhum cliente encontrado com essa busca. Você pode criar um novo agora.'
+            syncClientHelpText(context, { hasResults: false })
         }
     }
 
@@ -1350,6 +1359,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openNewClientModal(context) {
         state.clientModalContext = context
+        hideNewClientFormError()
         elements.newClientModal?.classList.remove('hidden')
         elements.newClientModal?.classList.add('flex')
         if (elements.newClientName) {
@@ -1370,6 +1380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeNewClientModal() {
+        hideNewClientFormError()
         elements.newClientModal?.classList.add('hidden')
         elements.newClientModal?.classList.remove('flex')
     }
@@ -1378,20 +1389,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const clientName = (elements.newClientName?.value || '').trim()
 
         if (!clientName) {
-            window.alert('O nome do cliente é obrigatório.')
+            showNewClientFormError()
             return
         }
 
-        const newClient = {
-            id: getNextClientId(),
+        hideNewClientFormError()
+
+        const clientPayload = {
             name: clientName,
             email: (elements.newClientEmail?.value || '').trim(),
             phone: (elements.newClientPhone?.value || '').trim(),
             address: (elements.newClientAddress?.value || '').trim(),
             document: (elements.newClientDocument?.value || '').trim()
         }
+        let newClient = null
 
-        state.clients.unshift(newClient)
+        if (clientStore) {
+            const result = clientStore.createClient(state.clients, clientPayload)
+            newClient = result.client
+            state.clients = result.clients
+        } else {
+            newClient = {
+                id: getNextClientId(),
+                ...clientPayload
+            }
+            state.clients.unshift(newClient)
+        }
+
         persistCollections()
         closeNewClientModal()
 
@@ -1425,6 +1449,31 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshEditorSummary()
         renderDashboard()
         queueSave()
+    }
+
+    function showNewClientFormError() {
+        if (elements.newClientFormError) {
+            elements.newClientFormError.textContent =
+                'Informe o nome do cliente para concluir o cadastro.'
+            elements.newClientFormError.classList.remove('hidden')
+        }
+
+        if (elements.newClientName) {
+            elements.newClientName.setAttribute('aria-invalid', 'true')
+            elements.newClientName.style.borderColor = '#f0b4b4'
+            elements.newClientName.style.backgroundColor = '#fff5f5'
+            elements.newClientName.focus()
+        }
+    }
+
+    function hideNewClientFormError() {
+        elements.newClientFormError?.classList.add('hidden')
+
+        if (elements.newClientName) {
+            elements.newClientName.removeAttribute('aria-invalid')
+            elements.newClientName.style.borderColor = ''
+            elements.newClientName.style.backgroundColor = ''
+        }
     }
 
     function openPreviewDrawer() {
