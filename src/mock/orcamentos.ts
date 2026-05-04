@@ -1,3 +1,5 @@
+import { defaultCompanyProfile } from '../services/company-profile'
+
 export type BudgetStatus = 'Rascunho' | 'Enviado' | 'Aprovado' | 'Recusado'
 
 export type PaymentMethodKey =
@@ -68,12 +70,7 @@ export interface BudgetSeedPayload {
 
 export const budgetSeedPayload: BudgetSeedPayload = {
     profile: {
-        companyName: 'Eliana Ranzani Paisagismo',
-        email: 'erpaisagismo@gmail.com',
-        phone: '(19) 99876-5432',
-        cnpj: '12.345.678/0001-90',
-        address: 'Rua das Acácias, 148 - Vila Botânica, São Paulo - SP',
-        logoUrl: '/img/erpaisagismo.jpg',
+        ...defaultCompanyProfile,
         defaultPaymentMethods: ['pix', 'transfer'],
         defaultPaymentConditions: '40% na aprovação do orçamento e 60% no início da execução.'
     },

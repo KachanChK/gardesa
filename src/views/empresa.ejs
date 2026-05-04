@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Empresa | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
+    <script src="/js/empresa-store.js" defer></script>
+    <script src="/js/empresa.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-branco font-sans text-preto antialiased">
+    <%
+        const currentPage = 'Empresa'
+        const navItems = [
+            { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/inicio', iconSize: 'size-5' },
+            { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: false, href: '/orcamentos', iconSize: 'size-5' },
+            { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '/clientes', iconSize: 'size-5' },
+            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: true, href: '/empresa', iconSize: 'size-5' }
+        ]
+    %>
+
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
+    <%- include('partials/dashboard-sidebar', { navItems }) %>
+
+    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[260px]">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
+
+        <main class="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+
+            <div>
+                <form data-company-form class="rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm sm:p-6" novalidate>
+                    <div class="flex flex-col gap-2">
+                        <h2 class="text-2xl font-semibold leading-tight text-preto">Dados da empresa</h2>
+                    </div>
+
+                    <div data-company-form-message role="alert"
+                        class="mt-5 hidden rounded-[8px] border px-4 py-3 text-sm font-medium leading-relaxed"></div>
+
+                    <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                        <div class="flex flex-col gap-2 sm:col-span-2">
+                            <span class="flex items-center justify-between gap-3 text-sm font-medium text-preto">
+                                <span>Foto/Logo da empresa</span>
+                                <span class="text-xs font-light text-preto/45">PNG/JPG até 1 MB</span>
+                            </span>
+                            <div data-company-field="logoUrl" tabindex="-1"
+                                class="relative flex min-w-0 items-center gap-3 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] p-3 pr-14 transition-colors min-[520px]:pr-40 sm:p-4">
+                                <div class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[#e2e2e2] bg-white min-[420px]:size-20 sm:size-24">
+                                    <img data-company-logo-preview alt="Logo da empresa" class="hidden max-h-full max-w-full object-contain" />
+                                    <span data-company-logo-placeholder class="px-2 text-center text-[10px] font-medium uppercase tracking-[0.12em] text-preto/35 min-[420px]:text-xs min-[420px]:tracking-[0.16em]">
+                                        Sem logo
+                                    </span>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <input id="company-logo-input" type="file" data-company-logo-input
+                                        accept=".png,.jpg,.jpeg,image/png,image/jpeg" class="sr-only" />
+                                    <label for="company-logo-input" data-company-logo-trigger role="button" tabindex="0"
+                                        class="inline-flex h-10 max-w-full cursor-pointer items-center justify-center truncate rounded-full bg-verde px-3 text-xs font-semibold text-white shadow-sm shadow-verde/20 transition-colors hover:bg-verde-2 min-[420px]:h-11 min-[420px]:px-4 min-[420px]:text-sm">
+                                        Escolher arquivo
+                                    </label>
+                                    <p data-company-logo-file-name class="mt-2 truncate text-xs font-light text-preto/50">
+                                        Nenhum arquivo escolhido
+                                    </p>
+                                </div>
+
+                                <button type="button" data-remove-company-logo
+                                    class="absolute right-3 top-1/2 hidden inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#e2e2e2] bg-white px-0 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3] min-[520px]:w-auto min-[520px]:px-4">
+                                    <img src="/img/icons/x_icon.svg" alt="" class="size-4 min-[520px]:hidden" />
+                                    <span class="hidden min-[520px]:inline">Remover logo</span>
+                                </button>
+                            </div>
+                            <span data-company-error="logoUrl" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </div>
+
+                        <label class="flex flex-col gap-2">
+                            <span class="flex items-center justify-between gap-3 text-sm font-medium text-preto">
+                                <span>Nome da empresa</span>
+                                <span data-company-name-counter class="text-xs font-light text-preto/45">0/40</span>
+                            </span>
+                            <input type="text" data-company-name data-company-field="companyName" maxlength="40"
+                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="Raz&atilde;o social ou nome comercial" autocomplete="organization" />
+                            <span data-company-error="companyName" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </label>
+
+                        <label class="flex flex-col gap-2">
+                            <span class="text-sm font-medium text-preto">E-mail da empresa</span>
+                            <input type="email" data-company-email data-company-field="email" maxlength="80"
+                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="contato@empresa.com.br" autocomplete="email" />
+                            <span data-company-error="email" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </label>
+
+                        <label class="flex flex-col gap-2">
+                            <span class="text-sm font-medium text-preto">CNPJ</span>
+                            <input type="text" data-company-cnpj data-company-field="cnpj" maxlength="18" inputmode="numeric"
+                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="12.345.678/0001-90" autocomplete="off" />
+                            <span data-company-error="cnpj" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </label>
+
+                        <label class="flex flex-col gap-2">
+                            <span class="text-sm font-medium text-preto">Telefone</span>
+                            <input type="tel" data-company-phone data-company-field="phone" maxlength="15" inputmode="numeric"
+                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="(19) 99876-5432" autocomplete="tel" />
+                            <span data-company-error="phone" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </label>
+
+                        <label class="flex flex-col gap-2 sm:col-span-2">
+                            <span class="flex items-center justify-between gap-3 text-sm font-medium text-preto">
+                                <span>Endere&ccedil;o</span>
+                                <span data-company-address-counter class="text-xs font-light text-preto/45">0/150</span>
+                            </span>
+                            <input type="text" data-company-address data-company-field="address" maxlength="150"
+                                class="h-12 rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 text-sm text-preto outline-none transition-colors focus:border-verde"
+                                placeholder="Rua, n&uacute;mero, bairro, cidade e estado" autocomplete="street-address" />
+                            <span data-company-error="address" class="hidden text-sm font-medium text-[#c62828]"></span>
+                        </label>
+                    </div>
+
+                    <div class="mt-6 flex flex-col gap-3 border-t border-[#e2e2e2] pt-5 sm:flex-row sm:items-center sm:justify-end">
+                        <button type="submit" data-save-company
+                            class="inline-flex h-11 items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-md shadow-verde/25 transition-colors hover:bg-verde-2 disabled:cursor-not-allowed disabled:opacity-60">
+                            Salvar altera&ccedil;&otilde;es
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.__EMPRESA_SEED__ = <%- serializedSeed %>
+    </script>
+</body>
+
+</html>

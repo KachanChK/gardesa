@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
     <script src="/js/clientes-store.js" defer></script>
+    <script src="/js/empresa-store.js" defer></script>
     <script src="/js/orcamentos.js" defer></script>
 </head>
 
@@ -19,7 +20,7 @@
             { label: 'Início', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/inicio', iconSize: 'size-5' },
             { label: 'Orçamentos', iconDefault: '/img/icons/orcamentos_default.svg', iconActive: '/img/icons/orcamentos_active.svg', active: true, href: '/orcamentos', iconSize: 'size-5' },
             { label: 'Clientes', iconDefault: '/img/icons/clientes_default.svg', iconActive: '/img/icons/clientes_active.svg', active: false, href: '/clientes', iconSize: 'size-5' },
-            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '#empresa', iconSize: 'size-5' }
+            { label: 'Empresa', iconDefault: '/img/icons/empresa_default.svg', iconActive: '/img/icons/empresa_active.svg', active: false, href: '/empresa', iconSize: 'size-5' }
         ]
     %>
 
@@ -160,7 +161,7 @@
                                     <span class="text-sm font-medium text-preto">Descrição</span>
                                     <textarea data-budget-description rows="5" maxlength="400"
                                         class="min-h-[120px] rounded-[8px] border border-[#e2e2e2] bg-[#fbfbfb] px-4 py-3 text-sm text-preto outline-none transition-colors focus:border-verde"
-                                        placeholder="Descreva o escopo, contexto do projeto ou informações relevantes para o PDF."></textarea>
+                                        placeholder="Descreva o escopo, contexto do projeto ou outras informações relevantes."></textarea>
                                 </label>
                             </div>
                         </section>

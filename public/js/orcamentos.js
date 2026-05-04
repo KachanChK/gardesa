@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const clientStore = window.GardesaClientStore || null
+    const companyStore = window.GardesaCompanyStore || null
 
     const STORAGE_KEYS = {
         profile: 'gardesa:orcamentos:profile:v1',
@@ -130,7 +131,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const state = {
-        profile: loadCollection(STORAGE_KEYS.profile, seed.profile),
+        profile: companyStore
+            ? companyStore.loadCompany(seed.profile)
+            : loadCollection(STORAGE_KEYS.profile, seed.profile),
+        budgetDefaults: {
+            defaultPaymentMethods: Array.isArray(seed.profile.defaultPaymentMethods)
+                ? [...seed.profile.defaultPaymentMethods]
+                : [],
+            defaultPaymentConditions: limitTextValue(
+                seed.profile.defaultPaymentConditions || '',
+                MAX_PAYMENT_CONDITIONS_LENGTH
+            )
+        },
         clients: clientStore
             ? clientStore.loadClients(seed.clients)
             : loadCollection(STORAGE_KEYS.clients, seed.clients),
@@ -1106,7 +1118,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderPaymentOptions() {
         const budget = getSelectedBudget()
-        const selectedMethods = new Set(budget ? budget.paymentMethods : state.profile.defaultPaymentMethods)
+        const selectedMethods = new Set(
+            budget ? budget.paymentMethods : state.budgetDefaults.defaultPaymentMethods
+        )
 
         elements.paymentOptions.innerHTML = seed.paymentOptions
             .map(
@@ -1124,21 +1138,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderProfileCard() {
+        const profile = getCurrentCompanyProfile()
+
         if (elements.profileCompanyName) {
-            elements.profileCompanyName.textContent = state.profile.companyName
+            elements.profileCompanyName.textContent = profile.companyName
         }
         if (elements.profileEmail) {
-            elements.profileEmail.textContent = state.profile.email
+            elements.profileEmail.textContent = profile.email
         }
         if (elements.profilePhone) {
-            elements.profilePhone.textContent = state.profile.phone
+            elements.profilePhone.textContent = profile.phone
         }
         if (elements.profileDocument) {
-            elements.profileDocument.textContent = state.profile.cnpj
+            elements.profileDocument.textContent = profile.cnpj
         }
         if (elements.profileAddress) {
-            elements.profileAddress.textContent = state.profile.address
+            elements.profileAddress.textContent = profile.address
         }
+    }
+
+    function getCurrentCompanyProfile() {
+        if (companyStore) {
+            state.profile = companyStore.loadCompany(seed.profile)
+        }
+
+        return state.profile
     }
 
     function normalizeClientSearch(value) {
@@ -1340,10 +1364,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showValuesInPdf: false,
             totalOverride: '',
             validityDate: '',
-            paymentMethods: [...state.profile.defaultPaymentMethods],
+            paymentMethods: [...state.budgetDefaults.defaultPaymentMethods],
             otherPaymentMethod: '',
             paymentConditions: limitTextValue(
-                state.profile.defaultPaymentConditions,
+                state.budgetDefaults.defaultPaymentConditions,
                 MAX_PAYMENT_CONDITIONS_LENGTH
             ),
             observations: '',
@@ -1529,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    profile: state.profile,
+                    profile: getCurrentCompanyProfile(),
                     client,
                     budget
                 })
@@ -1609,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    profile: state.profile,
+                    profile: getCurrentCompanyProfile(),
                     client,
                     budget: targetBudget
                 })
@@ -2024,7 +2048,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function persistCollections() {
-        localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(state.profile))
+        if (!companyStore) {
+            localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(state.profile))
+        }
         localStorage.setItem(STORAGE_KEYS.clients, JSON.stringify(state.clients))
         localStorage.setItem(STORAGE_KEYS.budgets, JSON.stringify(state.budgets))
         state.lastSavedAt = new Date()
@@ -2338,13 +2364,13 @@ document.addEventListener('DOMContentLoaded', () => {
             missingFields.push('Nome do orçamento')
         }
         if (!getClientById(budget.clientId)) {
-            missingFields.push('Cliente selecionado')
+            missingFields.push('Cliente')
         }
         if (!budget.items.length) {
-            missingFields.push('Ao menos 1 item')
+            missingFields.push('Itens')
         }
         if (getEffectiveTotal(budget) <= 0) {
-            missingFields.push('Valor total maior que zero')
+            missingFields.push('Valor total')
         }
 
         return missingFields
