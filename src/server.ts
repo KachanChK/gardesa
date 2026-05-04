@@ -5,6 +5,7 @@ import path from 'path'
 import dotenv from 'dotenv'
 dotenv.config()
 
+import { getWaitlistCount } from './services/waitlist'
 import waitlistRouter from './routes/waitlist'
 import orcamentosRouter from './routes/orcamentos'
 import clientesRouter from './routes/clientes'
@@ -34,10 +35,7 @@ app.set('views', path.join(__dirname, '../src/views'))
 // Rota principal — busca contagem da waitlist
 app.get('/', async (req, res) => {
   try {
-    const { supabase } = await import('./config/supabase')
-    const { count } = await supabase
-      .from('waitlist')
-      .select('*', { count: 'exact', head: true })
+    const count = await getWaitlistCount()
 
     res.render('landing', {
       waitlistCount: count,
