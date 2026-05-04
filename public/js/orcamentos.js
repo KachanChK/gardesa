@@ -2364,13 +2364,13 @@ document.addEventListener('DOMContentLoaded', () => {
             missingFields.push('Nome do orçamento')
         }
         if (!getClientById(budget.clientId)) {
-            missingFields.push('Cliente selecionado')
+            missingFields.push('Cliente')
         }
         if (!budget.items.length) {
-            missingFields.push('Ao menos 1 item')
+            missingFields.push('Itens')
         }
         if (getEffectiveTotal(budget) <= 0) {
-            missingFields.push('Valor total maior que zero')
+            missingFields.push('Valor total')
         }
 
         return missingFields

@@ -14,7 +14,7 @@ import { isAllowedLogoSource, sanitizeCompanyProfile } from '../services/company
 
 const router = Router()
 
-const ITEM_PAGE_SIZE = 8
+const ITEM_PAGE_SIZE = 11
 const MAX_BUDGET_ITEMS = 20
 const MAX_BUDGET_NAME_LENGTH = 50
 const MAX_PROJECT_DESCRIPTION_LENGTH = 400

@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
             <button type="button" data-client-action="${action}" data-client-id="${clientId}"
-                class="inline-flex ${sizeClass} items-center justify-center rounded-full border border-[#e2e2e2] bg-white transition-colors hover:bg-[#f3f3f3] cursor-pointer"
+                class="inline-flex ${sizeClass} items-center justify-center rounded-full bg-white transition-colors hover:bg-[#f3f3f3] cursor-pointer"
                 aria-label="${label}">
                 <img src="${icon}" alt="" class="${iconSizeClass}" />
             </button>
