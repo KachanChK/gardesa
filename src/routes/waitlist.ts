@@ -1,17 +1,15 @@
 import { Router } from 'express'
 import { isEmail, normalizeEmail } from 'validator'
-import { supabase } from '../config/supabase'
 import { resend } from '../config/resend'
 import { waitlistRateLimit } from '../middlewares/rateLimit'
+import {
+    addWaitlistEmail,
+    getDatabaseErrorMessage,
+    getWaitlistCount,
+    isUniqueViolation
+} from '../services/waitlist'
 
 const router = Router()
-
-async function getWaitlistCount(): Promise<number | null> {
-    const { count } = await supabase
-        .from('waitlist')
-        .select('*', { count: 'exact', head: true })
-    return count
-}
 
 router.post('/waitlist', waitlistRateLimit, async (req, res) => {
     const rawEmail: string = req.body?.email ?? ''
@@ -27,12 +25,12 @@ router.post('/waitlist', waitlistRateLimit, async (req, res) => {
         })
     }
 
-    const { error: dbError } = await supabase.from('waitlist').insert({ email })
-
-    if (dbError) {
+    try {
+        await addWaitlistEmail(email)
+    } catch (dbError) {
         const count = await getWaitlistCount()
 
-        if (dbError.code === '23505') {
+        if (isUniqueViolation(dbError)) {
             return res.render('landing', {
                 waitlistErro: 'Este e-mail já está na lista de espera!',
                 waitlistSucesso: false,
@@ -40,7 +38,7 @@ router.post('/waitlist', waitlistRateLimit, async (req, res) => {
             })
         }
 
-        console.error('[Waitlist] Erro ao inserir no banco:', dbError.message)
+        console.error('[Waitlist] Erro ao inserir no banco:', getDatabaseErrorMessage(dbError))
         return res.render('landing', {
             waitlistErro: 'Algo deu errado. Tente novamente em instantes.',
             waitlistSucesso: false,
@@ -115,7 +113,7 @@ function buildConfirmationEmail(email: string): string {
           <tr>
             <td style="padding-bottom:16px;">
               <h2 style="font-size:22px;color:#141414;margin:0;">
-                Você está na lista de espera!
+                Você está na lista de espera! 🎉
               </h2>
             </td>
           </tr>
