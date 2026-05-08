@@ -9,7 +9,15 @@ const router = Router()
 
 router.get('/empresa', (_req, res) => {
     const serializedSeed = JSON.stringify({
-        company: defaultCompanyProfile,
+        company: {
+            ...defaultCompanyProfile,
+            companyName: 'Gardesa Landscaping',
+            email: 'contato@gardesa.com',
+            phone: '',
+            address: '',
+            cnpj: '',
+            logoUrl: ''
+        },
         limits: COMPANY_PROFILE_LIMITS
     }).replace(/</g, '\\u003c')
 

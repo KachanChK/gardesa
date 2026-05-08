@@ -232,8 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.logoPlaceholders.forEach((logoPlaceholder) => {
             logoPlaceholder.classList.toggle('hidden', hasLogo)
         })
-        elements.logoRemoveButton?.classList.toggle('hidden', !hasLogo)
-
         if (elements.logoFileName) {
             elements.logoFileName.textContent = state.logoFileName || 'Nenhum arquivo escolhido'
         }
@@ -262,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fieldElement) {
                 fieldElement.setAttribute('aria-invalid', 'true')
                 fieldElement.classList.add('border-[#f0b4b4]', 'bg-[#fff5f5]')
-                fieldElement.classList.remove('border-[#e2e2e2]', 'bg-[#fbfbfb]')
+                fieldElement.classList.remove('border-[#d6d6d6]', 'border-[#e2e2e2]', 'bg-white', 'bg-[#fbfbfb]')
             }
         })
 
@@ -279,7 +277,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fieldElement) {
             fieldElement.removeAttribute('aria-invalid')
             fieldElement.classList.remove('border-[#f0b4b4]', 'bg-[#fff5f5]')
-            fieldElement.classList.add('border-[#e2e2e2]', 'bg-[#fbfbfb]')
+
+            if (fieldName === 'logoUrl') {
+                fieldElement.classList.add('border-[#e2e2e2]', 'bg-[#fbfbfb]')
+                return
+            }
+
+            fieldElement.classList.add('border-[#d6d6d6]', 'bg-white')
         }
     }
 
