@@ -32,13 +32,6 @@ Principais tecnologias identificadas:
 - dotenv para carregar variaveis de ambiente.
 - cookie-parser registrado no servidor, embora cookies nao sejam usados em fluxos de autenticacao no codigo atual.
 
-Dependencias presentes no `package.json`, mas sem uso identificado no codigo atual:
-
-- `bcryptjs`
-- `jsonwebtoken`
-- `multer`
-- `zod`
-
 Ferramentas de desenvolvimento:
 
 - `typescript`
