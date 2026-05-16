@@ -4,7 +4,7 @@ Guia tecnico do projeto Gardesa. Este documento descreve o funcionamento atual d
 
 ## 1. Visao geral do projeto
 
-A Gardesa e uma aplicacao web para paisagistas. O projeto combina uma landing page publica com lista de espera e um dashboard administrativo ainda sem autenticacao, focado em:
+A Gardesa e uma aplicacao web para paisagistas. O projeto combina uma landing page publica com lista de espera e uma area interna autenticada por Google OAuth em `/member`, focada em:
 
 - cadastro e manutencao local de clientes;
 - cadastro dos dados da empresa/prestador;
@@ -12,7 +12,7 @@ A Gardesa e uma aplicacao web para paisagistas. O projeto combina uma landing pa
 - pagina inicial de dashboard com metricas e dados demonstrativos;
 - captura de emails para waitlist via PostgreSQL e envio de email de confirmacao via Resend.
 
-O fluxo de dashboard usa dados seedados no servidor e persistencia no navegador via `localStorage`. O banco de dados, no codigo atual, e usado apenas para a waitlist da landing page.
+O fluxo legado de dashboard usa dados seedados no servidor e persistencia no navegador via `localStorage`. O banco de dados e usado para a waitlist e para usuarios/sessoes de autenticacao.
 
 ## 2. Stack utilizada
 
@@ -30,7 +30,8 @@ Principais tecnologias identificadas:
 - express-rate-limit para limitar submissao da waitlist.
 - validator para validacao de email e dados da empresa.
 - dotenv para carregar variaveis de ambiente.
-- cookie-parser registrado no servidor, embora cookies nao sejam usados em fluxos de autenticacao no codigo atual.
+- cookie-parser para cookies de sessao e estado OAuth.
+- Neon Auth gerenciado para login com Google e sessoes.
 
 Ferramentas de desenvolvimento:
 
@@ -77,11 +78,13 @@ Funcao das principais partes:
 - `src/config/database.ts`: cria o pool PostgreSQL usando `DATABASE_URL`.
 - `src/config/resend.ts`: instancia o cliente Resend usando `RESEND_API_KEY`.
 - `src/middlewares/rateLimit.ts`: define rate limit especifico da waitlist.
-- `src/routes/`: concentra os handlers HTTP. Nao ha camada separada de controllers.
-- `src/services/`: contem servicos reutilizaveis de banco/validacao/regra de negocio.
-- `src/mock/orcamentos.ts`: tipos TypeScript e dados seedados para clientes, empresa, orcamentos e opcoes de formulario.
-- `src/views/`: templates EJS de paginas.
-- `src/views/partials/`: partials EJS compartilhados e template do PDF de orcamento.
+- `src/routes/`: concentra os handlers HTTP ativos. Rotas antigas ficam isoladas em `src/routes/legacy/`.
+- `src/services/`: contem servicos reutilizaveis ativos de banco/validacao/regra de negocio.
+- `src/legacy/mock/orcamentos.ts`: tipos TypeScript e dados seedados legados para clientes, empresa, orcamentos e opcoes de formulario.
+- `src/legacy/services/company-profile.ts`: validacoes e sanitizacao legadas do perfil da empresa.
+- `src/views/`: templates EJS de paginas ativas.
+- `src/views/legacy/`: templates EJS de paginas antigas preservadas fora do fluxo principal.
+- `src/views/partials/`: partials EJS compartilhados pelas telas internas.
 - `public/js/`: scripts de frontend carregados diretamente pelas paginas EJS.
 - `public/css/styles.css`: entrada do Tailwind, fontes e tokens do tema.
 - `public/css/output.css`: CSS compilado pelo Tailwind.
@@ -99,9 +102,12 @@ A arquitetura atual e uma aplicacao Express server-rendered com JavaScript progr
 Camadas existentes:
 
 - Servidor HTTP: `src/server.ts`.
-- Rotas/handlers: arquivos em `src/routes/*.ts`.
-- Servicos de dominio/infra: arquivos em `src/services/*.ts` e `src/config/*.ts`.
-- Views server-side: arquivos EJS em `src/views`.
+- Rotas/handlers ativos: arquivos em `src/routes/*.ts`.
+- Rotas/handlers antigos preservados: arquivos em `src/routes/legacy/*.ts`.
+- Servicos de dominio/infra ativos: arquivos em `src/services/*.ts` e `src/config/*.ts`.
+- Codigo auxiliar antigo preservado: arquivos em `src/legacy`.
+- Views server-side ativas: arquivos EJS em `src/views`.
+- Views antigas preservadas: arquivos EJS em `src/views/legacy`.
 - Frontend interativo: arquivos em `public/js`, manipulando DOM e `localStorage`.
 - Assets estaticos: `public/css`, `public/img`, `public/fonts`.
 
@@ -109,8 +115,8 @@ Organizacao das responsabilidades:
 
 - `server.ts` registra middlewares, rotas e configuracoes globais.
 - Cada arquivo de rota expoe um `Router` do Express e mistura handler HTTP com funcoes auxiliares locais quando a regra e especifica daquela rota.
-- Regras reutilizadas ficam em `services`, como waitlist e perfil da empresa.
-- Dados estruturais de orcamento, cliente e empresa ficam tipados em `src/mock/orcamentos.ts`.
+- Regras reutilizadas ativas ficam em `services`, como waitlist.
+- Regras e dados estruturais antigos de orcamento, cliente e empresa ficam preservados em `src/legacy`.
 - As paginas EJS montam a estrutura HTML e injetam seeds serializados em variaveis globais (`window.__ORCAMENTOS_SEED__`, `window.__CLIENTES_SEED__`, `window.__EMPRESA_SEED__`).
 - O frontend usa seletores `data-*` para encontrar elementos e renderizar listas, modais, formularios e estados.
 
@@ -121,8 +127,7 @@ Nao ha, no estado atual:
 - ORM;
 - camada formal de controllers;
 - camada formal de models persistentes;
-- schemas/migrations versionados;
-- middleware de autenticacao;
+- sistema de permissoes por role.
 - sistema de permissoes.
 
 ## 5. Fluxo da aplicacao
@@ -139,9 +144,15 @@ Nao ha, no estado atual:
 8. Um email de confirmacao e enviado via Resend.
 9. A landing e renderizada novamente com sucesso ou erro.
 
-### Dashboard
+### Area interna
 
-O dashboard e acessado por rotas publicas:
+A area interna principal e acessada por:
+
+- `GET /member`
+
+Esta rota e protegida por autenticacao. Usuarios anonimos sao redirecionados para `/auth/google`; apos login bem-sucedido, voltam para `/member`.
+
+As rotas antigas ficam desabilitadas temporariamente e redirecionam para `/member`:
 
 - `GET /inicio`
 - `GET /orcamentos`
@@ -156,31 +167,34 @@ O layout de dashboard usa:
 
 ### Clientes
 
-1. `GET /clientes` renderiza `src/views/clientes.ejs`.
-2. O servidor injeta clientes seedados de `budgetSeedPayload.clients`.
-3. `public/js/clientes-store.js` carrega/salva clientes em `localStorage` na chave `gardesa:orcamentos:clients:v1`.
-4. `public/js/clientes.js` renderiza tabela/lista mobile, busca, paginacao, modal de cadastro/edicao e modal de exclusao.
-5. O cadastro/edicao/exclusao de clientes nao chama backend; fica no navegador.
+1. `GET /clientes` esta desabilitada temporariamente e redireciona para `/member`.
+2. O fluxo legado preservado renderiza `src/views/legacy/clientes.ejs`.
+3. O servidor injeta clientes seedados de `budgetSeedPayload.clients`.
+4. `public/js/clientes-store.js` carrega/salva clientes em `localStorage` na chave `gardesa:orcamentos:clients:v1`.
+5. `public/js/clientes.js` renderiza tabela/lista mobile, busca, paginacao, modal de cadastro/edicao e modal de exclusao.
+6. O cadastro/edicao/exclusao de clientes nao chama backend; fica no navegador.
 
 ### Empresa
 
-1. `GET /empresa` renderiza `src/views/empresa.ejs`.
-2. O servidor injeta `defaultCompanyProfile` e limites (`COMPANY_PROFILE_LIMITS`).
-3. `public/js/empresa-store.js` carrega/salva o perfil em `localStorage` na chave `gardesa:empresa:profile:v1`.
-4. Existe migracao local da chave antiga `gardesa:orcamentos:profile:v1`.
-5. `public/js/empresa.js` valida no frontend, envia `POST /empresa/validate` para validacao server-side e salva o resultado normalizado no navegador.
-6. Logo pode ser uma URL local em `/img/` ou data URL PNG/JPEG validada e limitada a 1 MB.
+1. `GET /empresa` esta desabilitada temporariamente e redireciona para `/member`.
+2. O fluxo legado preservado renderiza `src/views/legacy/empresa.ejs`.
+3. O servidor injeta `defaultCompanyProfile` e limites (`COMPANY_PROFILE_LIMITS`).
+4. `public/js/empresa-store.js` carrega/salva o perfil em `localStorage` na chave `gardesa:empresa:profile:v1`.
+5. Existe migracao local da chave antiga `gardesa:orcamentos:profile:v1`.
+6. `public/js/empresa.js` valida no frontend, envia `POST /empresa/validate` para validacao server-side e salva o resultado normalizado no navegador.
+7. Logo pode ser uma URL local em `/img/` ou data URL PNG/JPEG validada e limitada a 1 MB.
 
 ### Orcamentos
 
-1. `GET /orcamentos` renderiza `src/views/orcamentos.ejs`.
-2. O servidor injeta `budgetSeedPayload` serializado.
-3. `public/js/orcamentos.js` carrega perfil, clientes e orcamentos do `localStorage` ou dos seeds.
-4. O usuario cria, edita, remove, reordena itens, altera status, define validade, formas de pagamento, observacoes e total manual.
-5. Alteracoes sao salvas com debounce no `localStorage`.
-6. Preview chama `POST /orcamentos/preview`, enviando `profile`, `client` e `budget` em JSON.
-7. O servidor normaliza/sanitiza os dados, renderiza `src/views/partials/orcamentos-pdf.ejs` e devolve HTML para um `iframe`.
-8. Exportacao chama `POST /orcamentos/export`, que renderiza o mesmo HTML, abre Puppeteer headless, gera PDF A4 e retorna o arquivo para download.
+1. `GET /orcamentos` esta desabilitada temporariamente e redireciona para `/member`.
+2. O fluxo legado preservado renderiza `src/views/legacy/orcamentos.ejs`.
+3. O servidor injeta `budgetSeedPayload` serializado.
+4. `public/js/orcamentos.js` carrega perfil, clientes e orcamentos do `localStorage` ou dos seeds.
+5. O usuario cria, edita, remove, reordena itens, altera status, define validade, formas de pagamento, observacoes e total manual.
+6. Alteracoes sao salvas com debounce no `localStorage`.
+7. Preview chama `POST /orcamentos/preview`, enviando `profile`, `client` e `budget` em JSON.
+8. O servidor normaliza/sanitiza os dados, renderiza `src/views/legacy/partials/orcamentos-pdf.ejs` e devolve HTML para um `iframe`.
+9. Exportacao chama `POST /orcamentos/export`, que renderiza o mesmo HTML, abre Puppeteer headless, gera PDF A4 e retorna o arquivo para download.
 
 ## 6. Banco de dados
 
@@ -195,22 +209,23 @@ Uso identificado:
 - `src/services/waitlist.ts`
   - `SELECT public.get_waitlist_count() AS count`
   - `INSERT INTO waitlist (email) VALUES ($1)`
+- `src/services/neon-auth.ts`
+  - inicia login social Google pelo Neon Auth
+  - consulta sessao no endpoint gerenciado `get-session`
+  - encerra sessao pelo endpoint gerenciado `sign-out`
 
 Objetos de banco esperados pelo codigo:
 
 - tabela `waitlist`, com pelo menos a coluna `email`;
 - constraint unica em `waitlist.email` ou equivalente, pois o codigo trata erro PostgreSQL `23505`;
 - funcao `public.get_waitlist_count()` retornando a contagem da waitlist.
+- tabelas de autenticacao gerenciadas pelo Neon Auth no schema configurado pelo proprio Neon.
 
 Nao identificado no projeto:
 
-- migrations SQL;
-- schema formal do banco;
 - seeds de banco;
 - ORM;
-- models persistentes;
 - repositorios separados;
-- queries alem da waitlist;
 - configuracao de SSL do PostgreSQL;
 - scripts para criar tabela `waitlist` ou funcao `public.get_waitlist_count()`.
 
@@ -218,17 +233,16 @@ Dados de clientes, empresa e orcamentos no dashboard nao sao persistidos no Post
 
 ## 7. Autenticacao e autorizacao
 
-Autenticacao nao foi identificada no projeto atual.
+Autenticacao atual:
 
-Observacoes:
+- Login com Google via Neon Auth, com o Google configurado como OAuth Provider no Neon.
+- Rotas locais: `/auth/google` e `POST /auth/logout`.
+- Middleware `attachAuthenticatedUser` carrega o usuario autenticado via cookie de sessao.
+- Middleware `requireAuth` protege `/member` e futuras rotas registradas sob `/member`.
+- Sessoes e usuarios sao gerenciados pelo Neon Auth; a aplicacao apenas encaminha cookies `__Secure-neon-auth.*` e consulta a sessao.
+- Cookies do Neon Auth sao reescritos para o dominio da aplicacao com `SameSite` configuravel por `NEON_AUTH_COOKIE_SAMESITE`.
 
-- As rotas `/inicio`, `/orcamentos`, `/clientes` e `/empresa` estao publicas.
-- A landing exibe botoes "Acessar" e "Criar conta", mas eles apontam para `/` e usam estilo de cursor desabilitado.
-- `cookie-parser` esta registrado, mas nao ha login, sessao, JWT ou cookies de autenticacao implementados.
-- `bcryptjs` e `jsonwebtoken` estao instalados, mas nao ha uso identificado no codigo.
-- Nao foram identificadas roles, permissoes ou autorizacao por usuario.
-
-Ao implementar autenticacao futuramente, sera necessario proteger as rotas de dashboard e revisar o armazenamento atual em `localStorage`, pois hoje qualquer visitante pode acessar o dashboard e manipular os dados locais.
+Nao ha login com e-mail/senha, cadastro manual, recuperacao de senha, roles ou permissoes por usuario.
 
 ## 8. Padroes de codigo
 
@@ -237,21 +251,21 @@ Ao implementar autenticacao futuramente, sera necessario proteger as rotas de da
 - Backend TypeScript usa arquivos em kebab-case quando o nome tem mais de uma palavra, por exemplo `company-profile.ts` e `rateLimit.ts` como excecao camelCase existente.
 - Rotas usam nomes por dominio: `waitlist.ts`, `orcamentos.ts`, `clientes.ts`, `empresa.ts`.
 - Scripts publicos usam dominio ou responsabilidade: `orcamentos.js`, `clientes-store.js`, `dashboard-shell.js`.
-- Views EJS usam nomes das paginas: `landing.ejs`, `inicio.ejs`, `orcamentos.ejs`, `clientes.ejs`, `empresa.ejs`.
+- Views EJS ativas usam nomes das paginas no nivel raiz, como `landing.ejs` e `member.ejs`; paginas antigas ficam em `src/views/legacy`.
 
 ### Organizacao de funcoes
 
 - Handlers principais aparecem no topo dos arquivos de rota.
 - Funcoes auxiliares ficam abaixo dos handlers no mesmo arquivo quando sao especificas daquele fluxo.
-- Validacoes e normalizacoes reutilizadas ficam em `services`, como `company-profile.ts`.
+- Validacoes e normalizacoes reutilizadas ativas ficam em `services`; validacoes antigas de perfil ficam em `src/legacy/services/company-profile.ts`.
 - No frontend, cada arquivo registra `DOMContentLoaded`, coleta elementos em um objeto `elements`, mantem estado em `state`, chama `bindEvents()` e renderiza a tela.
 
 ### Separacao de responsabilidades
 
 - EJS monta a estrutura inicial e injeta seeds.
 - JavaScript publico controla interacao, estado local e chamadas pontuais ao backend.
-- Backend valida dados enviados para waitlist, empresa e PDF.
-- PDF tem template proprio em `src/views/partials/orcamentos-pdf.ejs`.
+- Backend ativo valida dados enviados para waitlist; validacoes antigas de empresa e PDF ficam preservadas no legado.
+- PDF legado tem template proprio em `src/views/legacy/partials/orcamentos-pdf.ejs`.
 
 ### Padroes de componentes/views
 
@@ -403,6 +417,9 @@ DATABASE_URL=postgresql://usuario:senha@host:5432/banco
 RESEND_API_KEY=re_xxxx
 RESEND_FROM=Gardesa <oi@gardesa.com.br>
 APP_URL=https://gardesa.com.br
+AUTH_URL=https://gardesa.com.br
+NEON_AUTH_BASE_URL=https://seu-auth-endpoint.neonauth.app
+NEON_AUTH_COOKIE_SAMESITE=lax
 ```
 
 Variaveis referenciadas no codigo:
@@ -411,27 +428,30 @@ Variaveis referenciadas no codigo:
 - `DATABASE_URL`: connection string PostgreSQL. Obrigatoria no startup.
 - `RESEND_API_KEY`: chave da API Resend. Obrigatoria no startup.
 - `RESEND_AUDIENCE_ID`: opcional no codigo; se existir, adiciona o email da waitlist a uma audience do Resend. Nao esta em `.env.example`.
+- `APP_URL`: URL publica da aplicacao; usada como fallback para callbacks de autenticacao.
+- `AUTH_URL`: URL publica da aplicacao usada como callback do Neon Auth. Em desenvolvimento, use `http://localhost:3000`.
+- `NEON_AUTH_BASE_URL`: URL do endpoint gerenciado do Neon Auth.
+- `NEON_AUTH_COOKIE_SAMESITE`: politica SameSite aplicada aos cookies do Neon Auth no dominio da aplicacao. Padrao recomendado para este fluxo: `lax`.
 
 Variaveis presentes no exemplo, mas sem uso identificado no codigo atual:
 
 - `RESEND_FROM`: o envio atual usa remetente hardcoded `Gardesa <waitlist@gardesa.com.br>`.
-- `APP_URL`: nao foi identificado uso no codigo.
 
 Nunca exponha valores reais de `.env` em documentacao, frontend, logs publicos ou commits.
 
 ## 12. Pontos de atencao
 
-- Autenticacao ausente: dashboard esta publico.
+- Area `/member` protegida por autenticacao Google; manter futuras rotas internas sob `/member` protegidas pelo mesmo middleware.
 - Persistencia do dashboard em `localStorage`: dados nao sincronizam entre dispositivos, usuarios ou navegadores.
-- Banco sem migrations versionadas: a tabela `waitlist` e a funcao `public.get_waitlist_count()` sao dependencias implicitas.
+- Banco ainda tem dependencias implicitas para waitlist; autenticacao e tabelas de usuarios/sessoes sao gerenciadas pelo Neon Auth.
 - Startup depende de `DATABASE_URL` e `RESEND_API_KEY`, mesmo para acessar telas que nao usam diretamente banco ou email.
 - Resend tem `RESEND_AUDIENCE_ID` opcional referenciado, mas nao documentado no `.env.example`.
 - Envio da waitlist usa remetente hardcoded e nao `RESEND_FROM`.
 - `helmet` esta ativo, mas `contentSecurityPolicy` esta desabilitada.
-- Nao ha protecao CSRF identificada para formularios/endpoints.
+- Logout usa POST e cookies `sameSite=lax`; formularios publicos ainda nao possuem token CSRF dedicado.
 - `POST /orcamentos/export` usa Puppeteer e pode consumir memoria/CPU; os limites de payload e de itens ajudam, mas o endpoint segue publico.
 - Logos em base64 sao salvas no `localStorage`; manter o limite de 1 MB.
-- O template de 404 e renderizado em `server.ts`, mas `src/views/404.ejs` nao foi encontrado.
+- Handler 404 customizado foi removido durante a reorganizacao de rotas.
 - Dependencias nao usadas podem indicar funcionalidades planejadas, mas tambem aumentam superficie de manutencao.
 - A fonte e os tokens do tema estao centralizados em `public/css/styles.css`; nao editar `output.css` manualmente.
 
@@ -441,7 +461,7 @@ Nunca exponha valores reais de `.env` em documentacao, frontend, logs publicos o
 - Adicionar `RESEND_AUDIENCE_ID` ao `.env.example` como opcional, ou remover o trecho se nao for usado.
 - Usar `RESEND_FROM` no envio de email, ou remover a variavel do exemplo.
 - Criar `src/views/404.ejs` ou alterar o handler 404 para uma resposta existente.
-- Implementar autenticacao antes de transformar dashboard em area real de usuario.
+- Expandir autorizacao por usuario/role quando houver dados internos reais.
 - Se clientes/orcamentos/empresa precisarem persistir de verdade, mover CRUD para backend e PostgreSQL com validacao e autorizacao.
 - Adicionar testes para validacoes criticas: waitlist, perfil da empresa, normalizacao de orcamento e geracao de PDF.
 - Considerar CSP adequada quando os scripts/estilos estiverem prontos para isso.

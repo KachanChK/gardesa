@@ -6,10 +6,11 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import { getWaitlistCount } from './services/waitlist'
+import { attachAuthenticatedUser } from './middlewares/auth'
 import waitlistRouter from './routes/waitlist'
-import orcamentosRouter from './routes/orcamentos'
-import clientesRouter from './routes/clientes'
-import empresaRouter from './routes/empresa'
+import authRouter from './routes/auth'
+import memberRouter from './routes/member'
+import legacyDisabledRouter from './routes/legacy-disabled'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -27,6 +28,7 @@ app.use(cookieParser())
 
 // Arquivos estáticos
 app.use(express.static(path.join(__dirname, '../public')))
+app.use(attachAuthenticatedUser)
 
 // Template engine
 app.set('view engine', 'ejs')
@@ -51,20 +53,11 @@ app.get('/', async (req, res) => {
   }
 })
 
-app.get('/inicio', (_req, res) => {
-  res.render('inicio')
-})
-
 // Rotas
 app.use(waitlistRouter)
-app.use(orcamentosRouter)
-app.use(clientesRouter)
-app.use(empresaRouter)
-
-// 404
-app.use((req, res) => {
-  res.status(404).render('404')
-})
+app.use(authRouter)
+app.use(memberRouter)
+app.use(legacyDisabledRouter)
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando em http://localhost:${PORT}`)

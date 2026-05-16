@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { budgetSeedPayload } from '../mock/orcamentos'
+import { budgetSeedPayload } from '../../legacy/mock/orcamentos'
 
 const router = Router()
 
@@ -8,7 +8,7 @@ router.get('/clientes', (_req, res) => {
         clients: budgetSeedPayload.clients
     }).replace(/</g, '\\u003c')
 
-    res.render('clientes', {
+    res.render('legacy/clientes', {
         serializedSeed
     })
 })
