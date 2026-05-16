@@ -9,8 +9,8 @@ import {
     type BudgetItem,
     type BudgetProfile,
     type PaymentMethodKey
-} from '../mock/orcamentos'
-import { isAllowedLogoSource, sanitizeCompanyProfile } from '../services/company-profile'
+} from '../../legacy/mock/orcamentos'
+import { isAllowedLogoSource, sanitizeCompanyProfile } from '../../legacy/services/company-profile'
 
 const router = Router()
 
@@ -26,7 +26,7 @@ const MAX_OBSERVATIONS_LENGTH = 250
 const MAX_ITEM_QUANTITY = 999
 const MAX_UNIT_PRICE = 999999
 const MAX_TOTAL_AMOUNT = 999999999.99
-const OUTPUT_CSS_PATH = path.join(__dirname, '../../public/css/output.css')
+const OUTPUT_CSS_PATH = path.join(__dirname, '../../../public/css/output.css')
 
 interface RenderableBudgetItem {
     sequence: number
@@ -68,7 +68,7 @@ const paymentMethodLabels: Record<PaymentMethodKey, string> = {
 router.get('/orcamentos', (_req, res) => {
     const serializedSeed = JSON.stringify(budgetSeedPayload).replace(/</g, '\\u003c')
 
-    res.render('orcamentos', {
+    res.render('legacy/orcamentos', {
         serializedSeed
     })
 })
@@ -139,7 +139,7 @@ async function renderBudgetDocumentHtml(
 ): Promise<string> {
     const model = buildBudgetDocumentViewModel(req, renderMode)
 
-    return renderView(req.app, 'partials/orcamentos-pdf', {
+    return renderView(req.app, 'legacy/partials/orcamentos-pdf', {
         doc: model
     })
 }
@@ -282,7 +282,7 @@ function resolveAssetSource(assetUrl: string, baseUrl: string): string {
             return ''
         }
 
-        const assetPath = path.join(__dirname, '../../public', publicRelativePath)
+        const assetPath = path.join(__dirname, '../../../public', publicRelativePath)
 
         try {
             const fileBuffer = readFileSync(assetPath)

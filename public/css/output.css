@@ -1153,9 +1153,6 @@
   .bg-verde {
     background-color: var(--color-verde);
   }
-  .bg-verde-3 {
-    background-color: var(--color-verde-3);
-  }
   .bg-verde\/30 {
     background-color: color-mix(in srgb, #5ADB40 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {

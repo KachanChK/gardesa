@@ -3,7 +3,7 @@ import {
     COMPANY_PROFILE_LIMITS,
     defaultCompanyProfile,
     validateCompanyProfilePayload
-} from '../services/company-profile'
+} from '../../legacy/services/company-profile'
 
 const router = Router()
 
@@ -21,7 +21,7 @@ router.get('/empresa', (_req, res) => {
         limits: COMPANY_PROFILE_LIMITS
     }).replace(/</g, '\\u003c')
 
-    res.render('empresa', {
+    res.render('legacy/empresa', {
         serializedSeed
     })
 })
