@@ -8,10 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const brand = document.getElementById('sidebar-brand')
     const brandText = document.getElementById('sidebar-brand-text')
     const brandIcon = document.getElementById('sidebar-brand-icon')
-
     if (!sidebar || !layout || !overlay || !toggle || !brand || !brandText || !brandIcon) {
         return
     }
+
+    const initialCollapsed = layout.dataset.sidebarInitialCollapsed === 'true'
+        || document.body.dataset.sidebarInitialCollapsed === 'true'
 
     let collapsed = false
 
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         brand.classList.toggle('md:px-5', !collapsed)
         brandText.classList.toggle('md:hidden', collapsed)
         brandIcon.classList.toggle('hidden', !collapsed)
+        brandIcon.classList.toggle('md:block', collapsed)
         brandIcon.classList.toggle('md:hidden', !collapsed)
 
         navLinks.forEach((link) => {
@@ -71,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     if (isDesktop()) {
+        setCollapsed(initialCollapsed)
+    } else {
         setCollapsed(false)
     }
 })
