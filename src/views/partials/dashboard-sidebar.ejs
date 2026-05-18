@@ -44,9 +44,13 @@
         </div>
         <% if (sidebarUser) { %>
             <form action="/auth/logout" method="POST" class="mt-2">
-                <button type="submit"
-                    class="flex h-10 w-full items-center justify-start rounded-[8px] px-3 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
-                    <span data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden' : '' %>">Sair</span>
+                <button type="submit" data-nav-link
+                    class="group flex h-11 w-full items-center <%= sidebarStartsCollapsed ? 'justify-start px-3 md:justify-center md:px-0' : 'justify-start px-3' %> gap-3 rounded-[8px] text-sm font-medium text-preto/70 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
+                    aria-label="Sair da conta">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
+                        <img src="/img/icons/x_icon.svg" alt="" class="size-4 object-contain" />
+                    </span>
+                    <span data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden ' : '' %>truncate">Sair</span>
                 </button>
             </form>
         <% } %>

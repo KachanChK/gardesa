@@ -1,6 +1,7 @@
 ## Faça
 - Utilize APENAS Tailwind para todos estilos das páginas
 - Crie todas as novas rotas dentro de src/routes/
+- Sempre utilize o MCP e o Plugin do Neon para mexer com integrações do banco de dados
 
 ## Não faça
 - Não utilize CSS tradicional nem adicione estilos para alguma página dentro de styles.css, utilize apenas tailwind

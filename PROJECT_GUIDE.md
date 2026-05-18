@@ -212,7 +212,6 @@ Uso identificado:
 - `src/services/neon-auth.ts`
   - inicia login social Google pelo Neon Auth
   - consulta sessao no endpoint gerenciado `get-session`
-  - encerra sessao pelo endpoint gerenciado `sign-out`
 
 Objetos de banco esperados pelo codigo:
 
@@ -236,10 +235,10 @@ Dados de clientes, empresa e orcamentos no dashboard nao sao persistidos no Post
 Autenticacao atual:
 
 - Login com Google via Neon Auth, com o Google configurado como OAuth Provider no Neon.
-- Rotas locais: `/auth/google` e `POST /auth/logout`.
+- Rotas locais: `/auth`, `/auth/google` e `/auth/callback`.
 - Middleware `attachAuthenticatedUser` carrega o usuario autenticado via cookie de sessao.
 - Middleware `requireAuth` protege `/member` e futuras rotas registradas sob `/member`.
-- Sessoes e usuarios sao gerenciados pelo Neon Auth; a aplicacao apenas encaminha cookies `__Secure-neon-auth.*` e consulta a sessao.
+- Sessoes e usuarios sao gerenciados pelo Neon Auth; a aplicacao apenas encaminha cookies de autenticacao do Neon e consulta a sessao.
 - Cookies do Neon Auth sao reescritos para o dominio da aplicacao com `SameSite` configuravel por `NEON_AUTH_COOKIE_SAMESITE`.
 
 Nao ha login com e-mail/senha, cadastro manual, recuperacao de senha, roles ou permissoes por usuario.
@@ -407,21 +406,6 @@ Atencoes para producao:
 
 Nao foram identificados scripts de teste no `package.json`.
 
-## 11. Variaveis de ambiente
-
-Variaveis encontradas em `.env.example`:
-
-```env
-PORT=3000
-DATABASE_URL=postgresql://usuario:senha@host:5432/banco
-RESEND_API_KEY=re_xxxx
-RESEND_FROM=Gardesa <oi@gardesa.com.br>
-APP_URL=https://gardesa.com.br
-AUTH_URL=https://gardesa.com.br
-NEON_AUTH_BASE_URL=https://seu-auth-endpoint.neonauth.app
-NEON_AUTH_COOKIE_SAMESITE=lax
-```
-
 Variaveis referenciadas no codigo:
 
 - `PORT`: porta HTTP do Express. Se ausente, usa `3000`.
@@ -448,7 +432,7 @@ Nunca exponha valores reais de `.env` em documentacao, frontend, logs publicos o
 - Resend tem `RESEND_AUDIENCE_ID` opcional referenciado, mas nao documentado no `.env.example`.
 - Envio da waitlist usa remetente hardcoded e nao `RESEND_FROM`.
 - `helmet` esta ativo, mas `contentSecurityPolicy` esta desabilitada.
-- Logout usa POST e cookies `sameSite=lax`; formularios publicos ainda nao possuem token CSRF dedicado.
+- Formularios publicos ainda nao possuem token CSRF dedicado.
 - `POST /orcamentos/export` usa Puppeteer e pode consumir memoria/CPU; os limites de payload e de itens ajudam, mas o endpoint segue publico.
 - Logos em base64 sao salvas no `localStorage`; manter o limite de 1 MB.
 - Handler 404 customizado foi removido durante a reorganizacao de rotas.

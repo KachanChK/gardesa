@@ -1,8 +1,27 @@
 import type { Request } from 'express'
 
-export const NEON_AUTH_COOKIE_PREFIX = '__Secure-neon-auth'
-export const NEON_AUTH_SESSION_COOKIE_NAME = `${NEON_AUTH_COOKIE_PREFIX}.session_token`
-export const NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAME = `${NEON_AUTH_COOKIE_PREFIX}.session_challange`
+export const NEON_AUTH_COOKIE_PREFIX = '__Secure-neonauth'
+export const NEON_AUTH_COMPAT_COOKIE_PREFIX = '__Secure-neon-auth'
+export const NEON_AUTH_COOKIE_PREFIXES = [
+    NEON_AUTH_COOKIE_PREFIX,
+    NEON_AUTH_COMPAT_COOKIE_PREFIX
+]
+
+export const NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAMES = NEON_AUTH_COOKIE_PREFIXES.flatMap((prefix) => {
+    return [
+        `${prefix}.session_challenge`,
+        `${prefix}.session_challange`
+    ]
+})
+export const NEON_AUTH_KNOWN_COOKIE_NAMES = NEON_AUTH_COOKIE_PREFIXES.flatMap((prefix) => {
+    return [
+        prefix,
+        `${prefix}.session_token`,
+        `${prefix}.session_data`,
+        `${prefix}.session_challenge`,
+        `${prefix}.session_challange`
+    ]
+})
 export const NEON_AUTH_SESSION_VERIFIER_PARAM_NAME = 'neon_auth_session_verifier'
 
 export interface NeonAuthUser {
@@ -64,4 +83,10 @@ export function getNeonAuthCookieSameSite(): 'strict' | 'lax' | 'none' {
     }
 
     return 'lax'
+}
+
+export function isNeonAuthCookieName(cookieName: string): boolean {
+    return NEON_AUTH_COOKIE_PREFIXES.some((prefix) => {
+        return cookieName === prefix || cookieName.startsWith(`${prefix}.`)
+    })
 }

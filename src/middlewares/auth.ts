@@ -3,6 +3,7 @@ import { NEON_AUTH_SESSION_VERIFIER_PARAM_NAME } from '../config/neon-auth'
 import { exchangeNeonAuthVerifier, getNeonAuthSession } from '../services/neon-auth'
 
 export const attachAuthenticatedUser: RequestHandler = async (req, res, next) => {
+    res.set('Cache-Control', 'no-store')
     res.locals.currentUser = null
     res.locals.authActionUrl = '/auth'
 
