@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Render AI | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-branco font-sans text-preto antialiased" data-sidebar-initial-collapsed="true">
+    <%
+        const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
+        const currentPage = 'Render AI'
+        const navItems = [
+            { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
+            { label: 'Render AI', iconDefault: '/img/icons/sparkles.svg', iconActive: '/img/icons/sparkles.svg', active: true, href: '/member/render', iconSize: 'size-5' }
+        ]
+    %>
+
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
+    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser, initialSidebarCollapsed: true }) %>
+
+    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[84px]" data-sidebar-initial-collapsed="true">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
+
+        <main class="mx-auto flex w-full max-w-[1540px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
+            <section class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_392px]">
+                <div data-render-workspace class="flex min-h-[560px] flex-col gap-4 rounded-[8px] border border-[#e2e2e2] bg-white p-4 shadow-sm sm:p-5 lg:min-h-[calc(100vh-108px)] lg:p-6">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold leading-tight text-preto">Imagem do projeto</h2>
+                            <p class="mt-1 text-sm font-light leading-relaxed text-preto/60">Prepare a base visual para o render realista.</p>
+                        </div>
+
+                        <span class="inline-flex h-8 w-fit items-center rounded-full bg-[#d1fac8] px-3 text-xs font-semibold text-[#2ed218]">
+                            PNG e JPG
+                        </span>
+                    </div>
+
+                    <div class="relative flex min-h-[440px] flex-1 items-center justify-center overflow-hidden rounded-[8px] border border-dashed border-[#bababa] bg-[#f8f8f8] px-4 py-10 sm:px-8">
+                        <div data-render-preview class="hidden h-full w-full items-center justify-center">
+                            <img src="" alt="Preview do projeto 3D" class="max-h-[min(62vh,680px)] w-full max-w-[980px] rounded-[8px] object-contain shadow-sm" />
+                        </div>
+
+                        <div data-render-empty-state class="flex w-full max-w-[460px] flex-col items-center text-center">
+                            <span class="flex size-20 items-center justify-center rounded-full bg-[#f2f8ef]">
+                                <img src="/img/icons/image_upload.svg" alt="" class="size-10" />
+                            </span>
+
+                            <p class="mt-6 text-base font-medium leading-relaxed text-preto">
+                                Utilize uma imagem clara, com boa ilumina&ccedil;&atilde;o e materiais visiveis para um resultado melhor
+                            </p>
+
+                            <button type="button" class="mt-6 inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] bg-white px-5 text-sm font-medium text-preto transition-colors hover:bg-[#f3f3f3]">
+                                Enviar imagem
+                            </button>
+
+                            <p class="mt-3 text-sm font-light text-preto/50">PNG e JPG</p>
+                        </div>
+                    </div>
+                </div>
+
+                <aside data-render-settings class="flex h-fit flex-col gap-6 rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm xl:sticky xl:top-[88px]">
+                    <div>
+                        <p class="text-sm font-light text-preto/60">Render AI</p>
+                        <h2 class="mt-1 text-xl font-semibold leading-tight text-preto">Configura&ccedil;&otilde;es do render</h2>
+                    </div>
+
+                    <section class="flex flex-col gap-3" aria-labelledby="render-weather-title">
+                        <h3 id="render-weather-title" class="text-sm font-semibold text-preto">Clima</h3>
+
+                        <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                            <button type="button" class="flex min-h-[72px] items-center justify-between rounded-[8px] border border-verde bg-[#f2f8ef] px-4 py-3 text-left transition-colors hover:bg-[#e8f7e4]">
+                                <span>
+                                    <span class="block text-sm font-semibold text-preto">Dia</span>
+                                    <span class="mt-1 block text-xs font-light text-preto/55">Luz natural</span>
+                                </span>
+                                <span class="size-3 rounded-full bg-[#2ed218]"></span>
+                            </button>
+
+                            <button type="button" class="flex min-h-[72px] items-center justify-between rounded-[8px] border border-[#e2e2e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#f3f3f3]">
+                                <span>
+                                    <span class="block text-sm font-semibold text-preto">Noite</span>
+                                    <span class="mt-1 block text-xs font-light text-preto/55">Luz artificial</span>
+                                </span>
+                                <span class="size-3 rounded-full bg-[#261F31]"></span>
+                            </button>
+
+                            <button type="button" class="flex min-h-[72px] items-center justify-between rounded-[8px] border border-[#e2e2e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#f3f3f3]">
+                                <span>
+                                    <span class="block text-sm font-semibold text-preto">Chuvoso</span>
+                                    <span class="mt-1 block text-xs font-light text-preto/55">Cena umida</span>
+                                </span>
+                                <span class="size-3 rounded-full bg-azul"></span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <button type="button" class="mt-2 inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-md shadow-verde/25 transition-colors hover:bg-verde-2">
+                        <span class="flex size-7 items-center justify-center rounded-full bg-white">
+                            <img src="/img/icons/sparkles.svg" alt="" class="size-4" />
+                        </span>
+                        Gerar render
+                    </button>
+                </aside>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

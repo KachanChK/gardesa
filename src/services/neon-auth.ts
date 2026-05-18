@@ -1,11 +1,12 @@
 import type { Request, Response as ExpressResponse } from 'express'
 import {
-    NEON_AUTH_COOKIE_PREFIX,
-    NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAME,
+    NEON_AUTH_KNOWN_COOKIE_NAMES,
+    NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAMES,
     NEON_AUTH_SESSION_VERIFIER_PARAM_NAME,
     NeonAuthSessionPayload,
     getNeonAuthBaseUrl,
-    getNeonAuthCookieSameSite
+    getNeonAuthCookieSameSite,
+    isNeonAuthCookieName
 } from '../config/neon-auth'
 
 interface NeonAuthRequestOptions {
@@ -20,12 +21,14 @@ interface NeonSignInResponse {
     url?: string
 }
 
-export async function startGoogleSignIn(req: Request, res: ExpressResponse, callbackURL: string): Promise<string> {
+export async function startGoogleSignIn(req: Request, res: ExpressResponse, callbackURL: string, errorCallbackURL: string): Promise<string> {
     const response = await callNeonAuth({
         body: {
             callbackURL,
-            errorCallbackURL: '/',
-            provider: 'google'
+            errorCallbackURL,
+            newUserCallbackURL: callbackURL,
+            provider: 'google',
+            requestSignUp: true
         },
         method: 'POST',
         path: 'sign-in/social',
@@ -70,7 +73,11 @@ export async function exchangeNeonAuthVerifier(req: Request, res: ExpressRespons
         ? req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME]
         : ''
 
-    if (!verifier || !req.cookies?.[NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAME]) {
+    const hasChallengeCookie = NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAMES.some((cookieName) => {
+        return Boolean(req.cookies?.[cookieName])
+    })
+
+    if (!verifier || !hasChallengeCookie) {
         return false
     }
 
@@ -88,19 +95,27 @@ export async function exchangeNeonAuthVerifier(req: Request, res: ExpressRespons
     return true
 }
 
-export async function signOutFromNeonAuth(req: Request, res: ExpressResponse): Promise<void> {
-    const response = await callNeonAuth({
-        method: 'POST',
-        path: 'sign-out',
-        req
-    })
+export async function signOutNeonAuth(req: Request, res: ExpressResponse): Promise<void> {
+    try {
+        const response = await callNeonAuth({
+            body: {},
+            method: 'POST',
+            path: 'sign-out',
+            req
+        })
 
-    forwardNeonAuthCookies(response, res)
-    clearLocalNeonAuthCookies(req, res)
+        forwardNeonAuthCookies(response, res)
+
+        if (!response.ok && response.status !== 401) {
+            throw new Error(`Neon Auth sign-out failed with status ${response.status}`)
+        }
+    } finally {
+        expireNeonAuthCookies(req, res)
+    }
 }
 
 function hasNeonAuthCookie(req: Request): boolean {
-    return Object.keys(req.cookies ?? {}).some((cookieName) => cookieName.startsWith(NEON_AUTH_COOKIE_PREFIX))
+    return Object.keys(req.cookies ?? {}).some(isNeonAuthCookieName)
 }
 
 async function callNeonAuth(options: NeonAuthRequestOptions): Promise<globalThis.Response> {
@@ -115,13 +130,8 @@ async function callNeonAuth(options: NeonAuthRequestOptions): Promise<globalThis
         'x-neon-auth-middleware': 'true'
     }
 
-    const contentType = options.req.get('content-type')
     const userAgent = options.req.get('user-agent')
     const referer = options.req.get('referer')
-
-    if (contentType) {
-        headers['content-type'] = contentType
-    }
 
     if (userAgent) {
         headers['user-agent'] = userAgent
@@ -144,7 +154,7 @@ async function callNeonAuth(options: NeonAuthRequestOptions): Promise<globalThis
 
 function getNeonAuthCookieHeader(req: Request): string {
     return Object.entries(req.cookies ?? {})
-        .filter(([name]) => name.startsWith(NEON_AUTH_COOKIE_PREFIX))
+        .filter(([name]) => isNeonAuthCookieName(name))
         .map(([name, value]) => `${name}=${encodeURIComponent(String(value))}`)
         .join('; ')
 }
@@ -152,6 +162,18 @@ function getNeonAuthCookieHeader(req: Request): string {
 function forwardNeonAuthCookies(response: globalThis.Response, res: ExpressResponse): void {
     for (const cookie of getSetCookieHeaders(response.headers)) {
         res.append('Set-Cookie', rewriteNeonAuthCookie(cookie))
+    }
+}
+
+function expireNeonAuthCookies(req: Request, res: ExpressResponse): void {
+    const cookieNames = new Set([
+        ...NEON_AUTH_KNOWN_COOKIE_NAMES,
+        ...Object.keys(req.cookies ?? {}).filter(isNeonAuthCookieName)
+    ])
+
+    for (const cookieName of cookieNames) {
+        res.append('Set-Cookie', buildExpiredNeonAuthCookie(cookieName))
+        res.append('Set-Cookie', buildExpiredNeonAuthCookie(cookieName, true))
     }
 }
 
@@ -181,16 +203,22 @@ function rewriteNeonAuthCookie(cookie: string): string {
     return parts.join('; ')
 }
 
-function clearLocalNeonAuthCookies(req: Request, res: ExpressResponse): void {
-    for (const cookieName of Object.keys(req.cookies ?? {})) {
-        if (cookieName.startsWith(NEON_AUTH_COOKIE_PREFIX)) {
-            res.clearCookie(cookieName, {
-                path: '/',
-                sameSite: getNeonAuthCookieSameSite(),
-                secure: true
-            })
-        }
+function buildExpiredNeonAuthCookie(cookieName: string, partitioned = false): string {
+    const parts = [
+        `${cookieName}=`,
+        'Max-Age=0',
+        'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'Path=/',
+        'HttpOnly',
+        'Secure',
+        `SameSite=${formatSameSite(getNeonAuthCookieSameSite())}`
+    ]
+
+    if (partitioned) {
+        parts.push('Partitioned')
     }
+
+    return parts.join('; ')
 }
 
 function getRequestOrigin(req: Request): string {

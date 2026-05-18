@@ -3,8 +3,9 @@ import { NEON_AUTH_SESSION_VERIFIER_PARAM_NAME } from '../config/neon-auth'
 import { exchangeNeonAuthVerifier, getNeonAuthSession } from '../services/neon-auth'
 
 export const attachAuthenticatedUser: RequestHandler = async (req, res, next) => {
+    res.set('Cache-Control', 'no-store')
     res.locals.currentUser = null
-    res.locals.authActionUrl = '/auth/google'
+    res.locals.authActionUrl = '/auth'
 
     if (req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME]) {
         next()
@@ -51,5 +52,5 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
         return
     }
 
-    res.redirect(303, `/auth/google?next=${encodeURIComponent(req.originalUrl || '/member')}`)
+    res.redirect(303, `/auth?next=${encodeURIComponent(req.originalUrl || '/member')}`)
 }

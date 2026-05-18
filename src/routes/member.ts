@@ -11,4 +11,10 @@ router.get('/member', (_req, res) => {
     })
 })
 
+router.get('/member/render', (_req, res) => {
+    res.render('render-ai', {
+        currentUser: res.locals.currentUser
+    })
+})
+
 export default router
