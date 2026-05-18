@@ -149,8 +149,12 @@ Nao ha, no estado atual:
 A area interna principal e acessada por:
 
 - `GET /member`
+- `GET /member/render`
+- `GET /member/gallery`
 
-Esta rota e protegida por autenticacao. Usuarios anonimos sao redirecionados para `/auth/google`; apos login bem-sucedido, voltam para `/member`.
+Essas rotas sao protegidas por autenticacao. Usuarios anonimos sao redirecionados para `/auth/google`; apos login bem-sucedido, voltam para `/member`.
+
+Novas paginas da area do usuario devem ser subrotas de `/member`, por exemplo `/member/nome-da-pagina`, e registradas em `src/routes/member.ts` usando o mesmo middleware `requireAuth`.
 
 As rotas antigas ficam desabilitadas temporariamente e redirecionam para `/member`:
 
@@ -313,14 +317,15 @@ Para manter a arquitetura atual:
 
 1. Identifique o dominio da feature (`clientes`, `empresa`, `orcamentos`, `waitlist` ou novo dominio).
 2. Se precisar de nova pagina, crie uma view EJS em `src/views` e registre uma rota em `src/routes`.
-3. Se a pagina fizer parte do dashboard, reutilize `dashboard-sidebar.ejs`, `dashboard-header.ejs`, `dashboard-shell.js` e o padrao de `navItems`.
-4. Para interacao no navegador, crie ou estenda um arquivo em `public/js` usando seletores `data-*`, objeto `elements`, objeto `state`, `bindEvents` e funcoes de renderizacao.
-5. Para regras reutilizaveis ou validacoes server-side, coloque em `src/services`.
-6. Para endpoints, mantenha validacao server-side mesmo quando ja houver validacao no frontend.
-7. Para dados persistidos em banco, crie uma estrategia de schema/migration antes de adicionar queries. Hoje essa estrutura nao existe.
-8. Para novas variaveis de ambiente, atualize `.env.example` com valores seguros e documente neste guia.
-9. Para novas dependencias, confirme se realmente sao necessarias e remova dependencias antigas nao usadas em uma tarefa separada.
-10. Se a feature exigir autenticacao/permissoes, implemente isso antes de expor dados sensiveis no dashboard.
+3. Se a pagina fizer parte da area autenticada do usuario, registre-a como subrota de `/member` em `src/routes/member.ts`, por exemplo `/member/nome-da-pagina`.
+4. Se a pagina fizer parte do dashboard, reutilize `dashboard-sidebar.ejs`, `dashboard-header.ejs`, `dashboard-shell.js` e o padrao de `navItems`.
+5. Para interacao no navegador, crie ou estenda um arquivo em `public/js` usando seletores `data-*`, objeto `elements`, objeto `state`, `bindEvents` e funcoes de renderizacao.
+6. Para regras reutilizaveis ou validacoes server-side, coloque em `src/services`.
+7. Para endpoints, mantenha validacao server-side mesmo quando ja houver validacao no frontend.
+8. Para dados persistidos em banco, crie uma estrategia de schema/migration antes de adicionar queries. Hoje essa estrutura nao existe.
+9. Para novas variaveis de ambiente, atualize `.env.example` com valores seguros e documente neste guia.
+10. Para novas dependencias, confirme se realmente sao necessarias e remova dependencias antigas nao usadas em uma tarefa separada.
+11. Se a feature exigir autenticacao/permissoes, implemente isso antes de expor dados sensiveis no dashboard.
 
 Evite:
 

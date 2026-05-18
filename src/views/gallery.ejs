@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home | Gardesa</title>
+    <title>Galeria | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
@@ -13,11 +13,11 @@
 <body class="min-h-screen bg-branco font-sans text-preto antialiased">
     <%
         const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
-        const currentPage = 'Home'
+        const currentPage = 'Galeria'
         const navItems = [
-            { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: true, href: '/member', iconSize: 'size-5' },
+            { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
             { label: 'Render IA', iconDefault: '/img/icons/sparkles_black.svg', iconActive: '/img/icons/sparkles.svg', active: false, href: '/member/render', iconSize: 'size-5' },
-            { label: 'Galeria', iconDefault: '/img/icons/layout_dark.svg', iconActive: '/img/icons/layout_green.svg', active: false, href: '/member/gallery', iconSize: 'size-5' }
+            { label: 'Galeria', iconDefault: '/img/icons/layout_dark.svg', iconActive: '/img/icons/layout_green.svg', active: true, href: '/member/gallery', iconSize: 'size-5' }
         ]
     %>
 

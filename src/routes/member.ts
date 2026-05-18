@@ -17,4 +17,10 @@ router.get('/member/render', (_req, res) => {
     })
 })
 
+router.get('/member/gallery', (_req, res) => {
+    res.render('gallery', {
+        currentUser: res.locals.currentUser
+    })
+})
+
 export default router

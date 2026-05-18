@@ -1,6 +1,7 @@
 ## Faça
 - Utilize APENAS Tailwind para todos estilos das páginas
 - Crie todas as novas rotas dentro de src/routes/
+- Rotas internas do usuário devem ser subrotas de /member, registradas em src/routes/member.ts
 - Sempre utilize o MCP e o Plugin do Neon para mexer com integrações do banco de dados
 
 ## Não faça

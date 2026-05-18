@@ -446,6 +446,24 @@
   .order-2 {
     order: 2;
   }
+  .container {
+    width: 100%;
+    @media (width >= 40rem) {
+      max-width: 40rem;
+    }
+    @media (width >= 48rem) {
+      max-width: 48rem;
+    }
+    @media (width >= 64rem) {
+      max-width: 64rem;
+    }
+    @media (width >= 80rem) {
+      max-width: 80rem;
+    }
+    @media (width >= 96rem) {
+      max-width: 96rem;
+    }
+  }
   .mx-auto {
     margin-inline: auto;
   }
@@ -688,6 +706,9 @@
   }
   .min-h-\[560px\] {
     min-height: 560px;
+  }
+  .min-h-\[calc\(100vh-68px\)\] {
+    min-height: calc(100vh - 68px);
   }
   .min-h-screen {
     min-height: 100vh;
@@ -2020,6 +2041,14 @@
   .focus\:ring-verde {
     &:focus {
       --tw-ring-color: var(--color-verde);
+    }
+  }
+  .focus\:ring-verde\/35 {
+    &:focus {
+      --tw-ring-color: color-mix(in srgb, #5ADB40 35%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        --tw-ring-color: color-mix(in oklab, var(--color-verde) 35%, transparent);
+      }
     }
   }
   .focus\:ring-offset-2 {
