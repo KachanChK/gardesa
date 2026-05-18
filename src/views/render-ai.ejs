@@ -4,27 +4,28 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Render AI | Gardesa</title>
+    <title>Render IA | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
 </head>
 
-<body class="min-h-screen bg-branco font-sans text-preto antialiased" data-sidebar-initial-collapsed="true">
+<body class="min-h-screen bg-branco font-sans text-preto antialiased">
     <%
         const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
-        const currentPage = 'Render AI'
+        const currentPage = 'Render IA'
         const navItems = [
             { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
-            { label: 'Render AI', iconDefault: '/img/icons/sparkles.svg', iconActive: '/img/icons/sparkles.svg', active: true, href: '/member/render', iconSize: 'size-5' }
+            { label: 'Render IA', iconDefault: '/img/icons/sparkles_black.svg', iconActive: '/img/icons/sparkles.svg', active: true, href: '/member/render', iconSize: 'size-5' },
+            { label: 'Galeria', iconDefault: '/img/icons/layout_dark.svg', iconActive: '/img/icons/layout_green.svg', active: false, href: '/member/gallery', iconSize: 'size-5' }
         ]
     %>
 
     <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
-    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser, initialSidebarCollapsed: true }) %>
+    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser }) %>
 
-    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[84px]" data-sidebar-initial-collapsed="true">
-        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage }) %>
+    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[240px]">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage, currentUser: authenticatedUser }) %>
 
         <main class="mx-auto flex w-full max-w-[1540px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
             <section class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_392px]">
@@ -65,7 +66,7 @@
 
                 <aside data-render-settings class="flex h-fit flex-col gap-6 rounded-[8px] border border-[#e2e2e2] bg-white p-5 shadow-sm xl:sticky xl:top-[88px]">
                     <div>
-                        <p class="text-sm font-light text-preto/60">Render AI</p>
+                        <p class="text-sm font-light text-preto/60">Render IA</p>
                         <h2 class="mt-1 text-xl font-semibold leading-tight text-preto">Configura&ccedil;&otilde;es do render</h2>
                     </div>
 

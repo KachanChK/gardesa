@@ -1,15 +1,63 @@
+<%
+    const headerUser = typeof currentUser !== 'undefined' ? currentUser : null
+%>
+
 <header
-    class="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-[#e2e2e2] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
-    <div class="flex min-w-0 items-center gap-4">
+    class="sticky top-0 z-30 flex h-[68px] items-center justify-between gap-3 border-b border-[#e2e2e2] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
         <button id="sidebar-toggle" type="button"
             class="flex size-10 shrink-0 items-center justify-center rounded-full text-preto transition-colors hover:bg-[#f3f3f3]"
             aria-label="Abrir ou fechar menu lateral">
-            <img src="/img/icons/panel-left-stroke-rounded.svg" alt="Visão Sidebar" class="size-6">
+            <img src="/img/icons/panel-left-stroke-rounded.svg" alt="Visao Sidebar" class="size-6">
         </button>
-        <div class="h-7 w-px bg-[#e2e2e2]"></div>
-        <div class="min-w-0">
-            <p class="text-xs font-light leading-none text-preto/50"><%= sectionLabel %></p>
-            <h1 class="mt-1 truncate text-lg font-semibold leading-none text-preto"><%= currentPage %></h1>
+        <div class="hidden h-7 w-px bg-[#e2e2e2] sm:block"></div>
+        <div class="flex min-w-0 items-center">
+            <h1 class="truncate text-xl font-semibold leading-none text-preto"><%= currentPage %></h1>
         </div>
     </div>
+
+    <% if (headerUser) { %>
+        <div class="relative shrink-0" data-user-menu>
+            <button id="user-menu-toggle" type="button"
+                class="flex h-12 max-w-[180px] items-center gap-2 rounded-[8px] px-2 text-left transition-colors hover:bg-[#f3f3f3] sm:max-w-[260px] sm:gap-3 sm:px-3"
+                aria-expanded="false"
+                aria-controls="user-menu-dropdown">
+                <% if (headerUser.avatarUrl) { %>
+                    <img src="<%= headerUser.avatarUrl %>" alt="" class="size-9 shrink-0 rounded-full border border-[#bababa]/70 object-cover" referrerpolicy="no-referrer" />
+                <% } else { %>
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#bababa]/70 bg-[#d9d9d9]">
+                        <span class="size-4 rounded-full bg-white/60"></span>
+                    </span>
+                <% } %>
+                <span class="hidden min-w-0 sm:block">
+                    <span class="block truncate text-sm font-medium leading-tight text-preto"><%= headerUser.name %></span>
+                    <span class="mt-0.5 block truncate text-xs font-light leading-tight text-preto/50"><%= headerUser.email %></span>
+                </span>
+                <img src="/img/icons/seta_baixo.svg" alt="" class="size-3 shrink-0 opacity-70 transition-transform" data-user-menu-arrow />
+            </button>
+
+            <div id="user-menu-dropdown"
+                class="absolute right-0 top-[calc(100%+10px)] z-50 hidden w-56 rounded-[8px] border border-[#e2e2e2] bg-white py-2 shadow-lg shadow-black/10"
+                role="menu">
+                <button type="button"
+                    class="flex h-10 w-full items-center px-4 text-left text-sm font-normal text-preto/75 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
+                    role="menuitem">
+                    Configurações
+                </button>
+                <button type="button"
+                    class="flex h-10 w-full items-center px-4 text-left text-sm font-normal text-preto/75 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
+                    role="menuitem">
+                    Ajuda e Feedback
+                </button>
+                <div class="my-2 h-px bg-[#e2e2e2]"></div>
+                <form action="/auth/logout" method="POST">
+                    <button type="submit"
+                        class="flex h-10 w-full items-center px-4 text-left text-sm font-medium text-[#c62828] transition-colors hover:bg-[#fff5f5] hover:text-[#b42318]"
+                        role="menuitem">
+                        Desconectar
+                    </button>
+                </form>
+            </div>
+        </div>
+    <% } %>
 </header>

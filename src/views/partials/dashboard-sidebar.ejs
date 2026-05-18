@@ -1,10 +1,9 @@
 <%
-    const sidebarUser = typeof currentUser !== 'undefined' ? currentUser : null
     const sidebarStartsCollapsed = typeof initialSidebarCollapsed !== 'undefined' ? Boolean(initialSidebarCollapsed) : false
 %>
 
 <aside id="dashboard-sidebar"
-    class="fixed inset-y-0 -left-[260px] z-50 flex <%= sidebarStartsCollapsed ? 'w-[84px]' : 'w-[260px]' %> flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 md:left-0 md:shadow-none">
+    class="fixed inset-y-0 -left-[240px] z-50 flex <%= sidebarStartsCollapsed ? 'w-[84px]' : 'w-[240px]' %> flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 ease-out md:left-0 md:shadow-none">
     <div id="sidebar-brand"
         class="flex h-[68px] items-center <%= sidebarStartsCollapsed ? 'justify-start px-5 md:justify-center md:px-0' : 'justify-start px-5' %> border-b border-[#e2e2e2] transition-all duration-300">
         <a class="flex items-center gap-3">
@@ -26,33 +25,4 @@
         <% }) %>
     </nav>
 
-    <div class="border-t border-[#e2e2e2] p-3">
-        <div data-nav-link class="flex h-12 items-center <%= sidebarStartsCollapsed ? 'justify-start px-3 md:justify-center md:px-0' : 'justify-start px-3' %> gap-3 rounded-[8px]">
-            <% if (sidebarUser && sidebarUser.avatarUrl) { %>
-                <img src="<%= sidebarUser.avatarUrl %>" alt="" class="size-9 shrink-0 rounded-full border border-[#bababa]/70 object-cover" referrerpolicy="no-referrer" />
-            <% } else { %>
-                <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#bababa]/70 bg-[#d9d9d9]">
-                    <span class="size-4 rounded-full bg-white/60"></span>
-                </span>
-            <% } %>
-            <div data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden ' : '' %>min-w-0">
-                <p class="truncate text-sm font-medium text-preto"><%= sidebarUser ? sidebarUser.name : 'Perfil' %></p>
-                <% if (sidebarUser) { %>
-                    <p class="truncate text-xs font-light text-preto/50"><%= sidebarUser.email %></p>
-                <% } %>
-            </div>
-        </div>
-        <% if (sidebarUser) { %>
-            <form action="/auth/logout" method="POST" class="mt-2">
-                <button type="submit" data-nav-link
-                    class="group flex h-11 w-full items-center <%= sidebarStartsCollapsed ? 'justify-start px-3 md:justify-center md:px-0' : 'justify-start px-3' %> gap-3 rounded-[8px] text-sm font-medium text-preto/70 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
-                    aria-label="Sair da conta">
-                    <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
-                        <img src="/img/icons/x_icon.svg" alt="" class="size-4 object-contain" />
-                    </span>
-                    <span data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden ' : '' %>truncate">Sair</span>
-                </button>
-            </form>
-        <% } %>
-    </div>
 </aside>
