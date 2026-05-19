@@ -1,0 +1,28 @@
+<%
+    const sidebarStartsCollapsed = typeof initialSidebarCollapsed !== 'undefined' ? Boolean(initialSidebarCollapsed) : false
+%>
+
+<aside id="dashboard-sidebar"
+    class="fixed inset-y-0 -left-[240px] z-50 flex <%= sidebarStartsCollapsed ? 'w-[84px]' : 'w-[240px]' %> flex-col border-r border-[#e2e2e2] bg-white shadow-lg transition-all duration-300 ease-out md:left-0 md:shadow-none">
+    <div id="sidebar-brand"
+        class="flex h-[68px] items-center <%= sidebarStartsCollapsed ? 'justify-start px-5 md:justify-center md:px-0' : 'justify-start px-5' %> border-b border-[#e2e2e2] transition-all duration-300">
+        <a class="flex items-center gap-3">
+            <img id="sidebar-brand-icon" src="/img/icons/logo_gardesa.svg" alt="Ícone Gardesa" class="<%= sidebarStartsCollapsed ? 'hidden md:block' : 'hidden' %> size-7" />
+            <span id="sidebar-brand-text" data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden ' : '' %>text-2xl leading-none text-verde">gardesa</span>
+        </a>
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-5" aria-label="Navegação principal">
+        <% navItems.forEach((item) => { %>
+            <a href="<%= item.href %>" data-nav-link
+                class="group flex h-11 items-center <%= sidebarStartsCollapsed ? 'justify-start px-3 md:justify-center md:px-0' : 'justify-start px-3' %> gap-3 rounded-[8px] text-sm font-medium transition-colors <%= item.active ? 'bg-[#d1fac8] text-[#2ed218]' : 'text-preto hover:bg-[#f3f3f3]' %>"
+                aria-current="<%= item.active ? 'page' : 'false' %>">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-transparent">
+                    <img src="<%= item.active ? item.iconActive : item.iconDefault %>" alt="" class="<%= item.iconSize %> object-contain" />
+                </span>
+                <span data-sidebar-label class="<%= sidebarStartsCollapsed ? 'md:hidden ' : '' %>truncate"><%= item.label %></span>
+            </a>
+        <% }) %>
+    </nav>
+
+</aside>
