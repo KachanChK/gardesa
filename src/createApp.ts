@@ -8,6 +8,7 @@ import { attachAuthenticatedUser } from './middlewares/auth'
 import waitlistRouter from './routes/waitlist'
 import authRouter from './routes/auth'
 import memberRouter from './routes/member'
+import legalRouter from './routes/legal'
 
 export function createApp(): Express {
   const app = express()
@@ -50,6 +51,7 @@ export function createApp(): Express {
     }
   })
 
+  app.use(legalRouter)
   app.use(waitlistRouter)
 
   if (systemAccessEnabled) {
