@@ -9,30 +9,20 @@
     <link rel="stylesheet" href="/css/output.css" />
 </head>
 
-<body class="min-h-screen bg-branco font-sans text-preto antialiased">
-    <main class="grid min-h-screen lg:grid-cols-[minmax(420px,0.75fr)_minmax(0,1.25fr)]">
+<body class="min-h-screen !bg-white bg-white font-sans text-preto antialiased">
+    <main class="grid min-h-screen bg-white xl:grid-cols-[minmax(480px,0.75fr)_minmax(0,1.25fr)]">
         <a href="/"
-            class="absolute left-6 top-6 z-20 w-fit text-3xl font-marca font-semibold text-verde sm:left-10 sm:top-8 lg:left-14 lg:top-12">
+            class="absolute left-6 top-6 z-20 w-fit text-3xl font-marca font-normal text-verde sm:left-10 sm:top-8 lg:left-14 lg:top-12">
             gardesa
         </a>
 
-        <section class="order-2 relative flex min-h-[42vh] overflow-hidden bg-preto sm:min-h-[48vh] lg:min-h-screen" aria-label="Gardesa">
+        <section class="order-2 relative hidden min-h-screen overflow-hidden bg-preto xl:flex" aria-label="Gardesa">
             <img src="/img/foto_hero.png" alt="Ambiente de paisagismo com plantas e área externa"
                 class="absolute inset-0 h-full w-full object-cover" />
             <div class="absolute inset-0 bg-preto/45"></div>
-            <div class="relative z-10 flex w-full flex-col justify-between px-6 py-6 sm:px-10 sm:py-8 lg:px-14 lg:py-12">
-                <div class="max-w-xl pb-4 sm:pb-8 lg:pb-0">
-                    <h1 class="text-4xl font-semibold leading-[1.05] text-white sm:text-5xl lg:text-6xl">
-                        Crie renders realistas com IA.
-                    </h1>
-                    <p class="mt-5 max-w-md text-base font-light leading-relaxed text-white/75 sm:text-lg">
-                        Orçamentos, clientes e rotina comercial em um espaço simples para tocar seus projetos.
-                    </p>
-                </div>
-            </div>
         </section>
 
-        <section class="order-1 flex min-h-[58vh] items-center justify-center px-6 py-10 sm:px-10 lg:min-h-screen lg:px-14">
+        <section class="order-1 relative flex min-h-screen items-center justify-center bg-white px-6 pb-24 pt-20 sm:px-10 xl:px-14">
             <div class="w-full max-w-sm">
                 <div class="mb-10">
                     <h2 class="text-3xl font-semibold leading-tight text-preto sm:text-4xl">
@@ -61,7 +51,14 @@
                 </a>
 
                 <p class="mt-5 text-center text-xs font-light leading-relaxed text-preto/50">
-                    Ao continuar, você concorda com os <a href="/tos">Termos de uso</a> e a <a href="/tos">Política de privacidade.</a>
+                    Ao continuar, você concorda com os <a href="/tos" class="font-medium text-verde underline underline-offset-2 transition-colors hover:text-verde-2">Termos de uso</a> e a <a href="/tos" class="font-medium text-verde underline underline-offset-2 transition-colors hover:text-verde-2">Política de privacidade.</a>
+                </p>
+            </div>
+
+            <div class="absolute inset-x-6 bottom-6 flex flex-col gap-2 text-xs font-normal text-preto/60 sm:inset-x-10 sm:flex-row sm:items-center sm:justify-between xl:inset-x-14">
+                <p>© 2026 Gardesa</p>
+                <p class="sm:text-right">
+                    Precisa de ajuda? <a href="mailto:suporte@gardesa.com.br" class="font-semibold text-verde underline underline-offset-2 transition-colors hover:text-verde-2">Fale com o suporte</a>
                 </p>
             </div>
         </section>

@@ -4,7 +4,8 @@
   "regions": ["gru1"],
   "functions": {
     "src/server.ts": {
-      "includeFiles": "src/views/**"
+      "includeFiles": "src/views/**",
+      "maxDuration": 300
     }
   }
 }
