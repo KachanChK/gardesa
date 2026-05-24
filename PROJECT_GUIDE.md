@@ -23,6 +23,8 @@ Principais tecnologias identificadas:
 - JavaScript vanilla no frontend, sem framework SPA.
 - Tailwind CSS 4 via CLI, com tema definido em `public/css/styles.css` e saida gerada em `public/css/output.css`.
 - PostgreSQL via pacote `pg`.
+- Vercel Blob para armazenamento privado de imagens de render IA.
+- Replicate para geracao de renders com IA.
 - Resend para contatos/email da waitlist.
 - Helmet para headers de seguranca, com CSP desabilitada.
 - express-rate-limit para limitar submissao da waitlist.
@@ -78,6 +80,7 @@ Funcao das principais partes:
 - `src/middlewares/rateLimit.ts`: define rate limit especifico da waitlist.
 - `src/routes/`: concentra os handlers HTTP ativos.
 - `src/services/`: contem servicos reutilizaveis ativos de banco/validacao/regra de negocio.
+- `src/client/`: contem scripts TypeScript empacotados para uso no navegador.
 - `src/views/`: templates EJS de paginas ativas.
 - `src/views/partials/`: partials EJS compartilhados pelas telas internas.
 - `public/js/`: scripts de frontend carregados diretamente pelas paginas EJS.
@@ -88,7 +91,7 @@ Funcao das principais partes:
 - `dist/`: saida compilada do TypeScript. E gerada por `npm run build` e esta no `.gitignore`.
 - `tmp/`: artefatos temporarios de validacao, capturas e PDFs. Esta no `.gitignore`.
 
-Arquivos/pastas de banco, migrations ou ORM nao foram identificados no projeto.
+- `database/migrations/`: migrations SQL criadas para objetos persistidos no Neon.
 
 ## 4. Arquitetura do sistema
 
@@ -153,6 +156,13 @@ O layout de dashboard usa:
 - `src/views/partials/dashboard-header.ejs`
 - `public/js/dashboard-shell.js`
 
+Render IA usa tambem:
+
+- `public/js/render-ai.js`, gerado a partir de `src/client/render-ai.ts`;
+- endpoints protegidos em `/member/render/*`;
+- Vercel Blob privado para imagens originais e renderizadas;
+- tabela `public.ai_renders` para metadados, status e vinculo com usuario.
+
 As antigas rotas `/inicio`, `/orcamentos`, `/clientes` e `/empresa` nao existem mais no servidor e devem retornar 404 ate que novas funcionalidades sejam implementadas.
 
 ## 6. Banco de dados
@@ -171,6 +181,9 @@ Uso identificado:
 - `src/services/neon-auth.ts`
   - inicia login social Google pelo Neon Auth
   - consulta sessao no endpoint gerenciado `get-session`
+- `src/services/render-repository.ts`
+  - cria e atualiza registros de `ai_renders`
+  - sempre filtra registros internos por `user_id`
 
 Objetos de banco esperados pelo codigo:
 
@@ -178,6 +191,7 @@ Objetos de banco esperados pelo codigo:
 - constraint unica em `waitlist.email` ou equivalente, pois o codigo trata erro PostgreSQL `23505`;
 - funcao `public.get_waitlist_count()` retornando a contagem da waitlist.
 - tabelas de autenticacao gerenciadas pelo Neon Auth no schema configurado pelo proprio Neon.
+- tabela `ai_renders` para renders de IA, criada por migration.
 
 Nao identificado no projeto:
 
@@ -187,7 +201,7 @@ Nao identificado no projeto:
 - configuracao de SSL do PostgreSQL;
 - scripts para criar tabela `waitlist` ou funcao `public.get_waitlist_count()`.
 
-Nao ha dados internos persistidos no PostgreSQL alem da waitlist e das estruturas gerenciadas pelo Neon Auth.
+Dados internos persistidos no PostgreSQL incluem waitlist, estruturas gerenciadas pelo Neon Auth e metadados de renders IA.
 
 ## 7. Autenticacao e autorizacao
 
@@ -371,6 +385,8 @@ Variaveis referenciadas no codigo:
 Variaveis presentes no exemplo, mas sem uso identificado no codigo atual:
 
 - `RESEND_FROM`: o envio atual usa remetente hardcoded `Gardesa <waitlist@gardesa.com.br>`.
+- `BLOB_READ_WRITE_TOKEN`: token do Vercel Blob para upload/leitura de imagens privadas.
+- `REPLICATE_API_TOKEN`: token server-side da API do Replicate.
 
 Nunca exponha valores reais de `.env` em documentacao, frontend, logs publicos ou commits.
 

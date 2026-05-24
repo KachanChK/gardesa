@@ -26,4 +26,4 @@ pnpm-lock.yaml
 config/local.json
 docker-compose.override.yml
 *.tsbuildinfo
-.vercel
+.vercel/
