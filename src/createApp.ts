@@ -1,4 +1,4 @@
-import express, { type Express, type RequestHandler } from 'express'
+import express, { type Express, type RequestHandler, type Router } from 'express'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import path from 'path'
@@ -6,8 +6,6 @@ import path from 'path'
 import { getWaitlistCount } from './services/waitlist'
 import { attachAuthenticatedUser } from './middlewares/auth'
 import waitlistRouter from './routes/waitlist'
-import authRouter from './routes/auth'
-import memberRouter from './routes/member'
 import legalRouter from './routes/legal'
 
 export function createApp(): Express {
@@ -55,6 +53,9 @@ export function createApp(): Express {
   app.use(waitlistRouter)
 
   if (systemAccessEnabled) {
+    const { default: authRouter } = require('./routes/auth') as { default: Router }
+    const { default: memberRouter } = require('./routes/member') as { default: Router }
+
     app.use(authRouter)
     app.use(memberRouter)
   }
