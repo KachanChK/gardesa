@@ -2,7 +2,8 @@ import Replicate from 'replicate'
 import {
     AI_RENDER_MODEL_VERSION,
     AI_RENDER_OUTPUT_FORMAT,
-    AI_RENDER_PROMPTS,
+    buildAiRenderPrompt,
+    type AiRenderEnvironment,
     type AiRenderQuality,
     type AiRenderWeather
 } from './render-config'
@@ -24,6 +25,7 @@ export interface ReplicateRenderResult {
 }
 
 export function buildNanoBananaInput(options: {
+    environment: AiRenderEnvironment
     imageBuffer: Buffer
     quality: AiRenderQuality
     weather: AiRenderWeather
@@ -34,12 +36,13 @@ export function buildNanoBananaInput(options: {
         image_input: [options.imageBuffer],
         image_search: false,
         output_format: AI_RENDER_OUTPUT_FORMAT,
-        prompt: AI_RENDER_PROMPTS[options.weather],
+        prompt: buildAiRenderPrompt(options.weather, options.environment),
         resolution: options.quality
     }
 }
 
 export async function generateAiRender(options: {
+    environment: AiRenderEnvironment
     imageBuffer: Buffer
     quality: AiRenderQuality
     weather: AiRenderWeather

@@ -1,5 +1,5 @@
 import { db } from '../config/database'
-import type { AiRenderQuality, AiRenderWeather } from './render-config'
+import type { AiRenderEnvironment, AiRenderQuality, AiRenderWeather } from './render-config'
 
 export interface AiRenderRecord {
     aspect_ratio: string | null
@@ -16,6 +16,7 @@ export interface AiRenderRecord {
     rendered_image_url: string | null
     replicate_model: string | null
     replicate_prediction_id: string | null
+    selected_environment: AiRenderEnvironment | null
     selected_quality: AiRenderQuality | null
     selected_weather: AiRenderWeather | null
     status: 'pending' | 'processing' | 'completed' | 'failed'
@@ -65,6 +66,7 @@ export async function findAiRenderForUser(id: string, userId: string): Promise<A
 
 export async function markAiRenderProcessing(options: {
     aspectRatio: string
+    environment: AiRenderEnvironment
     height: number
     id: string
     promptUsed: string
@@ -79,10 +81,11 @@ export async function markAiRenderProcessing(options: {
         SET aspect_ratio = $3,
             original_width = $4,
             original_height = $5,
-            selected_weather = $6,
-            selected_quality = $7,
-            prompt_used = $8,
-            replicate_model = $9,
+            selected_environment = $6,
+            selected_weather = $7,
+            selected_quality = $8,
+            prompt_used = $9,
+            replicate_model = $10,
             status = 'processing',
             error_message = NULL,
             updated_at = now()
@@ -93,6 +96,7 @@ export async function markAiRenderProcessing(options: {
             options.aspectRatio,
             options.width,
             options.height,
+            options.environment,
             options.weather,
             options.quality,
             options.promptUsed,

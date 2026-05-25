@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.ai_renders (
     original_height integer,
     rendered_image_url text,
     rendered_blob_pathname text,
+    selected_environment text,
     selected_weather text,
     selected_quality text,
     prompt_used text,
@@ -21,8 +22,10 @@ CREATE TABLE IF NOT EXISTS public.ai_renders (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     completed_at timestamptz,
+    CONSTRAINT ai_renders_selected_environment_check
+        CHECK (selected_environment IS NULL OR selected_environment IN ('exterior', 'interior')),
     CONSTRAINT ai_renders_selected_weather_check
-        CHECK (selected_weather IS NULL OR selected_weather IN ('dia', 'noite', 'chuvoso')),
+        CHECK (selected_weather IS NULL OR selected_weather IN ('dia', 'noite', 'chuvoso', 'por-do-sol')),
     CONSTRAINT ai_renders_selected_quality_check
         CHECK (selected_quality IS NULL OR selected_quality IN ('1K', '2K', '4K')),
     CONSTRAINT ai_renders_output_format_check
@@ -38,4 +41,3 @@ CREATE INDEX IF NOT EXISTS ai_renders_user_created_at_idx
 
 CREATE INDEX IF NOT EXISTS ai_renders_user_status_idx
     ON public.ai_renders (user_id, status);
-

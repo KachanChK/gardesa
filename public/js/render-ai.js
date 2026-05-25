@@ -2015,7 +2015,7 @@
   var require_render_ai = __commonJS({
     "src/client/render-ai.ts"() {
       init_client();
-      var MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+      var MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
       var ALLOWED_CONTENT_TYPES = /* @__PURE__ */ new Set(["image/png", "image/jpeg"]);
       var QUALITY_BY_SLIDER_VALUE = /* @__PURE__ */ new Map([
         ["1", "1K"],
@@ -2029,9 +2029,11 @@
           compareHandle: document.querySelector("[data-render-compare-handle]"),
           compareRange: document.querySelector("[data-render-compare-range]"),
           emptyState: document.querySelector("[data-render-empty-state]"),
+          environmentButtons: Array.from(document.querySelectorAll("[data-environment-option]")),
           error: document.querySelector("[data-render-error]"),
           fileInput: document.querySelector("[data-render-file-input]"),
           generateButton: document.querySelector("[data-render-generate]"),
+          qualityActive: document.querySelector("[data-quality-active]"),
           preview: document.querySelector("[data-render-preview]"),
           previewFrame: document.querySelector("[data-render-preview-frame]"),
           progress: document.querySelector("[data-render-progress]"),
@@ -2050,6 +2052,7 @@
         const state = {
           compareEnabled: true,
           comparePosition: 50,
+          environment: null,
           file: null,
           originalPreviewUrl: null,
           renderedUrl: null,
@@ -2066,6 +2069,13 @@
           elements.fileInput?.addEventListener("change", () => {
             const file = elements.fileInput?.files?.[0] ?? null;
             setSelectedFile(file);
+          });
+          elements.environmentButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              state.environment = button.dataset.environmentOption ?? null;
+              clearError();
+              renderEnvironmentState();
+            });
           });
           elements.weatherButtons.forEach((button) => {
             button.addEventListener("click", () => {
@@ -2122,6 +2132,10 @@
             showError("Envie uma imagem PNG ou JPG antes de gerar o render.");
             return;
           }
+          if (!state.environment) {
+            showError("Selecione o tipo de ambiente do render.");
+            return;
+          }
           if (!state.weather) {
             showError("Selecione o clima do render.");
             return;
@@ -2148,7 +2162,7 @@
             });
             setProgress("");
             setStatus("Gerando render...");
-            const rendered = await requestRenderGeneration(intent.renderId, state.weather, quality);
+            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality);
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl);
             state.compareEnabled = true;
             state.comparePosition = 50;
@@ -2179,9 +2193,10 @@
           });
           return parseJsonResponse(response);
         }
-        async function requestRenderGeneration(renderId, weather, quality) {
+        async function requestRenderGeneration(renderId, environment, weather, quality) {
           const response = await fetch("/member/render/generate", {
             body: JSON.stringify({
+              environment,
               quality,
               renderId,
               weather
@@ -2226,6 +2241,16 @@
             elements.compareRange.value = String(position);
           }
         }
+        function renderEnvironmentState() {
+          elements.environmentButtons.forEach((button) => {
+            const selected = button.dataset.environmentOption === state.environment;
+            button.classList.toggle("border-verde", selected);
+            button.classList.toggle("bg-[#f2f8ef]", selected);
+            button.classList.toggle("border-[#e2e2e2]", !selected);
+            button.classList.toggle("bg-white", !selected);
+            button.setAttribute("aria-pressed", String(selected));
+          });
+        }
         function renderWeatherState() {
           elements.weatherButtons.forEach((button) => {
             const selected = button.dataset.weatherOption === state.weather;
@@ -2233,15 +2258,17 @@
             button.classList.toggle("bg-[#f2f8ef]", selected);
             button.classList.toggle("border-[#e2e2e2]", !selected);
             button.classList.toggle("bg-white", !selected);
+            button.setAttribute("aria-pressed", String(selected));
           });
         }
         function renderQualityState() {
           const quality = getSelectedQuality();
+          const sliderValue = Number(elements.qualityRange?.value ?? 2);
+          const activeWidth = `${Math.max(0, Math.min(100, (sliderValue - 1) / 2 * 100))}%`;
+          elements.qualityActive?.style.setProperty("width", activeWidth);
           elements.qualityLabels.forEach((label) => {
             const selected = label.dataset.qualityLabel === quality;
-            label.classList.toggle("bg-preto", selected);
-            label.classList.toggle("text-white", selected);
-            label.classList.toggle("bg-[#f3f3f3]", !selected);
+            label.classList.toggle("text-preto", selected);
             label.classList.toggle("text-preto/55", !selected);
           });
         }
@@ -2253,7 +2280,7 @@
             return "Envie apenas imagens PNG ou JPG.";
           }
           if (file.size > MAX_UPLOAD_BYTES) {
-            return "A imagem deve ter ate 10 MB.";
+            return "A imagem deve ter ate 5 MB.";
           }
           return null;
         }
