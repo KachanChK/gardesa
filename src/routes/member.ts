@@ -4,6 +4,7 @@ import { requireAuth } from '../middlewares/auth'
 import {
     AI_RENDER_ALLOWED_CONTENT_TYPES,
     AI_RENDER_MAX_UPLOAD_BYTES,
+    isAiRenderEnvironment,
     isAiRenderQuality,
     isAiRenderWeather
 } from '../services/render-config'
@@ -47,7 +48,7 @@ router.post('/member/render/upload-intent', async (req, res) => {
     }
 
     if (!Number.isFinite(size) || size <= 0 || size > AI_RENDER_MAX_UPLOAD_BYTES) {
-        res.status(400).json({ message: 'A imagem deve ter ate 10 MB.' })
+        res.status(400).json({ message: 'A imagem deve ter ate 5 MB.' })
         return
     }
 
@@ -75,7 +76,7 @@ router.post('/member/render/upload-intent', async (req, res) => {
             upload
         })
     } catch (error) {
-        console.error('[Render IA] Erro ao preparar upload:', error)
+        console.error('[Renderizar Imagem] Erro ao preparar upload:', error)
         res.status(500).json({ message: 'Nao foi possivel preparar o upload da imagem.' })
     }
 })
@@ -83,6 +84,7 @@ router.post('/member/render/upload-intent', async (req, res) => {
 router.post('/member/render/generate', async (req, res) => {
     const currentUser = getCurrentUser(res)
     const renderId = typeof req.body?.renderId === 'string' ? req.body.renderId : ''
+    const environment = req.body?.environment
     const weather = req.body?.weather
     const quality = req.body?.quality
 
@@ -93,6 +95,11 @@ router.post('/member/render/generate', async (req, res) => {
 
     if (!isUuid(renderId)) {
         res.status(400).json({ message: 'Imagem enviada invalida.' })
+        return
+    }
+
+    if (!isAiRenderEnvironment(environment)) {
+        res.status(400).json({ message: 'Selecione o tipo de ambiente do render.' })
         return
     }
 
@@ -108,6 +115,7 @@ router.post('/member/render/generate', async (req, res) => {
 
     try {
         const result = await generateRenderForUser({
+            environment,
             quality,
             renderId,
             userId: currentUser.id,
@@ -116,7 +124,7 @@ router.post('/member/render/generate', async (req, res) => {
 
         res.json(result)
     } catch (error) {
-        console.error('[Render IA] Erro na geracao:', error)
+        console.error('[Renderizar Imagem] Erro na geracao:', error)
         res.status(500).json({ message: getPublicRenderErrorMessage(error) })
     }
 })
@@ -148,7 +156,7 @@ router.get('/member/render/:id/image/:kind', async (req, res) => {
 
         await pipePrivateBlobToResponse(pathname, res)
     } catch (error) {
-        console.error('[Render IA] Erro ao servir imagem:', error)
+        console.error('[Renderizar Imagem] Erro ao servir imagem:', error)
         res.status(500).send('Nao foi possivel carregar a imagem.')
     }
 })

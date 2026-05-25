@@ -1,8 +1,9 @@
 import {
     AI_RENDER_MAX_UPLOAD_BYTES,
     AI_RENDER_OUTPUT_FORMAT,
-    AI_RENDER_PROMPTS,
     AI_RENDER_REPLICATE_MODEL_LABEL,
+    buildAiRenderPrompt,
+    type AiRenderEnvironment,
     type AiRenderQuality,
     type AiRenderWeather
 } from './render-config'
@@ -21,6 +22,7 @@ import {
 import { generateAiRender } from './replicate-render'
 
 export async function generateRenderForUser(options: {
+    environment: AiRenderEnvironment
     quality: AiRenderQuality
     renderId: string
     userId: string
@@ -41,14 +43,15 @@ export async function generateRenderForUser(options: {
         const originalBlob = await readPrivateBlob(render.original_blob_pathname)
 
         if (originalBlob.size > AI_RENDER_MAX_UPLOAD_BYTES) {
-            throw new Error('A imagem excede o limite de 10 MB.')
+            throw new Error('A imagem excede o limite de 5 MB.')
         }
 
         const originalMetadata = getImageMetadata(originalBlob.buffer)
-        const promptUsed = AI_RENDER_PROMPTS[options.weather]
+        const promptUsed = buildAiRenderPrompt(options.weather, options.environment)
 
         await markAiRenderProcessing({
             aspectRatio: originalMetadata.aspectRatio,
+            environment: options.environment,
             height: originalMetadata.height,
             id: options.renderId,
             promptUsed,
@@ -60,6 +63,7 @@ export async function generateRenderForUser(options: {
         })
 
         const result = await generateAiRender({
+            environment: options.environment,
             imageBuffer: originalBlob.buffer,
             quality: options.quality,
             weather: options.weather
@@ -107,4 +111,3 @@ export function getPublicRenderErrorMessage(error: unknown): string {
 
     return 'Nao foi possivel gerar o render. Tente novamente em instantes.'
 }
-

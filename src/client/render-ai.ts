@@ -1,6 +1,6 @@
 import { put } from '@vercel/blob/client'
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 const ALLOWED_CONTENT_TYPES = new Set(['image/png', 'image/jpeg'])
 const QUALITY_BY_SLIDER_VALUE = new Map([
     ['1', '1K'],
@@ -31,9 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         compareHandle: document.querySelector<HTMLElement>('[data-render-compare-handle]'),
         compareRange: document.querySelector<HTMLInputElement>('[data-render-compare-range]'),
         emptyState: document.querySelector<HTMLElement>('[data-render-empty-state]'),
+        environmentButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-environment-option]')),
         error: document.querySelector<HTMLElement>('[data-render-error]'),
         fileInput: document.querySelector<HTMLInputElement>('[data-render-file-input]'),
         generateButton: document.querySelector<HTMLButtonElement>('[data-render-generate]'),
+        qualityActive: document.querySelector<HTMLElement>('[data-quality-active]'),
         preview: document.querySelector<HTMLElement>('[data-render-preview]'),
         previewFrame: document.querySelector<HTMLElement>('[data-render-preview-frame]'),
         progress: document.querySelector<HTMLElement>('[data-render-progress]'),
@@ -54,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const state: {
         compareEnabled: boolean
         comparePosition: number
+        environment: string | null
         file: File | null
         originalPreviewUrl: string | null
         renderedUrl: string | null
@@ -62,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } = {
         compareEnabled: true,
         comparePosition: 50,
+        environment: null,
         file: null,
         originalPreviewUrl: null,
         renderedUrl: null,
@@ -81,6 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.fileInput?.addEventListener('change', () => {
             const file = elements.fileInput?.files?.[0] ?? null
             setSelectedFile(file)
+        })
+
+        elements.environmentButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                state.environment = button.dataset.environmentOption ?? null
+                clearError()
+                renderEnvironmentState()
+            })
         })
 
         elements.weatherButtons.forEach((button) => {
@@ -153,6 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return
         }
 
+        if (!state.environment) {
+            showError('Selecione o tipo de ambiente do render.')
+            return
+        }
+
         if (!state.weather) {
             showError('Selecione o clima do render.')
             return
@@ -186,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setProgress('')
             setStatus('Gerando render...')
 
-            const rendered = await requestRenderGeneration(intent.renderId, state.weather, quality)
+            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality)
 
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl)
             state.compareEnabled = true
@@ -223,9 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return parseJsonResponse<UploadIntentResponse>(response)
     }
 
-    async function requestRenderGeneration(renderId: string, weather: string, quality: string): Promise<GenerateResponse> {
+    async function requestRenderGeneration(renderId: string, environment: string, weather: string, quality: string): Promise<GenerateResponse> {
         const response = await fetch('/member/render/generate', {
             body: JSON.stringify({
+                environment,
                 quality,
                 renderId,
                 weather
@@ -282,6 +300,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function renderEnvironmentState() {
+        elements.environmentButtons.forEach((button) => {
+            const selected = button.dataset.environmentOption === state.environment
+            button.classList.toggle('border-verde', selected)
+            button.classList.toggle('bg-[#f2f8ef]', selected)
+            button.classList.toggle('border-[#e2e2e2]', !selected)
+            button.classList.toggle('bg-white', !selected)
+            button.setAttribute('aria-pressed', String(selected))
+        })
+    }
+
     function renderWeatherState() {
         elements.weatherButtons.forEach((button) => {
             const selected = button.dataset.weatherOption === state.weather
@@ -289,17 +318,20 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.toggle('bg-[#f2f8ef]', selected)
             button.classList.toggle('border-[#e2e2e2]', !selected)
             button.classList.toggle('bg-white', !selected)
+            button.setAttribute('aria-pressed', String(selected))
         })
     }
 
     function renderQualityState() {
         const quality = getSelectedQuality()
+        const sliderValue = Number(elements.qualityRange?.value ?? 2)
+        const activeWidth = `${Math.max(0, Math.min(100, ((sliderValue - 1) / 2) * 100))}%`
+
+        elements.qualityActive?.style.setProperty('width', activeWidth)
 
         elements.qualityLabels.forEach((label) => {
             const selected = label.dataset.qualityLabel === quality
-            label.classList.toggle('bg-preto', selected)
-            label.classList.toggle('text-white', selected)
-            label.classList.toggle('bg-[#f3f3f3]', !selected)
+            label.classList.toggle('text-preto', selected)
             label.classList.toggle('text-preto/55', !selected)
         })
     }
@@ -314,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (file.size > MAX_UPLOAD_BYTES) {
-            return 'A imagem deve ter ate 10 MB.'
+            return 'A imagem deve ter ate 5 MB.'
         }
 
         return null
@@ -378,4 +410,3 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${url}${separator}t=${Date.now()}`
     }
 })
-

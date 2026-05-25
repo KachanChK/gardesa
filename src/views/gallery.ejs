@@ -16,15 +16,15 @@
         const currentPage = 'Galeria'
         const navItems = [
             { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
-            { label: 'Render IA', iconDefault: '/img/icons/sparkles_black.svg', iconActive: '/img/icons/sparkles.svg', active: false, href: '/member/render', iconSize: 'size-5' },
+            { label: 'Renderizar Imagem', iconDefault: '/img/icons/sparkles_black.svg', iconActive: '/img/icons/sparkles.svg', active: false, href: '/member/render', iconSize: 'size-5' },
             { label: 'Galeria', iconDefault: '/img/icons/layout_dark.svg', iconActive: '/img/icons/layout_green.svg', active: true, href: '/member/gallery', iconSize: 'size-5' }
         ]
     %>
 
     <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
-    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser }) %>
+    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser, initialSidebarCollapsed: true }) %>
 
-    <div id="dashboard-layout" class="min-h-screen transition-[padding] duration-300 md:pl-[240px]">
+    <div id="dashboard-layout" class="min-h-screen pl-[84px] transition-[padding] duration-300">
         <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage, currentUser: authenticatedUser }) %>
 
         <main class="min-h-[calc(100vh-68px)]"></main>
