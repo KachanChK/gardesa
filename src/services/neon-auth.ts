@@ -21,6 +21,11 @@ interface NeonSignInResponse {
     url?: string
 }
 
+interface NeonAuthExchangeDiagnostics {
+    hasChallengeCookie: boolean
+    hasVerifier: boolean
+}
+
 export async function startGoogleSignIn(req: Request, res: ExpressResponse, callbackURL: string, errorCallbackURL: string): Promise<string> {
     const response = await callNeonAuth({
         body: {
@@ -69,15 +74,9 @@ export async function getNeonAuthSession(req: Request): Promise<NeonAuthSessionP
 }
 
 export async function exchangeNeonAuthVerifier(req: Request, res: ExpressResponse): Promise<boolean> {
-    const verifier = typeof req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME] === 'string'
-        ? req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME]
-        : ''
+    const { hasChallengeCookie, hasVerifier } = getNeonAuthExchangeDiagnostics(req)
 
-    const hasChallengeCookie = NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAMES.some((cookieName) => {
-        return Boolean(req.cookies?.[cookieName])
-    })
-
-    if (!verifier || !hasChallengeCookie) {
+    if (!hasVerifier || !hasChallengeCookie) {
         return false
     }
 
@@ -93,6 +92,16 @@ export async function exchangeNeonAuthVerifier(req: Request, res: ExpressRespons
 
     forwardNeonAuthCookies(response, res)
     return true
+}
+
+export function getNeonAuthExchangeDiagnostics(req: Request): NeonAuthExchangeDiagnostics {
+    return {
+        hasChallengeCookie: NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAMES.some((cookieName) => {
+            return Boolean(req.cookies?.[cookieName])
+        }),
+        hasVerifier: typeof req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME] === 'string'
+            && req.query[NEON_AUTH_SESSION_VERIFIER_PARAM_NAME].length > 0
+    }
 }
 
 export async function signOutNeonAuth(req: Request, res: ExpressResponse): Promise<void> {
@@ -192,7 +201,11 @@ function rewriteNeonAuthCookie(cookie: string): string {
     const parts = cookie
         .split(';')
         .map((part) => part.trim())
-        .filter((part) => !/^domain=/i.test(part) && !/^samesite=/i.test(part))
+        .filter((part) => {
+            return !/^domain=/i.test(part)
+                && !/^samesite=/i.test(part)
+                && !/^partitioned$/i.test(part)
+        })
 
     if (!parts.some((part) => /^path=/i.test(part))) {
         parts.push('Path=/')

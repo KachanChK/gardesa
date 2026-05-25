@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { getAppUrl, getSafeRedirectPath } from '../config/neon-auth'
-import { exchangeNeonAuthVerifier, signOutNeonAuth, startGoogleSignIn } from '../services/neon-auth'
+import { exchangeNeonAuthVerifier, getNeonAuthExchangeDiagnostics, signOutNeonAuth, startGoogleSignIn } from '../services/neon-auth'
 
 const router = Router()
 
@@ -55,6 +55,13 @@ router.get('/auth/callback', async (req, res) => {
     } catch (error) {
         console.warn('[Neon Auth] Erro ao finalizar callback do Google:', error)
     }
+
+    console.warn('[Neon Auth] Callback sem sessao valida:', {
+        host: req.get('host'),
+        nextPath,
+        ...getNeonAuthExchangeDiagnostics(req),
+        userAgent: req.get('user-agent')
+    })
 
     res.redirect(303, `/auth?error=session&next=${encodeURIComponent(nextPath)}`)
 })
