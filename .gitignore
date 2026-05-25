@@ -27,3 +27,4 @@ config/local.json
 docker-compose.override.yml
 *.tsbuildinfo
 .vercel/
+output.css
