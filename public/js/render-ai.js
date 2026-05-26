@@ -2024,51 +2024,79 @@
       ]);
       document.addEventListener("DOMContentLoaded", () => {
         const elements = {
-          compareCheckbox: document.querySelector("[data-render-compare-checkbox]"),
-          compareControls: document.querySelector("[data-render-compare-controls]"),
+          actionMenu: document.querySelector("[data-render-actions]"),
           compareHandle: document.querySelector("[data-render-compare-handle]"),
           compareRange: document.querySelector("[data-render-compare-range]"),
+          downloadButton: document.querySelector("[data-render-download]"),
           emptyState: document.querySelector("[data-render-empty-state]"),
           environmentButtons: Array.from(document.querySelectorAll("[data-environment-option]")),
           error: document.querySelector("[data-render-error]"),
           fileInput: document.querySelector("[data-render-file-input]"),
+          fullscreenClose: document.querySelector("[data-render-fullscreen-close]"),
+          fullscreenImage: document.querySelector("[data-render-fullscreen-image]"),
+          fullscreenOverlay: document.querySelector("[data-render-fullscreen-overlay]"),
+          fullscreenToggle: document.querySelector("[data-render-fullscreen-toggle]"),
           generateButton: document.querySelector("[data-render-generate]"),
-          qualityActive: document.querySelector("[data-quality-active]"),
+          originalImage: document.querySelector("[data-original-image]"),
           preview: document.querySelector("[data-render-preview]"),
-          previewFrame: document.querySelector("[data-render-preview-frame]"),
           progress: document.querySelector("[data-render-progress]"),
+          qualityActive: document.querySelector("[data-quality-active]"),
           qualityLabels: Array.from(document.querySelectorAll("[data-quality-label]")),
           qualityRange: document.querySelector("[data-quality-range]"),
+          removeImageButton: document.querySelector("[data-render-remove-image]"),
           renderedImage: document.querySelector("[data-rendered-image]"),
           renderedLayer: document.querySelector("[data-rendered-layer]"),
           status: document.querySelector("[data-render-status]"),
-          uploadButtons: Array.from(document.querySelectorAll("[data-render-upload-button]")),
-          originalImage: document.querySelector("[data-original-image]"),
+          uploadEmpty: document.querySelector("[data-render-upload-empty]"),
+          uploadPreview: document.querySelector("[data-render-upload-preview]"),
+          uploadZone: document.querySelector("[data-render-upload-zone]"),
+          viewToggle: document.querySelector("[data-render-view-toggle]"),
+          viewToggleIcon: document.querySelector("[data-render-view-toggle-icon]"),
           weatherButtons: Array.from(document.querySelectorAll("[data-weather-option]"))
         };
-        if (!elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer) {
+        if (!elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer || !elements.uploadZone) {
           return;
         }
         const state = {
-          compareEnabled: true,
           comparePosition: 50,
           environment: null,
           file: null,
+          fullscreen: false,
           originalPreviewUrl: null,
           renderedUrl: null,
           renderId: null,
+          viewMode: "compare",
           weather: null
         };
         bindEvents();
+        renderEnvironmentState();
+        renderWeatherState();
         renderQualityState();
-        renderPreview();
+        renderUi();
         function bindEvents() {
-          elements.uploadButtons.forEach((button) => {
-            button.addEventListener("click", () => elements.fileInput?.click());
+          elements.uploadZone?.addEventListener("click", (event) => {
+            if (event.target instanceof HTMLElement && event.target.closest("[data-render-remove-image]")) {
+              return;
+            }
+            elements.fileInput?.click();
+          });
+          elements.uploadZone?.addEventListener("keydown", (event) => {
+            if (event.target instanceof HTMLElement && event.target.closest("[data-render-remove-image]")) {
+              return;
+            }
+            if (event.key !== "Enter" && event.key !== " ") {
+              return;
+            }
+            event.preventDefault();
+            elements.fileInput?.click();
           });
           elements.fileInput?.addEventListener("change", () => {
             const file = elements.fileInput?.files?.[0] ?? null;
             setSelectedFile(file);
+          });
+          elements.removeImageButton?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            removeSelectedFile();
           });
           elements.environmentButtons.forEach((button) => {
             button.addEventListener("click", () => {
@@ -2091,13 +2119,35 @@
           elements.generateButton?.addEventListener("click", () => {
             void generateRender();
           });
-          elements.compareCheckbox?.addEventListener("change", () => {
-            state.compareEnabled = Boolean(elements.compareCheckbox?.checked);
-            renderPreview();
-          });
           elements.compareRange?.addEventListener("input", () => {
             state.comparePosition = Number(elements.compareRange?.value ?? 50);
             renderComparisonPosition();
+          });
+          elements.viewToggle?.addEventListener("click", () => {
+            if (!state.renderedUrl) {
+              return;
+            }
+            state.viewMode = state.viewMode === "compare" ? "rendered" : "compare";
+            renderUi();
+          });
+          elements.downloadButton?.addEventListener("click", () => {
+            downloadRenderedImage();
+          });
+          elements.fullscreenToggle?.addEventListener("click", () => {
+            setFullscreen(true);
+          });
+          elements.fullscreenClose?.addEventListener("click", () => {
+            setFullscreen(false);
+          });
+          elements.fullscreenOverlay?.addEventListener("click", (event) => {
+            if (event.target === elements.fullscreenOverlay) {
+              setFullscreen(false);
+            }
+          });
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && state.fullscreen) {
+              setFullscreen(false);
+            }
           });
         }
         function setSelectedFile(file) {
@@ -2119,12 +2169,27 @@
           state.originalPreviewUrl = URL.createObjectURL(file);
           state.renderedUrl = null;
           state.renderId = null;
-          state.compareEnabled = true;
+          state.viewMode = "compare";
           state.comparePosition = 50;
-          if (elements.compareCheckbox) {
-            elements.compareCheckbox.checked = true;
+          state.fullscreen = false;
+          renderUi();
+        }
+        function removeSelectedFile() {
+          clearError();
+          setStatus("");
+          setProgress("");
+          if (state.originalPreviewUrl) {
+            URL.revokeObjectURL(state.originalPreviewUrl);
           }
-          renderPreview();
+          state.file = null;
+          state.originalPreviewUrl = null;
+          state.renderedUrl = null;
+          state.renderId = null;
+          state.viewMode = "compare";
+          state.comparePosition = 50;
+          state.fullscreen = false;
+          elements.fileInput.value = "";
+          renderUi();
         }
         async function generateRender() {
           clearError();
@@ -2164,12 +2229,10 @@
             setStatus("Gerando render...");
             const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality);
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl);
-            state.compareEnabled = true;
+            state.viewMode = "compare";
             state.comparePosition = 50;
-            if (elements.compareCheckbox) {
-              elements.compareCheckbox.checked = true;
-            }
-            renderPreview();
+            state.fullscreen = false;
+            renderUi();
             setStatus("Render finalizado.");
           } catch (error) {
             showError(getErrorMessage(error));
@@ -2215,23 +2278,38 @@
           }
           return payload;
         }
-        function renderPreview() {
+        function renderUi() {
           const hasOriginal = Boolean(state.originalPreviewUrl);
           const hasRendered = Boolean(state.renderedUrl);
-          elements.emptyState?.classList.toggle("hidden", hasOriginal);
-          elements.preview?.classList.toggle("hidden", !hasOriginal);
-          elements.preview?.classList.toggle("flex", hasOriginal);
-          elements.compareControls?.classList.toggle("hidden", !hasRendered);
-          if (!state.originalPreviewUrl) {
-            return;
+          const showComparison = hasOriginal && hasRendered && state.viewMode === "compare";
+          elements.emptyState?.classList.toggle("hidden", hasRendered);
+          elements.preview?.classList.toggle("hidden", !hasRendered);
+          elements.preview?.classList.toggle("flex", hasRendered);
+          elements.actionMenu?.classList.toggle("hidden", !hasRendered);
+          elements.actionMenu?.classList.toggle("flex", hasRendered);
+          elements.uploadEmpty?.classList.toggle("hidden", hasOriginal);
+          elements.uploadPreview?.classList.toggle("hidden", !hasOriginal);
+          elements.removeImageButton?.classList.toggle("hidden", !hasOriginal);
+          elements.removeImageButton?.classList.toggle("flex", hasOriginal);
+          if (state.originalPreviewUrl && elements.uploadPreview) {
+            elements.uploadPreview.src = state.originalPreviewUrl;
           }
-          const showComparison = hasRendered && state.compareEnabled;
-          elements.originalImage.src = showComparison ? state.originalPreviewUrl : state.renderedUrl ?? state.originalPreviewUrl;
-          elements.renderedImage.src = state.renderedUrl ?? "";
+          if (state.renderedUrl) {
+            elements.originalImage.src = showComparison ? state.originalPreviewUrl ?? state.renderedUrl : state.renderedUrl;
+            elements.renderedImage.src = state.renderedUrl;
+          }
           elements.renderedLayer.classList.toggle("hidden", !showComparison);
           elements.compareHandle?.classList.toggle("hidden", !showComparison);
           elements.compareRange?.classList.toggle("hidden", !showComparison);
+          if (elements.viewToggleIcon) {
+            elements.viewToggleIcon.src = state.viewMode === "compare" ? "/img/icons/image.svg" : "/img/icons/move-horizontal.svg";
+          }
+          elements.viewToggle?.setAttribute(
+            "aria-label",
+            state.viewMode === "compare" ? "Visualizar render" : "Comparar resultado"
+          );
           renderComparisonPosition();
+          renderFullscreen();
         }
         function renderComparisonPosition() {
           const position = Math.max(0, Math.min(100, state.comparePosition));
@@ -2239,6 +2317,16 @@
           elements.compareHandle?.style.setProperty("left", `${position}%`);
           if (elements.compareRange) {
             elements.compareRange.value = String(position);
+          }
+        }
+        function renderFullscreen() {
+          const showFullscreen = Boolean(state.fullscreen && state.renderedUrl);
+          elements.fullscreenOverlay?.classList.toggle("hidden", !showFullscreen);
+          elements.fullscreenOverlay?.classList.toggle("flex", showFullscreen);
+          elements.fullscreenOverlay?.setAttribute("aria-hidden", String(!showFullscreen));
+          document.body.classList.toggle("overflow-hidden", showFullscreen);
+          if (showFullscreen && state.renderedUrl && elements.fullscreenImage) {
+            elements.fullscreenImage.src = state.renderedUrl;
           }
         }
         function renderEnvironmentState() {
@@ -2271,6 +2359,24 @@
             label.classList.toggle("text-preto", selected);
             label.classList.toggle("text-preto/55", !selected);
           });
+        }
+        function setFullscreen(value) {
+          if (!state.renderedUrl) {
+            return;
+          }
+          state.fullscreen = value;
+          renderFullscreen();
+        }
+        function downloadRenderedImage() {
+          if (!state.renderedUrl) {
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = state.renderedUrl;
+          link.download = `gardesa-render-${state.renderId ?? Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
         }
         function getSelectedQuality() {
           return QUALITY_BY_SLIDER_VALUE.get(elements.qualityRange?.value ?? "2") ?? null;
