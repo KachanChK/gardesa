@@ -3,8 +3,13 @@ import type { AiRenderEnvironment, AiRenderQuality, AiRenderWeather } from './re
 
 export interface AiRenderRecord {
     aspect_ratio: string | null
+    completed_at: Date | null
+    created_at: Date
+    deleted_at: Date | null
     error_message: string | null
     id: string
+    is_deleted: boolean
+    is_favorite: boolean
     original_blob_pathname: string | null
     original_content_type: string | null
     original_height: number | null
@@ -20,7 +25,21 @@ export interface AiRenderRecord {
     selected_quality: AiRenderQuality | null
     selected_weather: AiRenderWeather | null
     status: 'pending' | 'processing' | 'completed' | 'failed'
+    updated_at: Date
     user_id: string
+}
+
+export interface AiRenderGalleryRecord {
+    completed_at: Date | null
+    created_at: Date
+    id: string
+    is_favorite: boolean
+    original_image_url: string | null
+    rendered_image_url: string | null
+    selected_environment: AiRenderEnvironment | null
+    selected_quality: AiRenderQuality | null
+    selected_weather: AiRenderWeather | null
+    sort_at: Date
 }
 
 export async function createPendingAiRender(options: {
@@ -59,6 +78,94 @@ export async function findAiRenderForUser(id: string, userId: string): Promise<A
     const result = await db.query<AiRenderRecord>(
         'SELECT * FROM ai_renders WHERE id = $1 AND user_id = $2 LIMIT 1',
         [id, userId]
+    )
+
+    return result.rows[0] ?? null
+}
+
+export async function listAiRendersForGallery(options: {
+    cursor?: { id: string, sortAt: string } | null
+    favoritesOnly: boolean
+    limit: number
+    userId: string
+}): Promise<AiRenderGalleryRecord[]> {
+    const params: unknown[] = [options.userId]
+    const where = [
+        'user_id = $1',
+        "status = 'completed'",
+        'is_deleted = false',
+        'rendered_blob_pathname IS NOT NULL'
+    ]
+
+    if (options.favoritesOnly) {
+        where.push('is_favorite = true')
+    }
+
+    if (options.cursor) {
+        params.push(options.cursor.sortAt, options.cursor.id)
+        where.push(`(COALESCE(completed_at, created_at), id) < ($${params.length - 1}::timestamptz, $${params.length}::uuid)`)
+    }
+
+    params.push(options.limit)
+
+    const result = await db.query<AiRenderGalleryRecord>(
+        `SELECT
+            id,
+            original_image_url,
+            rendered_image_url,
+            selected_environment,
+            selected_weather,
+            selected_quality,
+            is_favorite,
+            created_at,
+            completed_at,
+            COALESCE(completed_at, created_at) AS sort_at
+        FROM ai_renders
+        WHERE ${where.join(' AND ')}
+        ORDER BY COALESCE(completed_at, created_at) DESC, id DESC
+        LIMIT $${params.length}`,
+        params
+    )
+
+    return result.rows
+}
+
+export async function updateAiRenderFavorite(options: {
+    id: string
+    isFavorite: boolean
+    userId: string
+}): Promise<AiRenderRecord | null> {
+    const result = await db.query<AiRenderRecord>(
+        `UPDATE ai_renders
+        SET is_favorite = $3,
+            updated_at = now()
+        WHERE id = $1
+            AND user_id = $2
+            AND status = 'completed'
+            AND is_deleted = false
+        RETURNING *`,
+        [options.id, options.userId, options.isFavorite]
+    )
+
+    return result.rows[0] ?? null
+}
+
+export async function markAiRenderDeleted(options: {
+    id: string
+    userId: string
+}): Promise<AiRenderRecord | null> {
+    const result = await db.query<AiRenderRecord>(
+        `UPDATE ai_renders
+        SET is_deleted = true,
+            deleted_at = now(),
+            is_favorite = false,
+            updated_at = now()
+        WHERE id = $1
+            AND user_id = $2
+            AND status = 'completed'
+            AND is_deleted = false
+        RETURNING *`,
+        [options.id, options.userId]
     )
 
     return result.rows[0] ?? null

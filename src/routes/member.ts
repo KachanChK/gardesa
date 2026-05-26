@@ -8,10 +8,18 @@ import {
     isAiRenderQuality,
     isAiRenderWeather
 } from '../services/render-config'
-import { createPendingAiRender, findAiRenderForUser } from '../services/render-repository'
+import {
+    createPendingAiRender,
+    findAiRenderForUser,
+    listAiRendersForGallery,
+    markAiRenderDeleted,
+    updateAiRenderFavorite,
+    type AiRenderGalleryRecord
+} from '../services/render-repository'
 import {
     buildOriginalImagePathname,
     createUploadClientToken,
+    deletePrivateBlobs,
     pipePrivateBlobToResponse
 } from '../services/render-storage'
 import { generateRenderForUser, getPublicRenderErrorMessage } from '../services/render-service'
@@ -145,6 +153,12 @@ router.get('/member/render/:id/image/:kind', async (req, res) => {
 
     try {
         const render = await findAiRenderForUser(id, currentUser.id)
+
+        if (render?.is_deleted) {
+            res.status(404).send('Imagem nao encontrada.')
+            return
+        }
+
         const pathname = kind === 'original'
             ? render?.original_blob_pathname
             : render?.rendered_blob_pathname
@@ -167,6 +181,152 @@ router.get('/member/gallery', (_req, res) => {
     })
 })
 
+router.get('/member/gallery/items', async (req, res) => {
+    const currentUser = getCurrentUser(res)
+
+    if (!currentUser) {
+        res.status(401).json({ message: 'Faca login para acessar sua galeria.' })
+        return
+    }
+
+    const tab = req.query.tab === 'favorites' ? 'favorites' : 'all'
+    const limit = getGalleryLimit(req.query.limit)
+    const cursor = parseGalleryCursor(typeof req.query.cursor === 'string' ? req.query.cursor : '')
+
+    if (cursor === false) {
+        res.status(400).json({ message: 'Cursor invalido.' })
+        return
+    }
+
+    try {
+        const records = await listAiRendersForGallery({
+            cursor,
+            favoritesOnly: tab === 'favorites',
+            limit: limit + 1,
+            userId: currentUser.id
+        })
+        const visibleRecords = records.slice(0, limit)
+        const nextCursor = records.length > limit
+            ? encodeGalleryCursor(visibleRecords[visibleRecords.length - 1])
+            : null
+
+        res.json({
+            items: visibleRecords.map(serializeGalleryRender),
+            nextCursor
+        })
+    } catch (error) {
+        console.error('[Galeria] Erro ao listar renders:', error)
+        res.status(500).json({ message: 'Nao foi possivel carregar sua galeria.' })
+    }
+})
+
+router.patch('/member/gallery/:id/favorite', async (req, res) => {
+    const currentUser = getCurrentUser(res)
+    const { id } = req.params
+
+    if (!currentUser) {
+        res.status(401).json({ message: 'Faca login para favoritar renders.' })
+        return
+    }
+
+    if (!isUuid(id) || typeof req.body?.isFavorite !== 'boolean') {
+        res.status(400).json({ message: 'Render invalido.' })
+        return
+    }
+
+    try {
+        const render = await updateAiRenderFavorite({
+            id,
+            isFavorite: req.body.isFavorite,
+            userId: currentUser.id
+        })
+
+        if (!render) {
+            res.status(404).json({ message: 'Render nao encontrado.' })
+            return
+        }
+
+        res.json({
+            id: render.id,
+            isFavorite: render.is_favorite
+        })
+    } catch (error) {
+        console.error('[Galeria] Erro ao favoritar render:', error)
+        res.status(500).json({ message: 'Nao foi possivel atualizar o favorito.' })
+    }
+})
+
+router.get('/member/gallery/:id/download', async (req, res) => {
+    const currentUser = getCurrentUser(res)
+    const { id } = req.params
+
+    if (!currentUser) {
+        res.status(401).send('Faca login para baixar renders.')
+        return
+    }
+
+    if (!isUuid(id)) {
+        res.status(404).send('Render nao encontrado.')
+        return
+    }
+
+    try {
+        const render = await findAiRenderForUser(id, currentUser.id)
+
+        if (!render || render.is_deleted || render.status !== 'completed' || !render.rendered_blob_pathname) {
+            res.status(404).send('Render nao encontrado.')
+            return
+        }
+
+        await pipePrivateBlobToResponse(render.rendered_blob_pathname, res, {
+            downloadFilename: `gardesa-render-${render.id}.jpg`
+        })
+    } catch (error) {
+        console.error('[Galeria] Erro ao baixar render:', error)
+        res.status(500).send('Nao foi possivel baixar o render.')
+    }
+})
+
+router.delete('/member/gallery/:id', async (req, res) => {
+    const currentUser = getCurrentUser(res)
+    const { id } = req.params
+
+    if (!currentUser) {
+        res.status(401).json({ message: 'Faca login para excluir renders.' })
+        return
+    }
+
+    if (!isUuid(id)) {
+        res.status(404).json({ message: 'Render nao encontrado.' })
+        return
+    }
+
+    try {
+        const render = await findAiRenderForUser(id, currentUser.id)
+
+        if (!render || render.is_deleted || render.status !== 'completed') {
+            res.status(404).json({ message: 'Render nao encontrado.' })
+            return
+        }
+
+        await deletePrivateBlobs([render.original_blob_pathname, render.rendered_blob_pathname])
+        const deletedRender = await markAiRenderDeleted({ id, userId: currentUser.id })
+
+        if (!deletedRender) {
+            res.status(404).json({ message: 'Render nao encontrado.' })
+            return
+        }
+
+        res.json({
+            deleted: true,
+            id
+        })
+    } catch (error) {
+        console.error('[Galeria] Erro ao excluir render:', error)
+        res.status(500).json({ message: 'Nao foi possivel excluir o render.' })
+    }
+})
+
 function getCurrentUser(res: Response): { id: string } | null {
     const user = res.locals.currentUser
 
@@ -181,6 +341,72 @@ function getCurrentUser(res: Response): { id: string } | null {
 
 function isUuid(value: string): boolean {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+function getGalleryLimit(value: unknown): number {
+    const parsed = typeof value === 'string' ? Number(value) : 15
+
+    if (!Number.isFinite(parsed)) {
+        return 15
+    }
+
+    return Math.max(1, Math.min(30, Math.floor(parsed)))
+}
+
+function parseGalleryCursor(value: string): { id: string, sortAt: string } | null | false {
+    if (!value) {
+        return null
+    }
+
+    try {
+        const parsed = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as {
+            id?: unknown
+            sortAt?: unknown
+        }
+
+        if (typeof parsed.id !== 'string' || !isUuid(parsed.id) || typeof parsed.sortAt !== 'string') {
+            return false
+        }
+
+        const sortAt = new Date(parsed.sortAt)
+
+        if (Number.isNaN(sortAt.getTime())) {
+            return false
+        }
+
+        return {
+            id: parsed.id,
+            sortAt: sortAt.toISOString()
+        }
+    } catch {
+        return false
+    }
+}
+
+function encodeGalleryCursor(record: AiRenderGalleryRecord | undefined): string | null {
+    if (!record) {
+        return null
+    }
+
+    return Buffer.from(JSON.stringify({
+        id: record.id,
+        sortAt: record.sort_at.toISOString()
+    })).toString('base64url')
+}
+
+function serializeGalleryRender(record: AiRenderGalleryRecord) {
+    return {
+        completedAt: record.completed_at?.toISOString() ?? null,
+        createdAt: record.created_at.toISOString(),
+        generatedAt: (record.completed_at ?? record.created_at).toISOString(),
+        id: record.id,
+        isFavorite: record.is_favorite,
+        originalImageUrl: record.original_image_url ?? `/member/render/${record.id}/image/original`,
+        renderedImageUrl: record.rendered_image_url ?? `/member/render/${record.id}/image/rendered`,
+        selectedEnvironment: record.selected_environment ?? 'exterior',
+        selectedQuality: record.selected_quality,
+        selectedWeather: record.selected_weather
+    }
 }
 
 export default router
