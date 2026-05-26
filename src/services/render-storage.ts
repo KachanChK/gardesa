@@ -1,4 +1,4 @@
-import { get, put } from '@vercel/blob'
+import { del, get, put } from '@vercel/blob'
 import type { PutBlobResult } from '@vercel/blob'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Readable } from 'stream'
@@ -67,7 +67,21 @@ export async function writeRenderedImage(pathname: string, buffer: Buffer): Prom
     })
 }
 
-export async function pipePrivateBlobToResponse(pathname: string, res: Response): Promise<void> {
+export async function deletePrivateBlobs(pathnames: Array<string | null | undefined>): Promise<void> {
+    const uniquePathnames = [...new Set(pathnames.filter((pathname): pathname is string => Boolean(pathname)))]
+
+    if (uniquePathnames.length === 0) {
+        return
+    }
+
+    await del(uniquePathnames)
+}
+
+export async function pipePrivateBlobToResponse(
+    pathname: string,
+    res: Response,
+    options: { downloadFilename?: string } = {}
+): Promise<void> {
     const result = await get(pathname, {
         access: 'private'
     })
@@ -80,6 +94,10 @@ export async function pipePrivateBlobToResponse(pathname: string, res: Response)
     res.setHeader('Content-Type', result.blob.contentType)
     res.setHeader('Content-Length', String(result.blob.size))
     res.setHeader('Cache-Control', 'private, max-age=60')
+
+    if (options.downloadFilename) {
+        res.setHeader('Content-Disposition', `attachment; filename="${options.downloadFilename}"`)
+    }
 
     Readable.fromWeb(result.stream as unknown as Parameters<typeof Readable.fromWeb>[0]).pipe(res)
 }

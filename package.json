@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "tailwind": "tailwindcss -i public/css/styles.css -o public/css/output.css --watch",
-    "build:client": "esbuild src/client/render-ai.ts --bundle --format=iife --target=es2020 --outfile=public/js/render-ai.js",
+    "build:client": "esbuild src/client/render-ai.ts --bundle --format=iife --target=es2020 --outfile=public/js/render-ai.js && esbuild src/client/gallery.ts --bundle --format=iife --target=es2020 --outfile=public/js/gallery.js",
     "build": "tsc && npm run build:client && tailwindcss -i public/css/styles.css -o public/css/output.css",
     "start": "node dist/server.js"
   },
