@@ -4,6 +4,7 @@ import { requireAuth } from '../middlewares/auth'
 import {
     AI_RENDER_ALLOWED_CONTENT_TYPES,
     AI_RENDER_MAX_UPLOAD_BYTES,
+    isAiRenderAspectRatio,
     isAiRenderEnvironment,
     isAiRenderQuality,
     isAiRenderWeather
@@ -95,6 +96,7 @@ router.post('/member/render/generate', async (req, res) => {
     const environment = req.body?.environment
     const weather = req.body?.weather
     const quality = req.body?.quality
+    const aspectRatio = req.body?.aspectRatio
 
     if (!currentUser) {
         res.status(401).json({ message: 'Faca login para gerar renders.' })
@@ -121,8 +123,14 @@ router.post('/member/render/generate', async (req, res) => {
         return
     }
 
+    if (!isAiRenderAspectRatio(aspectRatio)) {
+        res.status(400).json({ message: 'Selecione o formato do render.' })
+        return
+    }
+
     try {
         const result = await generateRenderForUser({
+            aspectRatio,
             environment,
             quality,
             renderId,

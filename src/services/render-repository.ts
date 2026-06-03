@@ -1,5 +1,5 @@
 import { db } from '../config/database'
-import type { AiRenderEnvironment, AiRenderQuality, AiRenderWeather } from './render-config'
+import type { AiRenderAspectRatio, AiRenderEnvironment, AiRenderQuality, AiRenderWeather } from './render-config'
 
 export interface AiRenderRecord {
     aspect_ratio: string | null
@@ -21,6 +21,7 @@ export interface AiRenderRecord {
     rendered_image_url: string | null
     replicate_model: string | null
     replicate_prediction_id: string | null
+    selected_aspect_ratio: AiRenderAspectRatio | null
     selected_environment: AiRenderEnvironment | null
     selected_quality: AiRenderQuality | null
     selected_weather: AiRenderWeather | null
@@ -179,6 +180,7 @@ export async function markAiRenderProcessing(options: {
     promptUsed: string
     quality: AiRenderQuality
     replicateModel: string
+    selectedAspectRatio: AiRenderAspectRatio
     userId: string
     weather: AiRenderWeather
     width: number
@@ -191,8 +193,9 @@ export async function markAiRenderProcessing(options: {
             selected_environment = $6,
             selected_weather = $7,
             selected_quality = $8,
-            prompt_used = $9,
-            replicate_model = $10,
+            selected_aspect_ratio = $9,
+            prompt_used = $10,
+            replicate_model = $11,
             status = 'processing',
             error_message = NULL,
             updated_at = now()
@@ -206,6 +209,7 @@ export async function markAiRenderProcessing(options: {
             options.environment,
             options.weather,
             options.quality,
+            options.selectedAspectRatio,
             options.promptUsed,
             options.replicateModel
         ]

@@ -3,6 +3,7 @@ import {
     AI_RENDER_OUTPUT_FORMAT,
     AI_RENDER_REPLICATE_MODEL_LABEL,
     buildAiRenderPrompt,
+    type AiRenderAspectRatio,
     type AiRenderEnvironment,
     type AiRenderQuality,
     type AiRenderWeather
@@ -22,6 +23,7 @@ import {
 import { generateAiRender } from './replicate-render'
 
 export async function generateRenderForUser(options: {
+    aspectRatio: AiRenderAspectRatio
     environment: AiRenderEnvironment
     quality: AiRenderQuality
     renderId: string
@@ -57,12 +59,14 @@ export async function generateRenderForUser(options: {
             promptUsed,
             quality: options.quality,
             replicateModel: AI_RENDER_REPLICATE_MODEL_LABEL,
+            selectedAspectRatio: options.aspectRatio,
             userId: options.userId,
             weather: options.weather,
             width: originalMetadata.width
         })
 
         const result = await generateAiRender({
+            aspectRatio: options.aspectRatio,
             environment: options.environment,
             imageBuffer: originalBlob.buffer,
             quality: options.quality,

@@ -6,13 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
 </head>
 
-<body class="min-h-screen bg-branco font-sans text-preto antialiased">
+<body class="min-h-screen bg-[#fafafa] font-sans text-preto antialiased">
     <%
         const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
+        const homeUserName = authenticatedUser && authenticatedUser.name ? authenticatedUser.name.split(' ')[0] : 'Usuario'
         const currentPage = 'Home'
         const navItems = [
             { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: true, href: '/member', iconSize: 'size-5' },
@@ -27,8 +32,64 @@
     <div id="dashboard-layout" class="min-h-screen pl-[84px] transition-[padding] duration-300">
         <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage, currentUser: authenticatedUser }) %>
 
-        <main class="min-h-[calc(100vh-68px)]"></main>
+        <main class="min-h-[calc(100vh-68px)] bg-[#fafafa] px-4 pb-8 pt-8 sm:px-8 xl:h-[calc(100vh-68px)] xl:overflow-hidden xl:px-0 xl:pb-0 xl:pt-[43px]">
+            <section data-gallery-root data-gallery-mode="recent" data-gallery-limit="4" class="mx-auto w-full max-w-[971px]" aria-labelledby="home-title">
+                <h2 id="home-title" class="max-w-[720px] text-[32px] font-semibold leading-[40px] text-preto">
+                    Ol&aacute;, <%= homeUserName %>. O que voc&ecirc; vai criar hoje?
+                </h2>
+
+                <div class="mt-7 grid w-full gap-[19px] lg:grid-cols-3">
+                    <a href="/member/render" class="group flex h-[174px] w-full flex-col rounded-[8px] border border-[#e2e2e2] bg-white px-[33px] pt-[22px] text-left transition-colors hover:border-verde focus:outline-none focus:ring-2 focus:ring-verde/35 lg:w-[311px]" aria-label="Abrir Render">
+                        <span class="flex size-12 items-center justify-center rounded-[8px] bg-[#f3f3f3]">
+                            <img src="/img/icons/sparkles_black.svg" alt="" class="size-[25px]" />
+                        </span>
+                        <span class="mt-[11px] text-lg font-semibold leading-[22px] text-preto">Render</span>
+                        <span class="mt-[7px] max-w-[246px] text-sm font-normal leading-5 text-[#656565]">Crie renders realistas em segundos apartir de uma imagem.</span>
+                    </a>
+
+                    <button type="button" disabled aria-disabled="true" class="flex h-[174px] w-full cursor-not-allowed flex-col rounded-[8px] border border-[#e2e2e2] bg-white px-[33px] pt-[22px] text-left lg:w-[311px]" aria-label="Editar materiais indispon&iacute;vel">
+                        <span class="flex size-12 items-center justify-center rounded-[8px] bg-[#f3f3f3]">
+                            <img src="/img/icons/pencil.svg" alt="" class="size-6" />
+                        </span>
+                        <span class="mt-[11px] text-lg font-semibold leading-[22px] text-preto">Editar materiais</span>
+                        <span class="mt-[7px] max-w-[246px] text-sm font-normal leading-5 text-[#656565]">Altere texturas, materiais e cores de superf&iacute;cies ou objetos.</span>
+                    </button>
+
+                    <button type="button" disabled aria-disabled="true" class="flex h-[174px] w-full cursor-not-allowed flex-col rounded-[8px] border border-[#e2e2e2] bg-white px-[33px] pt-[22px] text-left lg:w-[311px]" aria-label="Alterar objetos indispon&iacute;vel">
+                        <span class="flex size-12 items-center justify-center rounded-[8px] bg-[#f3f3f3]">
+                            <img src="/img/icons/sofa.svg" alt="" class="size-[30px]" />
+                        </span>
+                        <span class="mt-[11px] text-lg font-semibold leading-[22px] text-preto">Alterar objetos</span>
+                        <span class="mt-[7px] max-w-[246px] text-sm font-normal leading-5 text-[#656565]">Insira ou altere objetos e m&oacute;veis com apenas um clique.</span>
+                    </button>
+                </div>
+
+                <div class="mt-[44px] flex w-full items-center justify-between gap-4">
+                    <h3 class="text-xl font-semibold leading-[30px] text-preto">Projetos recentes</h3>
+                    <a href="/member/gallery" class="inline-flex h-5 items-center gap-2 text-sm font-medium leading-5 text-preto transition-opacity hover:opacity-70">
+                        <span>Ver todos</span>
+                        <img src="/img/icons/seta_direita.svg" alt="" class="size-[18px]" />
+                    </a>
+                </div>
+
+                <p data-gallery-error class="mt-5 hidden rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] px-4 py-3 text-sm font-medium text-[#b42318]"></p>
+
+                <div data-gallery-grid class="mt-3 grid justify-start gap-x-[9px] gap-y-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,236px),236px))] xl:[grid-template-columns:repeat(4,236px)]"></div>
+
+                <div data-gallery-empty class="mx-auto mt-8 hidden w-full max-w-[360px] flex-col items-center text-center">
+                    <img src="/img/icons/image.svg" alt="" class="size-12 opacity-70" />
+                    <p class="mt-4 text-lg font-semibold leading-6 text-preto">Nenhum render encontrado</p>
+                    <p data-gallery-empty-copy class="mt-2 text-sm font-normal leading-5 text-preto/55">Quando voc&ecirc; gerar renders, eles aparecer&atilde;o aqui.</p>
+                </div>
+
+                <div data-gallery-loader class="flex h-20 items-center justify-center">
+                    <span class="size-8 animate-spin rounded-full border-2 border-[#e2e2e2] border-t-verde" aria-label="Carregando"></span>
+                </div>
+            </section>
+        </main>
     </div>
+
+    <%- include('partials/gallery-overlays') %>
 </body>
 
 </html>

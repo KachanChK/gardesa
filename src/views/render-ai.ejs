@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Renderizar Imagem | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
     <script src="/js/render-ai.js" defer></script>
@@ -33,7 +36,7 @@
                 <input data-render-file-input type="file" accept="image/png,image/jpeg" class="hidden">
 
                 <section aria-labelledby="render-image-title">
-                    <h2 id="render-image-title" class="text-sm font-semibold leading-[18px] text-preto">Imagem do projeto</h2>
+                    <h2 id="render-image-title" class="text-sm font-semibold leading-[18px] text-preto">IMAGEM DO PROJETO</h2>
 
                     <div data-render-upload-zone role="button" tabindex="0" class="relative mt-2 flex h-[180px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-dashed border-[#bababa] bg-[#f8f8f8] transition-colors hover:bg-[#f3f3f3]" aria-label="Enviar imagem do projeto">
                         <div data-render-upload-empty class="flex flex-col items-center text-center">
@@ -50,8 +53,20 @@
                     </div>
                 </section>
 
+                <section class="mt-4 flex flex-col gap-2" aria-labelledby="render-aspect-ratio-title">
+                    <h3 id="render-aspect-ratio-title" class="text-sm font-semibold leading-[18px] text-preto">FORMATO DO RENDER</h3>
+
+                    <select data-render-aspect-ratio aria-label="Formato do render" class="h-12 w-full rounded-[8px] border border-[#e2e2e2] bg-white px-4 text-sm font-semibold leading-[18px] text-preto transition-colors hover:bg-[#f3f3f3] focus:border-verde focus:outline-none focus:ring-2 focus:ring-verde/25">
+                        <option value="match_input_image" selected>Mesmo da imagem</option>
+                        <option value="1:1">1:1</option>
+                        <option value="3:4">3:4</option>
+                        <option value="16:9">16:9</option>
+                        <option value="9:16">9:16</option>
+                    </select>
+                </section>
+
                 <section class="mt-4 flex flex-col gap-2" aria-labelledby="render-environment-title">
-                    <h3 id="render-environment-title" class="text-sm font-semibold leading-[18px] text-preto">Tipo de ambiente</h3>
+                    <h3 id="render-environment-title" class="text-sm font-semibold leading-[18px] text-preto">TIPO DE AMBIENTE</h3>
 
                     <div class="grid grid-cols-2 gap-3">
                         <button data-environment-option="exterior" type="button" class="flex h-[87px] flex-col items-center justify-center gap-3 rounded-[8px] border border-[#e2e2e2] bg-white text-center transition-colors hover:bg-[#f3f3f3]" aria-pressed="false">
@@ -67,7 +82,7 @@
                 </section>
 
                 <section class="mt-4 flex flex-col gap-3" aria-labelledby="render-weather-title">
-                    <h3 id="render-weather-title" class="text-sm font-semibold leading-[18px] text-preto">Clima</h3>
+                    <h3 id="render-weather-title" class="text-sm font-semibold leading-[18px] text-preto">CLIMA</h3>
 
                     <div class="grid gap-3">
                         <button data-weather-option="dia" type="button" class="flex min-h-[68px] items-center rounded-[8px] border border-[#e2e2e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#f3f3f3]" aria-pressed="false">
@@ -106,7 +121,7 @@
 
                 <section class="mt-7 flex flex-col gap-4" aria-labelledby="render-quality-title">
                     <div class="flex items-center justify-between gap-3">
-                        <h3 id="render-quality-title" class="text-sm font-semibold leading-[18px] text-preto">Qualidade</h3>
+                        <h3 id="render-quality-title" class="text-sm font-semibold leading-[18px] text-preto">QUALIDADE</h3>
                         <span class="text-xs font-normal leading-4 text-preto/50">Resolu&ccedil;&atilde;o do render</span>
                     </div>
 
@@ -134,8 +149,8 @@
 
                 <div class="mt-7 flex flex-col gap-3 pb-4">
                     <p data-render-error class="hidden rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] px-3 py-2 text-sm font-medium text-[#b42318]"></p>
-                    <p data-render-progress class="hidden text-center text-sm font-light text-preto/60"></p>
-                    <p data-render-status class="hidden text-center text-sm font-light text-preto/60"></p>
+                    <p data-render-progress class="hidden"></p>
+                    <p data-render-status class="hidden"></p>
 
                     <button data-render-generate type="button" class="inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-[0px_4px_8px_0px_rgba(90,219,64,0.25)] transition-colors hover:bg-verde-2 disabled:pointer-events-none">
                         <span class="flex size-7 items-center justify-center rounded-full bg-white text-xs font-semibold leading-4 text-preto">3</span>
@@ -145,19 +160,25 @@
             </aside>
 
             <section data-render-workspace class="relative order-2 flex min-h-[620px] flex-1 flex-col px-6 pb-6 pt-10 sm:px-8 xl:order-none xl:min-h-[calc(100vh-68px)] xl:px-6 xl:pb-8 xl:pt-[78px]">
-                <div class="flex min-h-[420px] flex-1 flex-col items-center justify-center xl:min-h-0 xl:justify-start">
+                <div class="flex min-h-[420px] flex-1 flex-col items-center justify-center xl:min-h-0">
                     <div data-render-empty-state class="flex w-full max-w-[380px] flex-col items-center text-center xl:absolute xl:left-1/2 xl:top-[calc(50%-14px)] xl:-translate-x-1/2 xl:-translate-y-1/2">
                         <img src="/img/icons/image.svg" alt="" class="size-[50px]" />
                         <p class="mt-3 text-lg font-semibold leading-[18px] text-black">Seu render vai aparecer aqui</p>
                         <p class="mt-2 text-sm font-normal leading-[18px] text-black/50">Ajustes as configura&ccedil;&otilde;es no menu ao lado.</p>
                     </div>
 
-                    <div data-render-preview class="hidden w-full flex-col items-center">
-                        <div data-render-preview-frame class="relative w-full max-w-[949px] overflow-hidden">
-                            <img data-original-image src="" alt="Imagem do projeto" class="block max-h-[min(58vh,530px)] w-full object-contain" />
+                    <div data-render-loading class="hidden w-full max-w-[380px] flex-col items-center text-center" role="status" aria-live="polite" aria-busy="true">
+                        <span class="block size-14 animate-spin rounded-full border-4 border-[#e2e2e2] border-t-verde"></span>
+                        <p data-render-loading-status class="mt-5 text-sm font-semibold leading-[18px] text-preto">Preparando render...</p>
+                    </div>
+
+                    <div data-render-preview class="hidden w-full flex-col items-center justify-center">
+                        <div data-render-preview-frame class="relative inline-block max-w-[min(100%,1800px)] overflow-hidden align-top">
+                            <img data-render-measure-image src="" alt="" aria-hidden="true" class="block max-h-[min(72vh,900px)] max-w-[min(100%,1800px)] object-contain opacity-0 2xl:max-h-[min(78vh,1080px)]" />
+                            <img data-original-image src="" alt="Imagem do projeto" class="absolute inset-0 block h-full w-full object-cover" />
 
                             <div data-rendered-layer class="absolute inset-0 hidden overflow-hidden">
-                                <img data-rendered-image src="" alt="Render gerado com IA" class="h-full w-full object-contain" />
+                                <img data-rendered-image src="" alt="Render gerado com IA" class="h-full w-full object-cover" />
                             </div>
 
                             <span data-render-compare-handle class="pointer-events-none absolute inset-y-0 left-1/2 hidden w-[35px] -translate-x-1/2">

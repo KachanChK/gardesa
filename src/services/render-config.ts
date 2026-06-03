@@ -9,10 +9,12 @@ export const AI_RENDER_REPLICATE_MODEL_LABEL = 'google/nano-banana-2:b7866a05151
 export const AI_RENDER_ENVIRONMENTS = ['exterior', 'interior'] as const
 export const AI_RENDER_WEATHERS = ['dia', 'noite', 'chuvoso', 'por-do-sol'] as const
 export const AI_RENDER_QUALITIES = ['1K', '2K', '4K'] as const
+export const AI_RENDER_ASPECT_RATIOS = ['match_input_image', '1:1', '3:4', '16:9', '9:16'] as const
 
 export type AiRenderEnvironment = typeof AI_RENDER_ENVIRONMENTS[number]
 export type AiRenderWeather = typeof AI_RENDER_WEATHERS[number]
 export type AiRenderQuality = typeof AI_RENDER_QUALITIES[number]
+export type AiRenderAspectRatio = typeof AI_RENDER_ASPECT_RATIOS[number]
 
 export const AI_RENDER_PROMPTS: Record<AiRenderWeather, string> = {
     dia: 'Transform the uploaded image into an ultra-realistic exterior architectural photograph, preserving the same framing, perspective, proportions, building volumes, architecture, materials, finishes, colors, and textures from the original image. The scene should look as if it was captured during the day by a professional architectural photographer using a high-quality camera, with natural lighting, a clean and smooth blue sky, soft sunlight, balanced exposure, gentle realistic shadows, and a polished high-resolution finish. The sky must appear bright, evenly lit, smooth, and natural, with soft color gradients. Keep the atmosphere clear, elegant, and realistic. Add subtle tropical landscaping on the horizon and a few modern Brazilian condominium houses in the background, naturally integrated with the image depth, scale, and perspective. The final result should feel like a real photograph of a modern residential condominium in Brazil, with realistic materials, natural atmosphere, clean lighting, and sophisticated architectural presentation.',
@@ -46,6 +48,10 @@ export function isAiRenderWeather(value: unknown): value is AiRenderWeather {
 
 export function isAiRenderQuality(value: unknown): value is AiRenderQuality {
     return typeof value === 'string' && AI_RENDER_QUALITIES.includes(value as AiRenderQuality)
+}
+
+export function isAiRenderAspectRatio(value: unknown): value is AiRenderAspectRatio {
+    return typeof value === 'string' && AI_RENDER_ASPECT_RATIOS.includes(value as AiRenderAspectRatio)
 }
 
 export function getUploadExtension(contentType: string): 'png' | 'jpg' {

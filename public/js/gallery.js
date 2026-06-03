@@ -10,12 +10,16 @@
     "src/client/gallery.ts"() {
       document.addEventListener("DOMContentLoaded", () => {
         const grid = document.querySelector("[data-gallery-grid]");
-        const loader = document.querySelector("[data-gallery-loader]");
-        const sentinel = document.querySelector("[data-gallery-sentinel]");
-        const title = document.querySelector("[data-gallery-title]");
-        if (!grid || !loader || !sentinel || !title) {
+        if (!grid) {
           return;
         }
+        const root = grid.closest("[data-gallery-root]") ?? document.body;
+        const loader = root.querySelector("[data-gallery-loader]");
+        if (!loader) {
+          return;
+        }
+        const mode = root.dataset.galleryMode === "recent" ? "recent" : "full";
+        const pageSize = getGalleryPageSize(root.dataset.galleryLimit, mode === "recent" ? 4 : 15);
         const elements = {
           afterLabel: document.querySelector("[data-gallery-after-label]"),
           beforeLabel: document.querySelector("[data-gallery-before-label]"),
@@ -29,9 +33,9 @@
           deleteConfirm: document.querySelector("[data-gallery-delete-confirm]"),
           deleteOpen: document.querySelector("[data-gallery-delete-open]"),
           download: document.querySelector("[data-gallery-download]"),
-          empty: document.querySelector("[data-gallery-empty]"),
-          emptyCopy: document.querySelector("[data-gallery-empty-copy]"),
-          error: document.querySelector("[data-gallery-error]"),
+          empty: root.querySelector("[data-gallery-empty]"),
+          emptyCopy: root.querySelector("[data-gallery-empty-copy]"),
+          error: root.querySelector("[data-gallery-error]"),
           fullscreen: document.querySelector("[data-gallery-fullscreen]"),
           fullscreenClose: document.querySelector("[data-gallery-fullscreen-close]"),
           fullscreenImage: document.querySelector("[data-gallery-fullscreen-image]"),
@@ -52,9 +56,9 @@
           modalType: document.querySelector("[data-gallery-modal-type]"),
           modalWeather: document.querySelector("[data-gallery-modal-weather]"),
           renderedLayer: document.querySelector("[data-gallery-rendered-layer]"),
-          sentinel,
-          tabs: Array.from(document.querySelectorAll("[data-gallery-tab]")),
-          title
+          sentinel: root.querySelector("[data-gallery-sentinel]"),
+          tabs: Array.from(root.querySelectorAll("[data-gallery-tab]")),
+          title: root.querySelector("[data-gallery-title]")
         };
         const state = {
           compareActive: false,
@@ -175,6 +179,9 @@
           });
         }
         function observeInfiniteScroll() {
+          if (mode !== "full" || !elements.sentinel) {
+            return;
+          }
           const observer = new IntersectionObserver((entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
               void loadItems(false);
@@ -200,7 +207,7 @@
           renderLoading();
           try {
             const params = new URLSearchParams({
-              limit: "15",
+              limit: String(pageSize),
               tab: state.tab
             });
             if (!reset && state.nextCursor) {
@@ -269,7 +276,7 @@
               closeModal();
             }
             renderGrid();
-            if (state.nextCursor && state.order.length < 15) {
+            if (state.nextCursor && state.order.length < pageSize) {
               void loadItems(false);
             }
           } catch (error) {
@@ -285,7 +292,17 @@
           }
           return payload;
         }
+        function getGalleryPageSize(value, fallback) {
+          const parsed = Number(value);
+          if (!Number.isFinite(parsed)) {
+            return fallback;
+          }
+          return Math.max(1, Math.min(30, Math.floor(parsed)));
+        }
         function renderTabs() {
+          if (!elements.title) {
+            return;
+          }
           elements.title.textContent = state.tab === "favorites" ? "Galeria - Favoritos" : "Galeria - Todos";
           elements.tabs.forEach((button) => {
             const selected = button.dataset.galleryTab === state.tab;
@@ -299,13 +316,14 @@
           });
         }
         function renderGrid() {
-          const cards = state.order.map((id) => state.items.get(id)).filter((item) => Boolean(item)).map(createCard);
+          const visibleOrder = mode === "recent" ? state.order.slice(0, pageSize) : state.order;
+          const cards = visibleOrder.map((id) => state.items.get(id)).filter((item) => Boolean(item)).map(createCard);
           elements.grid.replaceChildren(...cards);
           const isEmpty = state.initialized && !state.loading && state.order.length === 0;
           elements.empty?.classList.toggle("hidden", !isEmpty);
           elements.empty?.classList.toggle("flex", isEmpty);
           if (elements.emptyCopy) {
-            elements.emptyCopy.textContent = state.tab === "favorites" ? "Os renders favoritados aparecem aqui." : "Quando voce gerar renders, eles aparecerao aqui.";
+            elements.emptyCopy.textContent = mode === "recent" ? "Quando voce gerar renders, eles aparecerao aqui." : state.tab === "favorites" ? "Os renders favoritados aparecem aqui." : "Quando voce gerar renders, eles aparecerao aqui.";
           }
         }
         function createCard(item) {
@@ -385,9 +403,9 @@
             syncBodyOverflow();
             return;
           }
-          const title2 = getRenderTitle(item);
-          elements.modalTitle.textContent = title2;
-          elements.modalType.textContent = title2;
+          const title = getRenderTitle(item);
+          elements.modalTitle.textContent = title;
+          elements.modalType.textContent = title;
           elements.modalDate.textContent = formatDateTime(item.generatedAt);
           elements.modalWeather.textContent = getWeatherLabel(item.selectedWeather);
           elements.modalQuality.textContent = getQualityLabel(item.selectedQuality);
@@ -395,7 +413,7 @@
           elements.modalFavorite?.setAttribute("aria-label", item.isFavorite ? "Remover dos favoritos" : "Favoritar render");
           if (elements.modalBase) {
             elements.modalBase.src = state.compareActive ? item.originalImageUrl : item.renderedImageUrl;
-            elements.modalBase.alt = state.compareActive ? "Imagem original" : title2;
+            elements.modalBase.alt = state.compareActive ? "Imagem original" : title;
           }
           if (elements.modalRendered) {
             elements.modalRendered.src = item.renderedImageUrl;
