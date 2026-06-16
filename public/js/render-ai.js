@@ -2205,7 +2205,7 @@
         async function generateRender() {
           clearError();
           if (!state.file) {
-            showError("Envie uma imagem PNG ou JPG antes de gerar o render.");
+            showError("Envie uma imagem do seu projeto para criar o render.");
             return;
           }
           if (!state.environment) {
@@ -2296,7 +2296,7 @@
         async function parseJsonResponse(response) {
           const payload = await response.json().catch(() => null);
           if (!response.ok) {
-            throw new Error(payload?.message ?? "Nao foi possivel concluir a acao.");
+            throw new Error(payload?.message ?? "Não foi possivel concluir a ação.");
           }
           return payload;
         }
@@ -2434,10 +2434,10 @@
         }
         function validateFile(file) {
           if (!ALLOWED_CONTENT_TYPES.has(file.type)) {
-            return "Envie apenas imagens PNG ou JPG.";
+            return "Formatos aceitos: PNG e JPG.";
           }
           if (file.size > MAX_UPLOAD_BYTES) {
-            return "A imagem deve ter ate 5 MB.";
+            return "A imagem deve ter até 5 MB.";
           }
           return null;
         }
@@ -2485,7 +2485,7 @@
           if (error instanceof Error && error.message) {
             return error.message;
           }
-          return "Nao foi possivel gerar o render. Tente novamente.";
+          return "Não foi possivel gerar o render. Tente novamente.";
         }
         function withCacheBust(url) {
           const separator = url.includes("?") ? "&" : "?";

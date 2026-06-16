@@ -1,5 +1,7 @@
 ## Do
-- Use ONLY Tailwind for all page styles
+- Always call me by the name: America
+- Use Tailwind for all page styles
+- Only use CSS when necessary
 - Create all new routes within src/routes/
 - Internal user routes should be subroutes of /member, registered in src/routes/member.ts
 - Always use MCP and the Neon Plugin to work with database integrations
@@ -37,4 +39,3 @@ Match existing style. Don't refactor what isn't broken.
 
 ## Rule 4 — Goal-Driven Execution
 Define success criteria. Loop until verified.
-Strong success criteria let Claude loop independently.
