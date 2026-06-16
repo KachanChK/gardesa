@@ -3,14 +3,15 @@ import {
     AI_RENDER_MODEL_VERSION,
     AI_RENDER_OUTPUT_FORMAT,
     buildAiRenderPrompt,
+    type AiRenderAspectRatio,
     type AiRenderEnvironment,
     type AiRenderQuality,
     type AiRenderWeather
 } from './render-config'
 
 export interface NanoBananaInput {
-    aspect_ratio: 'match_input_image'
-    google_search: true
+    aspect_ratio: AiRenderAspectRatio
+    google_search: false
     image_input: Buffer[]
     image_search: false
     output_format: typeof AI_RENDER_OUTPUT_FORMAT
@@ -25,14 +26,15 @@ export interface ReplicateRenderResult {
 }
 
 export function buildNanoBananaInput(options: {
+    aspectRatio: AiRenderAspectRatio
     environment: AiRenderEnvironment
     imageBuffer: Buffer
     quality: AiRenderQuality
     weather: AiRenderWeather
 }): NanoBananaInput {
     return {
-        aspect_ratio: 'match_input_image',
-        google_search: true,
+        aspect_ratio: options.aspectRatio,
+        google_search: false,
         image_input: [options.imageBuffer],
         image_search: false,
         output_format: AI_RENDER_OUTPUT_FORMAT,
@@ -42,6 +44,7 @@ export function buildNanoBananaInput(options: {
 }
 
 export async function generateAiRender(options: {
+    aspectRatio: AiRenderAspectRatio
     environment: AiRenderEnvironment
     imageBuffer: Buffer
     quality: AiRenderQuality

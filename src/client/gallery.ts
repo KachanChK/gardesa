@@ -26,13 +26,20 @@ interface FavoriteResponse {
 
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector<HTMLElement>('[data-gallery-grid]')
-    const loader = document.querySelector<HTMLElement>('[data-gallery-loader]')
-    const sentinel = document.querySelector<HTMLElement>('[data-gallery-sentinel]')
-    const title = document.querySelector<HTMLElement>('[data-gallery-title]')
 
-    if (!grid || !loader || !sentinel || !title) {
+    if (!grid) {
         return
     }
+
+    const root = grid.closest<HTMLElement>('[data-gallery-root]') ?? document.body
+    const loader = root.querySelector<HTMLElement>('[data-gallery-loader]')
+
+    if (!loader) {
+        return
+    }
+
+    const mode = root.dataset.galleryMode === 'recent' ? 'recent' : 'full'
+    const pageSize = getGalleryPageSize(root.dataset.galleryLimit, mode === 'recent' ? 4 : 15)
 
     const elements = {
         afterLabel: document.querySelector<HTMLElement>('[data-gallery-after-label]'),
@@ -47,9 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteConfirm: document.querySelector<HTMLButtonElement>('[data-gallery-delete-confirm]'),
         deleteOpen: document.querySelector<HTMLButtonElement>('[data-gallery-delete-open]'),
         download: document.querySelector<HTMLButtonElement>('[data-gallery-download]'),
-        empty: document.querySelector<HTMLElement>('[data-gallery-empty]'),
-        emptyCopy: document.querySelector<HTMLElement>('[data-gallery-empty-copy]'),
-        error: document.querySelector<HTMLElement>('[data-gallery-error]'),
+        empty: root.querySelector<HTMLElement>('[data-gallery-empty]'),
+        emptyCopy: root.querySelector<HTMLElement>('[data-gallery-empty-copy]'),
+        error: root.querySelector<HTMLElement>('[data-gallery-error]'),
         fullscreen: document.querySelector<HTMLElement>('[data-gallery-fullscreen]'),
         fullscreenClose: document.querySelector<HTMLButtonElement>('[data-gallery-fullscreen-close]'),
         fullscreenImage: document.querySelector<HTMLImageElement>('[data-gallery-fullscreen-image]'),
@@ -70,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modalType: document.querySelector<HTMLElement>('[data-gallery-modal-type]'),
         modalWeather: document.querySelector<HTMLElement>('[data-gallery-modal-weather]'),
         renderedLayer: document.querySelector<HTMLElement>('[data-gallery-rendered-layer]'),
-        sentinel,
-        tabs: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-gallery-tab]')),
-        title
+        sentinel: root.querySelector<HTMLElement>('[data-gallery-sentinel]'),
+        tabs: Array.from(root.querySelectorAll<HTMLButtonElement>('[data-gallery-tab]')),
+        title: root.querySelector<HTMLElement>('[data-gallery-title]')
     }
 
     const state: {
@@ -234,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function observeInfiniteScroll() {
+        if (mode !== 'full' || !elements.sentinel) {
+            return
+        }
+
         const observer = new IntersectionObserver((entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
                 void loadItems(false)
@@ -265,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const params = new URLSearchParams({
-                limit: '15',
+                limit: String(pageSize),
                 tab: state.tab
             })
 
@@ -351,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderGrid()
 
-            if (state.nextCursor && state.order.length < 15) {
+            if (state.nextCursor && state.order.length < pageSize) {
                 void loadItems(false)
             }
         } catch (error) {
@@ -371,7 +382,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return payload as T
     }
 
+    function getGalleryPageSize(value: string | undefined, fallback: number): number {
+        const parsed = Number(value)
+
+        if (!Number.isFinite(parsed)) {
+            return fallback
+        }
+
+        return Math.max(1, Math.min(30, Math.floor(parsed)))
+    }
+
     function renderTabs() {
+        if (!elements.title) {
+            return
+        }
+
         elements.title.textContent = state.tab === 'favorites'
             ? 'Galeria - Favoritos'
             : 'Galeria - Todos'
@@ -389,7 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderGrid() {
-        const cards = state.order
+        const visibleOrder = mode === 'recent'
+            ? state.order.slice(0, pageSize)
+            : state.order
+        const cards = visibleOrder
             .map((id) => state.items.get(id))
             .filter((item): item is GalleryItem => Boolean(item))
             .map(createCard)
@@ -401,7 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.empty?.classList.toggle('flex', isEmpty)
 
         if (elements.emptyCopy) {
-            elements.emptyCopy.textContent = state.tab === 'favorites'
+            elements.emptyCopy.textContent = mode === 'recent'
+                ? 'Quando voce gerar renders, eles aparecerao aqui.'
+                : state.tab === 'favorites'
                 ? 'Os renders favoritados aparecem aqui.'
                 : 'Quando voce gerar renders, eles aparecerao aqui.'
         }

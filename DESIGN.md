@@ -4,7 +4,7 @@ Guia visual e de branding da Gardesa. Este documento resume os padroes observado
 
 ## Essencia da marca
 
-Gardesa e uma plataforma para paisagistas. O visual deve parecer simples, profissional e vivo: tecnologia util, sem frieza corporativa. A marca fala com quem quer trocar planilhas e retrabalho por um fluxo mais organizado para criar projetos, orcamentos e materiais comerciais.
+Gardesa e uma plataforma para arquitetos, paisagistas e designers de interiores. O visual deve parecer simples, profissional e vivo: tecnologia util, sem frieza corporativa. A marca fala com quem quer gerar renders mais realistas em menos tempo, mesmo não tendo um computador extremamente pontente.
 
 Direcao visual:
 
@@ -14,9 +14,22 @@ Direcao visual:
 - Fotos reais de paisagismo e screenshots do produto sempre que ajudarem a explicar valor.
 - Interface interna mais densa e operacional, mantendo a mesma fonte, cores e bordas discretas.
 
+## Tailwind
+
+O projeto usa Tailwind CSS v4 via `@import "tailwindcss"` em `public/css/styles.css`. Nao existe `tailwind.config.*`; tokens customizados ficam no bloco `@theme` do proprio CSS.
+
+Configuracao atual:
+
+- Cores customizadas: apenas os tokens listados em "Cores".
+- Fontes customizadas: `--font-sans` e `--font-marca`.
+- Escalas de `fontSize`, `fontWeight`, `lineHeight`, `spacing`, `borderRadius`, `boxShadow` e `screens`: defaults do Tailwind.
+- Breakpoints em uso: defaults `sm`, `md`, `lg`, `xl` e `2xl`.
+- Plugins ativos: nenhum plugin Tailwind adicional; nao ha `@plugin` ou pacote como `@tailwindcss/forms`/`typography`.
+- CSS extra em `@layer components`: apenas `.quality-range`, usado para estilizar o input range da qualidade do render.
+
 ## Fontes
 
-A familia principal e `NeulisAlt`, carregada em `public/css/styles.css`.
+A familia principal e `DM Sans`, carregada nas views via Google Fonts CDN e referenciada por `--font-sans` em `public/css/styles.css`. A familia `NeulisAlt` e carregada localmente por `@font-face` e usada como `--font-marca`.
 
 Use:
 
@@ -24,6 +37,7 @@ Use:
 - `font-marca` para a wordmark `gardesa`.
 - `font-semibold` para titulos e CTAs.
 - `font-medium` para navegacao, labels e itens de lista.
+- `font-normal` para textos internos neutros e descricoes operacionais.
 - `font-light` para textos de apoio e descricoes.
 
 Padroes de escala:
@@ -49,7 +63,7 @@ Tokens oficiais definidos em `public/css/styles.css`:
 | `laranja` | `#EF7D00` | Alertas ou acentos de atencao |
 | `azul-escuro` | `#261F31` | Acento escuro alternativo, uso raro |
 | `preto` | `#141414` | Texto principal, fundos escuros e botoes secundarios fortes |
-| `branco` | `#F3F3F3` | Fundo base da aplicacao e secoes claras |
+| `branco` | `#FFFFFF` | Fundo branco base e secoes claras |
 
 Cores auxiliares recorrentes:
 
@@ -57,11 +71,16 @@ Cores auxiliares recorrentes:
 - `#e2e2e2`: bordas do dashboard.
 - `#dddddd`: hover de links/pills na landing.
 - `#f3f3f3`: hover de itens internos e superficie clara.
+- `#fafafa`: fundo das paginas internas do dashboard.
+- `#f8f8f8`: superficies de upload e preview.
 - `#f6f6f6`: fundo de inputs publicos.
+- `#656565`: texto secundario dos cards internos da Home.
+- `#d9d9d9`: bordas de abas inativas e placeholder visual.
 - `#d1fac8`: item ativo da sidebar.
 - `#2ED218`: verde usado em padrao de bolinhas e estado ativo legado.
 - `#f0fdf0`: fundo de mensagem de sucesso.
-- `#c62828` e `#b42318`: acoes destrutivas.
+- `#fff5f5` e `#f1b8b8`: fundos e bordas de erro.
+- `#c62828`, `#b42318`, `#e30000` e `#c90000`: acoes destrutivas e botoes de remocao.
 
 Se uma cor auxiliar virar recorrente em novas telas, promova para token em `public/css/styles.css`. Nao crie CSS de pagina para cores novas.
 
@@ -94,6 +113,10 @@ Padroes do dashboard:
 - Header interno com `h-[68px]`, fundo `bg-white/95`, `backdrop-blur` e borda `#e2e2e2`.
 - Navegacao interna com itens de `h-11`, `rounded-[8px]`, icone + label.
 - Superficies internas usam `bg-white`, bordas `#e2e2e2` e radius `rounded-[8px]`.
+- Fundo geral das paginas internas usa `bg-[#fafafa]`.
+- A Home usa largura maxima `max-w-[971px]`, cards de acao `h-[174px] lg:w-[311px]` e grid recente com cards de `236px`.
+- A Galeria usa largura maxima `max-w-[1292px]`, abas `rounded-full` e grid `repeat(auto-fill,minmax(min(100%,236px),236px))`.
+- A tela de Render usa painel lateral `xl:w-[360px]`, workspace com preview fluido e controles internos compactos.
 
 ## Componentes
 
@@ -150,6 +173,7 @@ Padrao interno:
 - Waitlist usa card central com `border border-[#bababa] rounded-2xl px-8 py-10`.
 - Pricing usa `rounded-2xl border border-black/25 bg-white p-6`.
 - Dashboard usa cards mais utilitarios, geralmente `rounded-[8px] border border-[#e2e2e2] bg-white`.
+- Modais e overlays internos usam `rounded-[8px]`, `bg-white`, sombras arbitrarias e overlays `bg-black/*`.
 
 Evite colocar cards dentro de cards. Prefira secoes claras e componentes repetidos bem separados.
 
@@ -158,6 +182,14 @@ Evite colocar cards dentro de cards. Prefira secoes claras e componentes repetid
 - Badges publicos usam `rounded-full`, fonte pequena e borda discreta.
 - Estado ativo no dashboard usa fundo verde claro `#d1fac8` e texto verde vivo.
 - Mensagens de sucesso usam verde claro, borda verde suave e texto `text-verde`.
+- Mensagens de erro internas usam `rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] text-[#b42318]`.
+
+### Controles de render
+
+- Upload: zona `rounded-[8px] border border-dashed border-[#bababa] bg-[#f8f8f8]`.
+- Selects e botoes de opcao: `h-12` ou `min-h-[68px]`, `rounded-[8px]`, `border-[#e2e2e2]`, `bg-white`, `hover:bg-[#f3f3f3]`.
+- Range de qualidade: input com classe `quality-range`, trilho `h-1 rounded-full bg-[#e2e2e2]` e preenchimento `bg-verde`.
+- Acoes de preview/render: botoes iconicos pequenos com `aria-label`, geralmente sem texto visivel.
 
 ### FAQ e accordions
 
@@ -191,16 +223,14 @@ Direcao de imagem:
 Tom:
 
 - Direto, humano e pratico.
-- Fala com paisagistas, nao com "usuarios" genericos.
+- Fala com profissionais, nao com "usuarios" genericos.
 - Enfatiza economia de tempo, menos planilhas, menos retrabalho e entregas profissionais.
 - Usa frases curtas e beneficios concretos.
 
 Exemplos alinhados:
 
-- "Tecnologia feita para paisagistas."
-- "Menos planilhas, menos trabalho."
-- "Crie orcamentos profissionais em minutos."
-- "Cadastre uma vez e nunca preencha os mesmos dados de novo."
+- "Tecnologia feita para profissionais."
+- "Crie renders profissionais em segundos."
 
 Evite:
 
@@ -214,6 +244,7 @@ Use mobile-first:
 
 - Comece com `grid-cols-1`, `flex-col`, tamanhos compactos e aumente em `sm`, `md`, `lg`.
 - Landing revela a imagem do hero apenas em `lg` para preservar foco e performance no mobile.
+- Dashboard usa `sm`, `md`, `lg`, `xl` e `2xl` defaults do Tailwind; nao ha breakpoints customizados.
 - CTAs devem quebrar linha com `flex-wrap` quando necessario.
 - Inputs de formularios publicos viram coluna no mobile e linha em `sm`.
 - Textos dentro de botoes devem usar `whitespace-nowrap` quando a largura permitir, mas nunca causar overflow.
@@ -230,7 +261,7 @@ Use mobile-first:
 
 - Use apenas Tailwind para estilos de paginas.
 - Nao adicione CSS tradicional de pagina em `public/css/styles.css`.
-- Use `public/css/styles.css` apenas para fontes, import do Tailwind e tokens globais.
+- Use `public/css/styles.css` para fontes, import do Tailwind, tokens globais e componentes globais inevitaveis como controles nativos.
 - Nao edite `public/css/output.css` manualmente; gere pelo build do Tailwind.
 - Novas rotas devem ficar em `src/routes/`.
 - Novas views devem seguir os partials e padroes existentes quando forem parte do dashboard.
@@ -240,6 +271,9 @@ Use mobile-first:
 
 - A landing usa algumas classes como `text-verde-escuro` e `border-verde-escuro`, mas esse token nao esta definido em `public/css/styles.css`. Para novas telas, prefira `verde-3` ou adicione o token global antes de usar.
 - A wordmark da landing usa `font-regular`; em Tailwind, o peso padrao equivalente e `font-normal`. Para novos componentes, prefira `font-normal`, `font-medium` ou `font-semibold`.
+- `text-verde` sobre branco e `text-white`/`text-branco` sobre `bg-verde` aparecem no produto, mas nao atingem contraste AA para texto normal. Para novos textos funcionais, prefira `verde-3` em texto ou `text-preto` sobre `bg-verde`.
+- Algumas views internas usam cores auxiliares ainda hardcoded (`#fafafa`, `#656565`, `#e30000`, `#c90000`). Para novas telas, prefira tokens existentes ou promova cores recorrentes para `@theme`.
+- Home, Galeria e Render usam muitos valores arbitrarios para layout fixo. Mantenha esse padrao apenas quando estiver reproduzindo dimensoes ja existentes; para novos fluxos, prefira a escala default do Tailwind.
 - O padrao visual publico aceita `rounded-2xl`; o dashboard tende a `rounded-[8px]` para ficar mais compacto e operacional.
 
 ## Checklist para novas telas

@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Galeria | Gardesa</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css" />
     <script src="/js/dashboard-shell.js" defer></script>
     <script src="/js/gallery.js" defer></script>
@@ -61,111 +64,7 @@
         </main>
     </div>
 
-    <div data-gallery-modal class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/75 px-4 py-8" aria-hidden="true">
-        <div data-gallery-modal-panel class="relative flex max-h-[calc(100vh-48px)] w-full max-w-[1120px] flex-col overflow-hidden rounded-[8px] bg-white shadow-[0px_24px_48px_0px_rgba(0,0,0,0.18)] lg:h-[592px] lg:flex-row">
-            <section class="relative flex min-h-[360px] flex-1 items-center justify-center bg-white p-7 lg:min-h-0 lg:pr-4">
-                <div data-gallery-preview-frame class="relative h-full max-h-[536px] w-full overflow-hidden rounded-[6px] bg-[#f8f8f8]">
-                    <img data-gallery-modal-base src="" alt="Render selecionado" class="block h-full w-full object-cover" />
-
-                    <div data-gallery-rendered-layer class="absolute inset-0 hidden overflow-hidden">
-                        <img data-gallery-modal-rendered src="" alt="Render gerado" class="h-full w-full object-cover" />
-                    </div>
-
-                    <span data-gallery-compare-handle class="pointer-events-none absolute inset-y-0 left-1/2 hidden w-[35px] -translate-x-1/2">
-                        <span class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow-[0px_0px_2px_0px_rgba(0,0,0,0.18)]"></span>
-                        <span class="absolute left-1/2 top-1/2 flex h-[50px] w-[34px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[8px] bg-white shadow-[0px_2px_6px_0px_rgba(0,0,0,0.18)]">
-                            <img src="/img/icons/move-horizontal.svg" alt="" class="size-5" />
-                        </span>
-                    </span>
-
-                    <span data-gallery-before-label class="absolute bottom-4 left-5 hidden rounded-full bg-white px-5 py-2 text-xs font-medium leading-4 text-preto">Antes</span>
-                    <span data-gallery-after-label class="absolute bottom-4 right-5 hidden rounded-full bg-white px-5 py-2 text-xs font-medium leading-4 text-preto">Depois</span>
-
-                    <input data-gallery-compare-range type="range" min="0" max="100" value="50" aria-label="Comparar imagem original e render" class="absolute inset-0 hidden h-full w-full cursor-ew-resize opacity-0">
-
-                    <div class="absolute right-4 top-4 flex h-[34px] items-center gap-1 rounded-full bg-white px-3 shadow-[0px_2px_8px_0px_rgba(0,0,0,0.12)]">
-                        <button data-gallery-compare-toggle type="button" class="flex size-6 items-center justify-center" aria-label="Mostrar compara&ccedil;&atilde;o">
-                            <img data-gallery-compare-icon src="/img/icons/image.svg" alt="" class="size-5" />
-                        </button>
-                        <button data-gallery-fullscreen-open type="button" class="flex size-6 items-center justify-center" aria-label="Abrir render em tela cheia">
-                            <img src="/img/icons/expand.svg" alt="" class="size-5" />
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <aside class="relative flex w-full flex-col border-t border-[#e2e2e2] p-7 lg:w-[368px] lg:border-l lg:border-t-0">
-                <button data-gallery-modal-close type="button" class="absolute right-3 top-3 flex size-[30px] items-center justify-center rounded-[8px] bg-[#e30000] transition-colors hover:bg-[#c90000]" aria-label="Fechar render">
-                    <img src="/img/icons/x_close.svg" alt="" class="size-4" />
-                </button>
-
-                <div class="flex items-center gap-3 pr-10">
-                    <button data-gallery-modal-favorite type="button" class="flex size-6 shrink-0 items-center justify-center" aria-label="Favoritar render">
-                        <img data-gallery-modal-favorite-icon src="/img/icons/star.svg" alt="" class="size-6" />
-                    </button>
-                    <h3 data-gallery-modal-title class="min-w-0 truncate text-2xl font-semibold leading-7 text-preto">Render externo</h3>
-                </div>
-
-                <div class="mt-6 h-px bg-[#e2e2e2]"></div>
-
-                <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-5">
-                    <div>
-                        <dt class="text-xs font-medium leading-4 text-preto/50">Tipo do render</dt>
-                        <dd data-gallery-modal-type class="mt-1 text-base font-semibold leading-5 text-preto">Render externo</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs font-medium leading-4 text-preto/50">Gerado em</dt>
-                        <dd data-gallery-modal-date class="mt-1 text-base font-semibold leading-5 text-preto">--</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs font-medium leading-4 text-preto/50">Clima</dt>
-                        <dd data-gallery-modal-weather class="mt-1 text-base font-semibold leading-5 text-preto">--</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs font-medium leading-4 text-preto/50">Qualidade</dt>
-                        <dd data-gallery-modal-quality class="mt-1 text-base font-semibold leading-5 text-preto">--</dd>
-                    </div>
-                </dl>
-
-                <p data-gallery-modal-error class="mt-5 hidden rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] px-3 py-2 text-sm font-medium text-[#b42318]"></p>
-
-                <div class="mt-auto flex flex-col gap-3 pt-8">
-                    <button data-gallery-download type="button" class="inline-flex h-[46px] w-full items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
-                        Baixar render
-                    </button>
-                    <button data-gallery-delete-open type="button" class="inline-flex h-10 w-full items-center justify-center rounded-full border border-[#c62828] bg-white px-5 text-sm font-semibold text-[#c62828] transition-colors hover:bg-[#fff5f5]">
-                        Excluir
-                    </button>
-                </div>
-            </aside>
-        </div>
-    </div>
-
-    <div data-gallery-confirm class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/65 px-4" aria-hidden="true">
-        <div class="w-full max-w-[496px] rounded-[8px] bg-white px-16 py-8 text-center shadow-[0px_22px_42px_0px_rgba(0,0,0,0.22)]">
-            <img src="/img/icons/triangle-alert.svg" alt="" class="mx-auto size-12" />
-            <h3 class="mt-6 text-2xl font-semibold leading-7 text-preto">Excluir render?</h3>
-            <p class="mt-3 text-sm font-normal leading-5 text-preto/60">Tem certeza que deseja excluir? Essa a&ccedil;&atilde;o n&atilde;o poder&aacute; ser desfeita.</p>
-            <p data-gallery-confirm-error class="mt-4 hidden rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] px-3 py-2 text-sm font-medium text-[#b42318]"></p>
-
-            <div class="mt-8 grid grid-cols-2 gap-4">
-                <button data-gallery-delete-cancel type="button" class="inline-flex h-11 items-center justify-center rounded-full border border-[#e2e2e2] bg-white px-5 text-sm font-semibold text-preto transition-colors hover:bg-[#f3f3f3]">
-                    Cancelar
-                </button>
-                <button data-gallery-delete-confirm type="button" class="inline-flex h-11 items-center justify-center rounded-full bg-[#c62828] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#b42318]">
-                    Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div data-gallery-fullscreen class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/90 px-4 py-16" aria-hidden="true">
-        <button data-gallery-fullscreen-close type="button" class="absolute right-6 top-6 flex size-10 items-center justify-center rounded-full border border-[#bababa] bg-white transition-colors hover:bg-[#f3f3f3]" aria-label="Fechar tela cheia">
-            <img src="/img/icons/x_close.svg" alt="" class="size-4" />
-        </button>
-
-        <img data-gallery-fullscreen-image src="" alt="Render em tela cheia" class="max-h-[calc(100vh-120px)] max-w-[calc(100vw-32px)] object-contain" />
-    </div>
+    <%- include('partials/gallery-overlays') %>
 </body>
 
 </html>

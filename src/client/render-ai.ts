@@ -2,6 +2,7 @@ import { put } from '@vercel/blob/client'
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 const ALLOWED_CONTENT_TYPES = new Set(['image/png', 'image/jpeg'])
+const ASPECT_RATIOS = new Set(['match_input_image', '1:1', '3:4', '16:9', '9:16'])
 const QUALITY_BY_SLIDER_VALUE = new Map([
     ['1', '1K'],
     ['2', '2K'],
@@ -9,6 +10,7 @@ const QUALITY_BY_SLIDER_VALUE = new Map([
 ])
 
 type RenderViewMode = 'compare' | 'rendered'
+type RenderAspectRatio = 'match_input_image' | '1:1' | '3:4' | '16:9' | '9:16'
 
 interface UploadIntentResponse {
     renderId: string
@@ -29,6 +31,7 @@ interface GenerateResponse {
 document.addEventListener('DOMContentLoaded', () => {
     const elements = {
         actionMenu: document.querySelector<HTMLElement>('[data-render-actions]'),
+        aspectRatioSelect: document.querySelector<HTMLSelectElement>('[data-render-aspect-ratio]'),
         compareHandle: document.querySelector<HTMLElement>('[data-render-compare-handle]'),
         compareRange: document.querySelector<HTMLInputElement>('[data-render-compare-range]'),
         downloadButton: document.querySelector<HTMLButtonElement>('[data-render-download]'),
@@ -41,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreenOverlay: document.querySelector<HTMLElement>('[data-render-fullscreen-overlay]'),
         fullscreenToggle: document.querySelector<HTMLButtonElement>('[data-render-fullscreen-toggle]'),
         generateButton: document.querySelector<HTMLButtonElement>('[data-render-generate]'),
+        loading: document.querySelector<HTMLElement>('[data-render-loading]'),
+        loadingStatus: document.querySelector<HTMLElement>('[data-render-loading-status]'),
+        measureImage: document.querySelector<HTMLImageElement>('[data-render-measure-image]'),
         originalImage: document.querySelector<HTMLImageElement>('[data-original-image]'),
         preview: document.querySelector<HTMLElement>('[data-render-preview]'),
         progress: document.querySelector<HTMLElement>('[data-render-progress]'),
@@ -59,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         weatherButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-weather-option]'))
     }
 
-    if (!elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer || !elements.uploadZone) {
+    if (!elements.aspectRatioSelect || !elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.loading || !elements.loadingStatus || !elements.measureImage || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer || !elements.uploadZone) {
         return
     }
 
@@ -68,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         environment: string | null
         file: File | null
         fullscreen: boolean
+        isLoading: boolean
+        loadingMessage: string
         originalPreviewUrl: string | null
         renderedUrl: string | null
         renderId: string | null
@@ -78,6 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         environment: null,
         file: null,
         fullscreen: false,
+        isLoading: false,
+        loadingMessage: '',
         originalPreviewUrl: null,
         renderedUrl: null,
         renderId: null,
@@ -144,6 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
             renderQualityState()
         })
 
+        elements.aspectRatioSelect?.addEventListener('change', () => {
+            clearError()
+        })
+
         elements.generateButton?.addEventListener('click', () => {
             void generateRender()
         })
@@ -154,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
         elements.viewToggle?.addEventListener('click', () => {
-            if (!state.renderedUrl) {
+            if (!state.renderedUrl || !state.originalPreviewUrl) {
                 return
             }
 
@@ -227,11 +241,13 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(state.originalPreviewUrl)
         }
 
+        const hasRendered = Boolean(state.renderedUrl)
+
         state.file = null
         state.originalPreviewUrl = null
-        state.renderedUrl = null
-        state.renderId = null
-        state.viewMode = 'compare'
+        state.renderedUrl = hasRendered ? state.renderedUrl : null
+        state.renderId = hasRendered ? state.renderId : null
+        state.viewMode = hasRendered ? 'rendered' : 'compare'
         state.comparePosition = 50
         state.fullscreen = false
         elements.fileInput!.value = ''
@@ -264,6 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return
         }
 
+        const aspectRatio = getSelectedAspectRatio()
+
+        if (!aspectRatio) {
+            showError('Selecione o formato do render.')
+            return
+        }
+
         try {
             setLoading(true)
             setStatus('Enviando imagem...')
@@ -271,10 +294,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const intent = await createUploadIntent(state.file)
             state.renderId = intent.renderId
 
+            let isUploading = true
+
             await put(intent.upload.pathname, state.file, {
                 access: 'private',
                 contentType: intent.upload.contentType,
                 onUploadProgress: (progress) => {
+                    if (!isUploading) {
+                        return
+                    }
+
                     const percentage = Math.max(0, Math.min(100, Math.round(progress.percentage)))
                     setProgress(`${percentage}%`)
                     setStatus(`Enviando imagem... ${percentage}%`)
@@ -282,10 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 token: intent.upload.token
             })
 
+            isUploading = false
             setProgress('')
             setStatus('Gerando render...')
 
-            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality)
+            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality, aspectRatio)
 
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl)
             state.viewMode = 'compare'
@@ -293,12 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
             state.fullscreen = false
 
             renderUi()
-            setStatus('Render finalizado.')
         } catch (error) {
             showError(getErrorMessage(error))
             setStatus('')
         } finally {
             setLoading(false)
+            setStatus('')
             setProgress('')
         }
     }
@@ -319,9 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return parseJsonResponse<UploadIntentResponse>(response)
     }
 
-    async function requestRenderGeneration(renderId: string, environment: string, weather: string, quality: string): Promise<GenerateResponse> {
+    async function requestRenderGeneration(renderId: string, environment: string, weather: string, quality: string, aspectRatio: RenderAspectRatio): Promise<GenerateResponse> {
         const response = await fetch('/member/render/generate', {
             body: JSON.stringify({
+                aspectRatio,
                 environment,
                 quality,
                 renderId,
@@ -349,13 +380,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderUi() {
         const hasOriginal = Boolean(state.originalPreviewUrl)
         const hasRendered = Boolean(state.renderedUrl)
-        const showComparison = hasOriginal && hasRendered && state.viewMode === 'compare'
+        const isLoading = state.isLoading
 
-        elements.emptyState?.classList.toggle('hidden', hasRendered)
-        elements.preview?.classList.toggle('hidden', !hasRendered)
-        elements.preview?.classList.toggle('flex', hasRendered)
-        elements.actionMenu?.classList.toggle('hidden', !hasRendered)
-        elements.actionMenu?.classList.toggle('flex', hasRendered)
+        if (!hasOriginal && state.viewMode === 'compare') {
+            state.viewMode = 'rendered'
+        }
+
+        const showComparison = !isLoading && hasOriginal && hasRendered && state.viewMode === 'compare'
+
+        elements.emptyState?.classList.toggle('hidden', isLoading || hasRendered)
+        elements.loading?.classList.toggle('hidden', !isLoading)
+        elements.loading?.classList.toggle('flex', isLoading)
+        elements.loading?.setAttribute('aria-busy', String(isLoading))
+        elements.preview?.classList.toggle('hidden', isLoading || !hasRendered)
+        elements.preview?.classList.toggle('flex', !isLoading && hasRendered)
+        elements.actionMenu?.classList.toggle('hidden', isLoading || !hasRendered)
+        elements.actionMenu?.classList.toggle('flex', !isLoading && hasRendered)
+
+        if (elements.loadingStatus) {
+            elements.loadingStatus.textContent = state.loadingMessage || 'Preparando render...'
+        }
 
         elements.uploadEmpty?.classList.toggle('hidden', hasOriginal)
         elements.uploadPreview?.classList.toggle('hidden', !hasOriginal)
@@ -364,18 +408,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.originalPreviewUrl && elements.uploadPreview) {
             elements.uploadPreview.src = state.originalPreviewUrl
+        } else {
+            elements.uploadPreview?.removeAttribute('src')
         }
 
         if (state.renderedUrl) {
+            elements.measureImage!.src = state.renderedUrl
             elements.originalImage!.src = showComparison
-                ? state.originalPreviewUrl ?? state.renderedUrl
+                ? state.originalPreviewUrl!
                 : state.renderedUrl
             elements.renderedImage!.src = state.renderedUrl
+        } else {
+            elements.measureImage!.removeAttribute('src')
+            elements.originalImage!.removeAttribute('src')
+            elements.renderedImage!.removeAttribute('src')
         }
 
         elements.renderedLayer!.classList.toggle('hidden', !showComparison)
         elements.compareHandle?.classList.toggle('hidden', !showComparison)
         elements.compareRange?.classList.toggle('hidden', !showComparison)
+        elements.viewToggle?.classList.toggle('hidden', isLoading || !hasOriginal)
+        elements.viewToggle?.toggleAttribute('disabled', isLoading || !hasOriginal)
 
         if (elements.viewToggleIcon) {
             elements.viewToggleIcon.src = state.viewMode === 'compare'
@@ -477,6 +530,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return QUALITY_BY_SLIDER_VALUE.get(elements.qualityRange?.value ?? '2') ?? null
     }
 
+    function getSelectedAspectRatio(): RenderAspectRatio | null {
+        const value = elements.aspectRatioSelect?.value ?? 'match_input_image'
+
+        if (isRenderAspectRatio(value)) {
+            return value
+        }
+
+        return null
+    }
+
+    function isRenderAspectRatio(value: string): value is RenderAspectRatio {
+        return ASPECT_RATIOS.has(value)
+    }
+
     function validateFile(file: File): string | null {
         if (!ALLOWED_CONTENT_TYPES.has(file.type)) {
             return 'Envie apenas imagens PNG ou JPG.'
@@ -490,21 +557,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoading(value: boolean) {
+        state.isLoading = value
+
+        if (!value) {
+            state.loadingMessage = ''
+        }
+
         elements.generateButton!.disabled = value
         elements.generateButton!.classList.toggle('opacity-70', value)
         elements.generateButton!.classList.toggle('cursor-not-allowed', value)
         elements.generateButton!.querySelector('[data-render-button-label]')!.textContent = value
             ? 'Gerando render...'
             : 'Gerar render'
+
+        renderUi()
     }
 
     function setStatus(message: string) {
-        if (!elements.status) {
-            return
+        state.loadingMessage = message
+
+        if (elements.loadingStatus && state.isLoading) {
+            elements.loadingStatus.textContent = message || 'Preparando render...'
         }
 
-        elements.status.textContent = message
-        elements.status.classList.toggle('hidden', !message)
+        if (elements.status) {
+            elements.status.textContent = message
+        }
     }
 
     function setProgress(message: string) {
@@ -513,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         elements.progress.textContent = message
-        elements.progress.classList.toggle('hidden', !message)
     }
 
     function showError(message: string) {

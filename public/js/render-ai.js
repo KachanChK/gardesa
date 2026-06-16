@@ -2017,6 +2017,7 @@
       init_client();
       var MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
       var ALLOWED_CONTENT_TYPES = /* @__PURE__ */ new Set(["image/png", "image/jpeg"]);
+      var ASPECT_RATIOS = /* @__PURE__ */ new Set(["match_input_image", "1:1", "3:4", "16:9", "9:16"]);
       var QUALITY_BY_SLIDER_VALUE = /* @__PURE__ */ new Map([
         ["1", "1K"],
         ["2", "2K"],
@@ -2025,6 +2026,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         const elements = {
           actionMenu: document.querySelector("[data-render-actions]"),
+          aspectRatioSelect: document.querySelector("[data-render-aspect-ratio]"),
           compareHandle: document.querySelector("[data-render-compare-handle]"),
           compareRange: document.querySelector("[data-render-compare-range]"),
           downloadButton: document.querySelector("[data-render-download]"),
@@ -2037,6 +2039,9 @@
           fullscreenOverlay: document.querySelector("[data-render-fullscreen-overlay]"),
           fullscreenToggle: document.querySelector("[data-render-fullscreen-toggle]"),
           generateButton: document.querySelector("[data-render-generate]"),
+          loading: document.querySelector("[data-render-loading]"),
+          loadingStatus: document.querySelector("[data-render-loading-status]"),
+          measureImage: document.querySelector("[data-render-measure-image]"),
           originalImage: document.querySelector("[data-original-image]"),
           preview: document.querySelector("[data-render-preview]"),
           progress: document.querySelector("[data-render-progress]"),
@@ -2054,7 +2059,7 @@
           viewToggleIcon: document.querySelector("[data-render-view-toggle-icon]"),
           weatherButtons: Array.from(document.querySelectorAll("[data-weather-option]"))
         };
-        if (!elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer || !elements.uploadZone) {
+        if (!elements.aspectRatioSelect || !elements.fileInput || !elements.generateButton || !elements.preview || !elements.emptyState || !elements.loading || !elements.loadingStatus || !elements.measureImage || !elements.originalImage || !elements.renderedImage || !elements.renderedLayer || !elements.uploadZone) {
           return;
         }
         const state = {
@@ -2062,6 +2067,8 @@
           environment: null,
           file: null,
           fullscreen: false,
+          isLoading: false,
+          loadingMessage: "",
           originalPreviewUrl: null,
           renderedUrl: null,
           renderId: null,
@@ -2116,6 +2123,9 @@
             clearError();
             renderQualityState();
           });
+          elements.aspectRatioSelect?.addEventListener("change", () => {
+            clearError();
+          });
           elements.generateButton?.addEventListener("click", () => {
             void generateRender();
           });
@@ -2124,7 +2134,7 @@
             renderComparisonPosition();
           });
           elements.viewToggle?.addEventListener("click", () => {
-            if (!state.renderedUrl) {
+            if (!state.renderedUrl || !state.originalPreviewUrl) {
               return;
             }
             state.viewMode = state.viewMode === "compare" ? "rendered" : "compare";
@@ -2181,11 +2191,12 @@
           if (state.originalPreviewUrl) {
             URL.revokeObjectURL(state.originalPreviewUrl);
           }
+          const hasRendered = Boolean(state.renderedUrl);
           state.file = null;
           state.originalPreviewUrl = null;
-          state.renderedUrl = null;
-          state.renderId = null;
-          state.viewMode = "compare";
+          state.renderedUrl = hasRendered ? state.renderedUrl : null;
+          state.renderId = hasRendered ? state.renderId : null;
+          state.viewMode = hasRendered ? "rendered" : "compare";
           state.comparePosition = 50;
           state.fullscreen = false;
           elements.fileInput.value = "";
@@ -2194,7 +2205,7 @@
         async function generateRender() {
           clearError();
           if (!state.file) {
-            showError("Envie uma imagem PNG ou JPG antes de gerar o render.");
+            showError("Envie uma imagem do seu projeto para criar o render.");
             return;
           }
           if (!state.environment) {
@@ -2210,35 +2221,45 @@
             showError("Selecione a qualidade do render.");
             return;
           }
+          const aspectRatio = getSelectedAspectRatio();
+          if (!aspectRatio) {
+            showError("Selecione o formato do render.");
+            return;
+          }
           try {
             setLoading(true);
             setStatus("Enviando imagem...");
             const intent = await createUploadIntent(state.file);
             state.renderId = intent.renderId;
+            let isUploading = true;
             await put(intent.upload.pathname, state.file, {
               access: "private",
               contentType: intent.upload.contentType,
               onUploadProgress: (progress) => {
+                if (!isUploading) {
+                  return;
+                }
                 const percentage = Math.max(0, Math.min(100, Math.round(progress.percentage)));
                 setProgress(`${percentage}%`);
                 setStatus(`Enviando imagem... ${percentage}%`);
               },
               token: intent.upload.token
             });
+            isUploading = false;
             setProgress("");
             setStatus("Gerando render...");
-            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality);
+            const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality, aspectRatio);
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl);
             state.viewMode = "compare";
             state.comparePosition = 50;
             state.fullscreen = false;
             renderUi();
-            setStatus("Render finalizado.");
           } catch (error) {
             showError(getErrorMessage(error));
             setStatus("");
           } finally {
             setLoading(false);
+            setStatus("");
             setProgress("");
           }
         }
@@ -2256,9 +2277,10 @@
           });
           return parseJsonResponse(response);
         }
-        async function requestRenderGeneration(renderId, environment, weather, quality) {
+        async function requestRenderGeneration(renderId, environment, weather, quality, aspectRatio) {
           const response = await fetch("/member/render/generate", {
             body: JSON.stringify({
+              aspectRatio,
               environment,
               quality,
               renderId,
@@ -2274,33 +2296,52 @@
         async function parseJsonResponse(response) {
           const payload = await response.json().catch(() => null);
           if (!response.ok) {
-            throw new Error(payload?.message ?? "Nao foi possivel concluir a acao.");
+            throw new Error(payload?.message ?? "Não foi possivel concluir a ação.");
           }
           return payload;
         }
         function renderUi() {
           const hasOriginal = Boolean(state.originalPreviewUrl);
           const hasRendered = Boolean(state.renderedUrl);
-          const showComparison = hasOriginal && hasRendered && state.viewMode === "compare";
-          elements.emptyState?.classList.toggle("hidden", hasRendered);
-          elements.preview?.classList.toggle("hidden", !hasRendered);
-          elements.preview?.classList.toggle("flex", hasRendered);
-          elements.actionMenu?.classList.toggle("hidden", !hasRendered);
-          elements.actionMenu?.classList.toggle("flex", hasRendered);
+          const isLoading = state.isLoading;
+          if (!hasOriginal && state.viewMode === "compare") {
+            state.viewMode = "rendered";
+          }
+          const showComparison = !isLoading && hasOriginal && hasRendered && state.viewMode === "compare";
+          elements.emptyState?.classList.toggle("hidden", isLoading || hasRendered);
+          elements.loading?.classList.toggle("hidden", !isLoading);
+          elements.loading?.classList.toggle("flex", isLoading);
+          elements.loading?.setAttribute("aria-busy", String(isLoading));
+          elements.preview?.classList.toggle("hidden", isLoading || !hasRendered);
+          elements.preview?.classList.toggle("flex", !isLoading && hasRendered);
+          elements.actionMenu?.classList.toggle("hidden", isLoading || !hasRendered);
+          elements.actionMenu?.classList.toggle("flex", !isLoading && hasRendered);
+          if (elements.loadingStatus) {
+            elements.loadingStatus.textContent = state.loadingMessage || "Preparando render...";
+          }
           elements.uploadEmpty?.classList.toggle("hidden", hasOriginal);
           elements.uploadPreview?.classList.toggle("hidden", !hasOriginal);
           elements.removeImageButton?.classList.toggle("hidden", !hasOriginal);
           elements.removeImageButton?.classList.toggle("flex", hasOriginal);
           if (state.originalPreviewUrl && elements.uploadPreview) {
             elements.uploadPreview.src = state.originalPreviewUrl;
+          } else {
+            elements.uploadPreview?.removeAttribute("src");
           }
           if (state.renderedUrl) {
-            elements.originalImage.src = showComparison ? state.originalPreviewUrl ?? state.renderedUrl : state.renderedUrl;
+            elements.measureImage.src = state.renderedUrl;
+            elements.originalImage.src = showComparison ? state.originalPreviewUrl : state.renderedUrl;
             elements.renderedImage.src = state.renderedUrl;
+          } else {
+            elements.measureImage.removeAttribute("src");
+            elements.originalImage.removeAttribute("src");
+            elements.renderedImage.removeAttribute("src");
           }
           elements.renderedLayer.classList.toggle("hidden", !showComparison);
           elements.compareHandle?.classList.toggle("hidden", !showComparison);
           elements.compareRange?.classList.toggle("hidden", !showComparison);
+          elements.viewToggle?.classList.toggle("hidden", isLoading || !hasOriginal);
+          elements.viewToggle?.toggleAttribute("disabled", isLoading || !hasOriginal);
           if (elements.viewToggleIcon) {
             elements.viewToggleIcon.src = state.viewMode === "compare" ? "/img/icons/image.svg" : "/img/icons/move-horizontal.svg";
           }
@@ -2381,34 +2422,50 @@
         function getSelectedQuality() {
           return QUALITY_BY_SLIDER_VALUE.get(elements.qualityRange?.value ?? "2") ?? null;
         }
+        function getSelectedAspectRatio() {
+          const value = elements.aspectRatioSelect?.value ?? "match_input_image";
+          if (isRenderAspectRatio(value)) {
+            return value;
+          }
+          return null;
+        }
+        function isRenderAspectRatio(value) {
+          return ASPECT_RATIOS.has(value);
+        }
         function validateFile(file) {
           if (!ALLOWED_CONTENT_TYPES.has(file.type)) {
-            return "Envie apenas imagens PNG ou JPG.";
+            return "Formatos aceitos: PNG e JPG.";
           }
           if (file.size > MAX_UPLOAD_BYTES) {
-            return "A imagem deve ter ate 5 MB.";
+            return "A imagem deve ter até 5 MB.";
           }
           return null;
         }
         function setLoading(value) {
+          state.isLoading = value;
+          if (!value) {
+            state.loadingMessage = "";
+          }
           elements.generateButton.disabled = value;
           elements.generateButton.classList.toggle("opacity-70", value);
           elements.generateButton.classList.toggle("cursor-not-allowed", value);
           elements.generateButton.querySelector("[data-render-button-label]").textContent = value ? "Gerando render..." : "Gerar render";
+          renderUi();
         }
         function setStatus(message) {
-          if (!elements.status) {
-            return;
+          state.loadingMessage = message;
+          if (elements.loadingStatus && state.isLoading) {
+            elements.loadingStatus.textContent = message || "Preparando render...";
           }
-          elements.status.textContent = message;
-          elements.status.classList.toggle("hidden", !message);
+          if (elements.status) {
+            elements.status.textContent = message;
+          }
         }
         function setProgress(message) {
           if (!elements.progress) {
             return;
           }
           elements.progress.textContent = message;
-          elements.progress.classList.toggle("hidden", !message);
         }
         function showError(message) {
           if (!elements.error) {
@@ -2428,7 +2485,7 @@
           if (error instanceof Error && error.message) {
             return error.message;
           }
-          return "Nao foi possivel gerar o render. Tente novamente.";
+          return "Não foi possivel gerar o render. Tente novamente.";
         }
         function withCacheBust(url) {
           const separator = url.includes("?") ? "&" : "?";
