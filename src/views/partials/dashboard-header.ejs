@@ -1,5 +1,7 @@
 <%
     const headerUser = typeof currentUser !== 'undefined' ? currentUser : null
+    const headerUserName = headerUser && headerUser.name ? headerUser.name : 'Usuario'
+    const headerUserEmail = headerUser && headerUser.email ? headerUser.email : 'Email nao informado'
 %>
 
 <header
@@ -24,8 +26,8 @@
                     </span>
                 <% } %>
                 <span class="hidden min-w-0 sm:block">
-                    <span class="block truncate text-sm font-medium leading-tight text-preto"><%= headerUser.name %></span>
-                    <span class="mt-0.5 block truncate text-xs font-light leading-tight text-preto/50"><%= headerUser.email %></span>
+                    <span class="block truncate text-sm font-medium leading-tight text-preto"><%= headerUserName %></span>
+                    <span class="mt-0.5 block truncate text-xs font-light leading-tight text-preto/50"><%= headerUserEmail %></span>
                 </span>
                 <img src="/img/icons/seta_baixo.svg" alt="" class="size-3 shrink-0 opacity-70 transition-transform" data-user-menu-arrow />
             </button>
@@ -34,9 +36,10 @@
                 class="absolute right-0 top-[calc(100%+10px)] z-50 hidden w-56 rounded-[8px] border border-[#e2e2e2] bg-white py-2 shadow-lg shadow-black/10"
                 role="menu">
                 <button type="button"
+                    data-settings-modal-open
                     class="flex h-10 w-full items-center px-4 text-left text-sm font-normal text-preto/75 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
                     role="menuitem">
-                    Configurações
+                    Configura&ccedil;&otilde;es
                 </button>
                 <button type="button"
                     class="flex h-10 w-full items-center px-4 text-left text-sm font-normal text-preto/75 transition-colors hover:bg-[#f3f3f3] hover:text-preto"
@@ -55,3 +58,75 @@
         </div>
     <% } %>
 </header>
+
+<% if (headerUser) { %>
+    <div data-settings-modal class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/65 px-4 py-8" aria-hidden="true">
+        <div data-settings-modal-panel role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" class="relative flex h-[680px] max-h-[calc(100vh-48px)] w-full max-w-[880px] flex-col overflow-hidden rounded-[8px] bg-white shadow-[0px_24px_48px_0px_rgba(0,0,0,0.18)]">
+            <div class="flex items-start justify-between gap-4 border-b border-[#e2e2e2] px-5 py-5 sm:px-7">
+                <div class="flex min-w-0 items-center gap-4">
+                    <% if (headerUser.avatarUrl) { %>
+                        <img src="<%= headerUser.avatarUrl %>" alt="" class="size-14 shrink-0 rounded-full border border-[#bababa]/70 object-cover" referrerpolicy="no-referrer" />
+                    <% } else { %>
+                        <span class="flex size-14 shrink-0 items-center justify-center rounded-full border border-[#bababa]/70 bg-[#d9d9d9]">
+                            <span class="size-6 rounded-full bg-white/60"></span>
+                        </span>
+                    <% } %>
+                    <div class="min-w-0">
+                        <h2 id="settings-modal-title" class="text-2xl font-semibold leading-7 text-preto">Configura&ccedil;&otilde;es</h2>
+                        <p class="mt-1 truncate text-sm font-medium leading-5 text-preto/55"><%= headerUserName %></p>
+                    </div>
+                </div>
+
+                <button data-settings-modal-close type="button" class="flex size-[30px] shrink-0 items-center justify-center rounded-[8px] bg-[#e30000] transition-colors hover:bg-[#c90000]" aria-label="Fechar configura&ccedil;&otilde;es">
+                    <img src="/img/icons/x_close.svg" alt="" class="size-4" />
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
+                <div class="space-y-[21px]">
+                    <section aria-labelledby="settings-profile-title">
+                        <h3 id="settings-profile-title" class="text-sm font-semibold uppercase leading-[18px] text-preto">Informa&ccedil;&otilde;es</h3>
+                        <dl class="mt-4 grid border-y border-[#e2e2e2] sm:grid-cols-2">
+                            <div class="py-4 sm:pr-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">Nome</dt>
+                                <dd class="mt-1 truncate text-sm font-semibold leading-5 text-preto"><%= headerUserName %></dd>
+                            </div>
+                            <div class="border-t border-[#e2e2e2] py-4 sm:border-t-0 sm:pl-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">E-mail</dt>
+                                <dd class="mt-1 truncate text-sm font-semibold leading-5 text-preto"><%= headerUserEmail %></dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section aria-labelledby="settings-payment-title">
+                        <h3 id="settings-payment-title" class="text-sm font-semibold uppercase leading-[18px] text-preto">Pagamento</h3>
+                        <dl class="mt-4 grid border-y border-[#e2e2e2] sm:grid-cols-2">
+                            <div class="py-4 sm:pr-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">Plano atual</dt>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">Gardesa Pro</dd>
+                            </div>
+                            <div class="border-t border-[#e2e2e2] py-4 sm:border-t-0 sm:pl-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">Cr&eacute;ditos</dt>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">120 creditos disponiveis</dd>
+                            </div>
+                            <div class="border-t border-[#e2e2e2] py-4 sm:pr-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">Pr&oacute;xima cobran&ccedil;a</dt>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">15/07/2026</dd>
+                            </div>
+                            <div class="border-t border-[#e2e2e2] py-4 sm:pl-5">
+                                <dt class="text-xs font-medium leading-4 text-preto/50">M&eacute;todo de pagamento</dt>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">Cartao final 4242</dd>
+                            </div>
+                        </dl>
+                    </section>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end border-t border-[#e2e2e2] px-5 py-4 sm:px-7">
+                <button data-settings-modal-close type="button" class="inline-flex h-11 min-w-[112px] items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+<% } %>
