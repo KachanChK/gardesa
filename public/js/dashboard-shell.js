@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const userMenuToggle = document.getElementById('user-menu-toggle')
     const userMenuDropdown = document.getElementById('user-menu-dropdown')
     const userMenuArrow = document.querySelector('[data-user-menu-arrow]')
+    const settingsModalOpen = document.querySelector('[data-settings-modal-open]')
+    const settingsModal = document.querySelector('[data-settings-modal]')
+    const settingsModalPanel = document.querySelector('[data-settings-modal-panel]')
+    const settingsModalCloseButtons = document.querySelectorAll('[data-settings-modal-close]')
 
     let hoveringSidebar = false
     let focusingSidebar = false
     let userMenuOpen = false
+    let settingsModalVisible = false
 
     function applyCollapsedPresentation(value, options = {}) {
         const updateLayout = options.updateLayout !== false
@@ -66,6 +71,22 @@ document.addEventListener('DOMContentLoaded', () => {
         userMenuArrow?.classList.toggle('rotate-180', userMenuOpen)
     }
 
+    function setSettingsModal(open) {
+        if (!settingsModal) {
+            return
+        }
+
+        settingsModalVisible = open
+
+        settingsModal.classList.toggle('hidden', !settingsModalVisible)
+        settingsModal.classList.toggle('flex', settingsModalVisible)
+        settingsModal.setAttribute('aria-hidden', String(!settingsModalVisible))
+
+        if (settingsModalVisible) {
+            setUserMenu(false)
+        }
+    }
+
     sidebar.addEventListener('mouseenter', () => {
         hoveringSidebar = true
         syncSidebar()
@@ -106,6 +127,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 setUserMenu(false)
+                setSettingsModal(false)
+            }
+        })
+    }
+
+    if (settingsModalOpen && settingsModal && settingsModalPanel) {
+        settingsModalOpen.addEventListener('click', () => {
+            setSettingsModal(true)
+        })
+
+        settingsModalCloseButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setSettingsModal(false)
+            })
+        })
+
+        settingsModal.addEventListener('click', (event) => {
+            if (event.target === settingsModal) {
+                setSettingsModal(false)
             }
         })
     }
