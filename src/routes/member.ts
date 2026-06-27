@@ -1,4 +1,4 @@
-import { Router, type Response } from 'express'
+import { Router, type RequestHandler, type Response } from 'express'
 import { randomUUID } from 'crypto'
 import { requireAuth } from '../middlewares/auth'
 import {
@@ -10,10 +10,12 @@ import {
     isAiRenderWeather
 } from '../services/render-config'
 import {
+    claimAiRenderForProcessing,
     createPendingAiRender,
     findAiRenderForUser,
     listAiRendersForGallery,
     markAiRenderDeleted,
+    markAiRenderFailed,
     updateAiRenderFavorite,
     type AiRenderGalleryRecord
 } from '../services/render-repository'
@@ -24,21 +26,99 @@ import {
     pipePrivateBlobToResponse
 } from '../services/render-storage'
 import { generateRenderForUser, getPublicRenderErrorMessage } from '../services/render-service'
+import {
+    ensureRenderQualityAllowed,
+    getCreditSummary,
+    InsufficientCreditsError,
+    QualityNotAllowedError,
+    reserveCreditsForRender,
+    refundCreditsForRender
+} from '../services/credits-service'
+import { listPlans } from '../services/credits-repository'
+import { createPlanCheckout } from '../services/billing-service'
 
 const router = Router()
 
 router.use('/member', requireAuth)
 
-router.get('/member', (_req, res) => {
+const attachCreditSummary: RequestHandler = async (_req, res, next) => {
+    const currentUser = getCurrentUser(res)
+
+    if (!currentUser) {
+        next()
+        return
+    }
+
+    try {
+        res.locals.creditSummary = await getCreditSummary(currentUser.id)
+    } catch (error) {
+        console.error('[Creditos] Erro ao carregar saldo do usuario:', error)
+        res.locals.creditSummary = null
+    }
+
+    next()
+}
+
+router.get('/member', attachCreditSummary, (_req, res) => {
     res.render('member', {
         currentUser: res.locals.currentUser
     })
 })
 
-router.get('/member/render', (_req, res) => {
+router.get('/member/render', attachCreditSummary, (_req, res) => {
     res.render('render-ai', {
         currentUser: res.locals.currentUser
     })
+})
+
+router.get('/member/billing', attachCreditSummary, async (_req, res) => {
+    try {
+        const plans = await listPlans()
+
+        res.render('billing', {
+            currentUser: res.locals.currentUser,
+            plans: plans.filter((plan) => plan.is_paid)
+        })
+    } catch (error) {
+        console.error('[Billing] Erro ao carregar planos:', error)
+        res.status(500).render('billing', {
+            currentUser: res.locals.currentUser,
+            plans: []
+        })
+    }
+})
+
+router.post('/member/billing/checkout', async (req, res) => {
+    const currentUser = getCurrentUser(res)
+    const planSlug = typeof req.body?.planSlug === 'string' ? req.body.planSlug : ''
+    const paymentMethod = req.body?.paymentMethod === 'PIX' ? 'PIX' : 'CARD'
+    const taxId = typeof req.body?.taxId === 'string' ? req.body.taxId.replace(/\D/g, '') : ''
+
+    if (!currentUser) {
+        res.status(401).json({ message: 'Faca login para assinar um plano.' })
+        return
+    }
+
+    if (taxId.length !== 11 && taxId.length !== 14) {
+        res.status(400).json({ message: 'Informe um CPF ou CNPJ valido.' })
+        return
+    }
+
+    try {
+        const checkoutUrl = await createPlanCheckout({
+            email: typeof res.locals.currentUser?.email === 'string' ? res.locals.currentUser.email : '',
+            name: typeof res.locals.currentUser?.name === 'string' ? res.locals.currentUser.name : '',
+            paymentMethod,
+            planSlug,
+            taxId,
+            userId: currentUser.id
+        })
+
+        res.redirect(303, checkoutUrl)
+    } catch (error) {
+        console.error('[Billing] Erro ao criar checkout:', error)
+        res.status(400).json({ message: error instanceof Error ? error.message : 'Nao foi possivel iniciar a assinatura.' })
+    }
 })
 
 router.post('/member/render/upload-intent', async (req, res) => {
@@ -129,6 +209,58 @@ router.post('/member/render/generate', async (req, res) => {
     }
 
     try {
+        await ensureRenderQualityAllowed(currentUser.id, quality)
+    } catch (error) {
+        if (error instanceof QualityNotAllowedError) {
+            res.status(403).json({
+                allowedQualities: error.allowedQualities,
+                code: 'QUALITY_NOT_ALLOWED',
+                message: 'Seu plano atual nao permite esta qualidade de render.',
+                upgradeUrl: '/member/billing'
+            })
+            return
+        }
+
+        console.error('[Creditos] Erro ao validar qualidade:', error)
+        res.status(500).json({ message: 'Nao foi possivel validar seu plano.' })
+        return
+    }
+
+    const claimed = await claimAiRenderForProcessing(renderId, currentUser.id)
+
+    if (!claimed) {
+        res.status(409).json({ message: 'Este render ja esta sendo gerado.' })
+        return
+    }
+
+    let reservedBalance: number
+
+    try {
+        reservedBalance = await reserveCreditsForRender({ quality, renderId, userId: currentUser.id })
+    } catch (error) {
+        await markAiRenderFailed({
+            errorMessage: 'Creditos insuficientes.',
+            id: renderId,
+            userId: currentUser.id
+        }).catch(() => undefined)
+
+        if (error instanceof InsufficientCreditsError) {
+            res.status(402).json({
+                balance: error.balance,
+                code: 'INSUFFICIENT_CREDITS',
+                message: 'Voce nao tem creditos suficientes para gerar este render.',
+                requiredCredits: error.requiredCredits,
+                upgradeUrl: '/member/billing'
+            })
+            return
+        }
+
+        console.error('[Creditos] Erro ao reservar creditos:', error)
+        res.status(500).json({ message: 'Nao foi possivel reservar seus creditos.' })
+        return
+    }
+
+    try {
         const result = await generateRenderForUser({
             aspectRatio,
             environment,
@@ -138,8 +270,12 @@ router.post('/member/render/generate', async (req, res) => {
             weather
         })
 
-        res.json(result)
+        res.json({ ...result, balance: reservedBalance })
     } catch (error) {
+        await refundCreditsForRender(currentUser.id, renderId).catch((refundError) => {
+            console.error('[Creditos] Erro ao estornar creditos:', refundError)
+        })
+
         console.error('[Renderizar Imagem] Erro na geracao:', error)
         res.status(500).json({ message: getPublicRenderErrorMessage(error) })
     }
@@ -183,7 +319,7 @@ router.get('/member/render/:id/image/:kind', async (req, res) => {
     }
 })
 
-router.get('/member/gallery', (_req, res) => {
+router.get('/member/gallery', attachCreditSummary, (_req, res) => {
     res.render('gallery', {
         currentUser: res.locals.currentUser
     })

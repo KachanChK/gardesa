@@ -2,6 +2,16 @@
     const headerUser = typeof currentUser !== 'undefined' ? currentUser : null
     const headerUserName = headerUser && headerUser.name ? headerUser.name : 'Usuario'
     const headerUserEmail = headerUser && headerUser.email ? headerUser.email : 'Email nao informado'
+    const headerCredits = typeof creditSummary !== 'undefined' ? creditSummary : null
+    const headerBalance = headerCredits ? headerCredits.balance : 0
+    const headerPlanName = headerCredits && headerCredits.planName ? headerCredits.planName : 'Free'
+    const headerQualityLabels = { '1K': 'HD', '2K': 'Full HD', '4K': '4K' }
+    const headerNextRenewal = headerCredits && headerCredits.currentPeriodEnd
+        ? new Date(headerCredits.currentPeriodEnd).toLocaleDateString('pt-BR')
+        : null
+    const headerPaymentMethod = headerCredits && headerCredits.paymentMethod === 'PIX'
+        ? 'Pix'
+        : (headerCredits && headerCredits.paymentMethod === 'CARD' ? 'Cartao' : 'Nenhum')
 %>
 
 <header
@@ -13,6 +23,17 @@
     </div>
 
     <% if (headerUser) { %>
+        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+        <a href="/member/billing"
+            class="flex h-10 items-center gap-2 rounded-full border border-[#e2e2e2] bg-white px-3 transition-colors hover:bg-[#f3f3f3]"
+            aria-label="Ver creditos e planos">
+            <img src="/img/icons/sparkles_black.svg" alt="" class="size-4" />
+            <span class="text-sm font-semibold leading-4 text-preto">
+                <span data-credit-balance><%= headerBalance %></span>
+                <span class="hidden font-normal text-preto/55 sm:inline">creditos</span>
+            </span>
+        </a>
+
         <div class="relative shrink-0" data-user-menu>
             <button id="user-menu-toggle" type="button"
                 class="flex h-12 max-w-[180px] items-center gap-2 rounded-[8px] px-2 text-left transition-colors hover:bg-[#f3f3f3] sm:max-w-[260px] sm:gap-3 sm:px-3"
@@ -55,6 +76,7 @@
                     </button>
                 </form>
             </div>
+        </div>
         </div>
     <% } %>
 </header>
@@ -103,21 +125,26 @@
                         <dl class="mt-4 grid border-y border-[#e2e2e2] sm:grid-cols-2">
                             <div class="py-4 sm:pr-5">
                                 <dt class="text-xs font-medium leading-4 text-preto/50">Plano atual</dt>
-                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">Gardesa Pro</dd>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto"><%= headerPlanName %></dd>
                             </div>
                             <div class="border-t border-[#e2e2e2] py-4 sm:border-t-0 sm:pl-5">
                                 <dt class="text-xs font-medium leading-4 text-preto/50">Cr&eacute;ditos</dt>
-                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">120 creditos disponiveis</dd>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto"><%= headerBalance %> creditos disponiveis</dd>
                             </div>
                             <div class="border-t border-[#e2e2e2] py-4 sm:pr-5">
-                                <dt class="text-xs font-medium leading-4 text-preto/50">Pr&oacute;xima cobran&ccedil;a</dt>
-                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">15/07/2026</dd>
+                                <dt class="text-xs font-medium leading-4 text-preto/50">Pr&oacute;xima renova&ccedil;&atilde;o</dt>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto"><%= headerNextRenewal ? headerNextRenewal : 'Sem renovacao' %></dd>
                             </div>
                             <div class="border-t border-[#e2e2e2] py-4 sm:pl-5">
                                 <dt class="text-xs font-medium leading-4 text-preto/50">M&eacute;todo de pagamento</dt>
-                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto">Cartao final 4242</dd>
+                                <dd class="mt-1 text-sm font-semibold leading-5 text-preto"><%= headerPaymentMethod %></dd>
                             </div>
                         </dl>
+                        <div class="mt-4">
+                            <a href="/member/billing" class="inline-flex h-10 items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2">
+                                Gerenciar plano
+                            </a>
+                        </div>
                     </section>
                 </div>
             </div>

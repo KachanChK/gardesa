@@ -75,6 +75,18 @@ export async function createPendingAiRender(options: {
     return result.rows[0]
 }
 
+export async function claimAiRenderForProcessing(id: string, userId: string): Promise<boolean> {
+    const result = await db.query(
+        `UPDATE ai_renders
+        SET status = 'processing', updated_at = now()
+        WHERE id = $1 AND user_id = $2 AND status = 'pending'
+        RETURNING id`,
+        [id, userId]
+    )
+
+    return result.rowCount === 1
+}
+
 export async function findAiRenderForUser(id: string, userId: string): Promise<AiRenderRecord | null> {
     const result = await db.query<AiRenderRecord>(
         'SELECT * FROM ai_renders WHERE id = $1 AND user_id = $2 LIMIT 1',

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planos | Gardesa</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico?=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/output.css" />
+    <script src="/js/dashboard-shell.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-[#fafafa] font-sans text-preto antialiased">
+    <%
+        const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
+        const summary = typeof creditSummary !== 'undefined' ? creditSummary : null
+        const currentPlanSlug = summary && summary.planSlug ? summary.planSlug : 'free'
+        const currentPage = 'Planos'
+        const qualityLabels = { '1K': 'HD', '2K': 'Full HD', '4K': '4K' }
+        const navItems = [
+            { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
+            { label: 'Renderizar Imagem', iconDefault: '/img/icons/sparkles_black.svg', iconActive: '/img/icons/sparkles.svg', active: false, href: '/member/render', iconSize: 'size-5' },
+            { label: 'Galeria', iconDefault: '/img/icons/layout_dark.svg', iconActive: '/img/icons/layout_green.svg', active: false, href: '/member/gallery', iconSize: 'size-5' }
+        ]
+    %>
+
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/30 md:hidden" aria-hidden="true"></div>
+    <%- include('partials/dashboard-sidebar', { navItems, currentUser: authenticatedUser, initialSidebarCollapsed: true }) %>
+
+    <div id="dashboard-layout" class="min-h-screen pl-[84px] transition-[padding] duration-300">
+        <%- include('partials/dashboard-header', { sectionLabel: 'Dashboard', currentPage, currentUser: authenticatedUser }) %>
+
+        <main class="min-h-[calc(100vh-68px)] bg-[#fafafa] px-4 pb-12 pt-8 sm:px-8">
+            <section class="mx-auto w-full max-w-[1040px]" aria-labelledby="billing-title">
+                <h2 id="billing-title" class="text-[32px] font-semibold leading-[40px] text-preto">Escolha seu plano</h2>
+                <p class="mt-2 max-w-[640px] text-sm font-normal leading-5 text-[#656565]">
+                    Os cr&eacute;ditos renovam mensalmente enquanto a assinatura estiver ativa. No cart&atilde;o a renova&ccedil;&atilde;o &eacute; autom&aacute;tica; no Pix voc&ecirc; paga a cada m&ecirc;s para manter o plano.
+                </p>
+
+                <% if (typeof plans === 'undefined' || !plans.length) { %>
+                    <p class="mt-8 rounded-[8px] border border-[#f1b8b8] bg-[#fff5f5] px-4 py-3 text-sm font-medium text-[#b42318]">
+                        N&atilde;o foi poss&iacute;vel carregar os planos agora. Tente novamente em instantes.
+                    </p>
+                <% } else { %>
+                    <div class="mt-8 grid gap-5 lg:grid-cols-3">
+                        <% plans.forEach((plan) => { %>
+                            <%
+                                const isCurrent = plan.slug === currentPlanSlug
+                                const priceLabel = (plan.price_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                const qualities = (plan.allowed_qualities || []).map((quality) => qualityLabels[quality] || quality)
+                            %>
+                            <article class="flex flex-col rounded-[8px] border <%= isCurrent ? 'border-verde shadow-[0px_4px_16px_0px_rgba(90,219,64,0.18)]' : 'border-[#e2e2e2]' %> bg-white p-6">
+                                <div class="flex items-center justify-between gap-3">
+                                    <h3 class="text-lg font-semibold leading-6 text-preto"><%= plan.name %></h3>
+                                    <% if (isCurrent) { %>
+                                        <span class="inline-flex items-center rounded-full bg-[#d1fac8] px-3 py-1 text-xs font-semibold text-[#2ed218]">Plano atual</span>
+                                    <% } %>
+                                </div>
+
+                                <p class="mt-4 text-3xl font-semibold leading-9 text-preto">
+                                    R$ <%= priceLabel %><span class="text-sm font-normal text-preto/50">/m&ecirc;s</span>
+                                </p>
+
+                                <ul class="mt-5 flex flex-col gap-3 text-sm font-normal leading-5 text-preto/75">
+                                    <li class="flex items-center gap-2">
+                                        <span class="flex size-5 items-center justify-center rounded-full bg-[#d1fac8] text-xs font-semibold text-[#2ed218]">&#10003;</span>
+                                        <%= plan.monthly_credits %> cr&eacute;ditos por m&ecirc;s
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <span class="flex size-5 items-center justify-center rounded-full bg-[#d1fac8] text-xs font-semibold text-[#2ed218]">&#10003;</span>
+                                        Qualidade: <%= qualities.join(', ') %>
+                                    </li>
+                                </ul>
+
+                                <form action="/member/billing/checkout" method="POST" class="mt-6 flex flex-col gap-3 border-t border-[#e2e2e2] pt-5">
+                                    <input type="hidden" name="planSlug" value="<%= plan.slug %>" />
+
+                                    <label class="text-xs font-medium leading-4 text-preto/55">
+                                        CPF ou CNPJ
+                                        <input type="text" name="taxId" inputmode="numeric" required placeholder="Somente n&uacute;meros"
+                                            class="mt-1 h-11 w-full rounded-[8px] border border-[#e2e2e2] bg-white px-3 text-sm font-medium text-preto focus:border-verde focus:outline-none focus:ring-2 focus:ring-verde/25" />
+                                    </label>
+
+                                    <fieldset class="flex gap-2">
+                                        <legend class="sr-only">Forma de pagamento</legend>
+                                        <label class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[8px] border border-[#e2e2e2] px-3 py-2 text-sm font-semibold text-preto has-[:checked]:border-verde has-[:checked]:bg-[#f2f8ef]">
+                                            <input type="radio" name="paymentMethod" value="CARD" class="accent-verde" checked />
+                                            Cart&atilde;o
+                                        </label>
+                                        <label class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[8px] border border-[#e2e2e2] px-3 py-2 text-sm font-semibold text-preto has-[:checked]:border-verde has-[:checked]:bg-[#f2f8ef]">
+                                            <input type="radio" name="paymentMethod" value="PIX" class="accent-verde" />
+                                            Pix
+                                        </label>
+                                    </fieldset>
+
+                                    <button type="submit" class="inline-flex h-12 w-full items-center justify-center rounded-full bg-verde px-5 text-sm font-semibold text-white transition-colors hover:bg-verde-2 disabled:pointer-events-none disabled:opacity-60" <%= isCurrent ? 'disabled aria-disabled="true"' : '' %>>
+                                        <%= isCurrent ? 'Plano atual' : 'Assinar ' + plan.name %>
+                                    </button>
+                                </form>
+                            </article>
+                        <% }) %>
+                    </div>
+
+                    <p class="mt-6 text-xs font-normal leading-5 text-preto/50">
+                        Ao assinar, voc&ecirc; &eacute; redirecionado para o ambiente seguro da AbacatePay para concluir o pagamento. Os cr&eacute;ditos s&atilde;o liberados ap&oacute;s a confirma&ccedil;&atilde;o.
+                    </p>
+                <% } %>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

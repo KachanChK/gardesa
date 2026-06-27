@@ -7,5 +7,11 @@
       "includeFiles": "{src/views/**,node_modules/@vercel/blob/**,node_modules/async-retry/**,node_modules/retry/**,node_modules/is-buffer/**,node_modules/is-node-process/**,node_modules/throttleit/**,node_modules/undici/**,node_modules/image-size/**,node_modules/replicate/**}",
       "maxDuration": 300
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/internal/cron/reconcile-credits",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }
