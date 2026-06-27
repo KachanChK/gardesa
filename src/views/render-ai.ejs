@@ -17,6 +17,10 @@
 <body class="min-h-screen bg-[#fafafa] font-sans text-preto antialiased">
     <%
         const authenticatedUser = typeof currentUser !== 'undefined' ? currentUser : null
+        const renderSummary = typeof creditSummary !== 'undefined' ? creditSummary : null
+        const allowedQualities = renderSummary && renderSummary.allowedQualities ? renderSummary.allowedQualities : ['1K']
+        const qualityLocked = !(allowedQualities.indexOf('2K') !== -1 || allowedQualities.indexOf('4K') !== -1)
+        const renderBalance = renderSummary ? renderSummary.balance : 0
         const currentPage = 'Renderizar Imagem'
         const navItems = [
             { label: 'Home', iconDefault: '/img/icons/inicio_default.svg', iconActive: '/img/icons/inicio_active.svg', active: false, href: '/member', iconSize: 'size-5' },
@@ -119,16 +123,16 @@
                     </div>
                 </section>
 
-                <section class="mt-7 flex flex-col gap-4" aria-labelledby="render-quality-title">
+                <section class="mt-7 flex flex-col gap-4" aria-labelledby="render-quality-title" data-quality-allowed="<%= allowedQualities.join(',') %>">
                     <div class="flex items-center justify-between gap-3">
                         <h3 id="render-quality-title" class="text-sm font-semibold leading-[18px] text-preto">QUALIDADE</h3>
                         <span class="text-xs font-normal leading-4 text-preto/50">Resolu&ccedil;&atilde;o do render</span>
                     </div>
 
-                    <div class="relative pt-2">
+                    <div class="relative pt-2 <%= qualityLocked ? 'opacity-60' : '' %>">
                         <div class="h-1 rounded-full bg-[#e2e2e2]"></div>
-                        <div data-quality-active class="absolute left-0 top-2 h-1 w-1/2 rounded-full bg-verde"></div>
-                        <input data-quality-range type="range" min="1" max="3" step="1" value="2" aria-label="Qualidade do render" class="quality-range absolute inset-x-0 top-0 h-5 w-full cursor-pointer bg-transparent">
+                        <div data-quality-active class="absolute left-0 top-2 h-1 w-0 rounded-full bg-verde"></div>
+                        <input data-quality-range type="range" min="1" max="3" step="1" value="<%= qualityLocked ? 1 : 2 %>" aria-label="Qualidade do render" class="quality-range absolute inset-x-0 top-0 h-5 w-full cursor-pointer bg-transparent disabled:cursor-not-allowed" <%= qualityLocked ? 'disabled aria-disabled="true"' : '' %>>
                     </div>
 
                     <div class="grid grid-cols-3 text-xs font-semibold leading-4">
@@ -136,7 +140,7 @@
                             <span class="block">HD</span>
                             <span class="block">2</span>
                         </span>
-                        <span data-quality-label="2K" class="text-center text-preto">
+                        <span data-quality-label="2K" class="text-center text-preto/55">
                             <span class="block">Full HD</span>
                             <span class="block">3</span>
                         </span>
@@ -145,6 +149,12 @@
                             <span class="block">5</span>
                         </span>
                     </div>
+
+                    <% if (qualityLocked) { %>
+                        <a href="/member/billing" class="inline-flex items-center gap-1 text-xs font-medium leading-4 text-verde-3 transition-opacity hover:opacity-80">
+                            Full HD e 4K disponiveis nos planos Pro e Studio
+                        </a>
+                    <% } %>
                 </section>
 
                 <div class="mt-7 flex flex-col gap-3 pb-4">
@@ -153,7 +163,7 @@
                     <p data-render-status class="hidden"></p>
 
                     <button data-render-generate type="button" class="inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-verde px-5 text-sm font-semibold text-white shadow-[0px_4px_8px_0px_rgba(90,219,64,0.25)] transition-colors hover:bg-verde-2 disabled:pointer-events-none">
-                        <span class="flex size-7 items-center justify-center rounded-full bg-white text-xs font-semibold leading-4 text-preto">3</span>
+                        <span data-render-cost class="flex size-7 items-center justify-center rounded-full bg-white text-xs font-semibold leading-4 text-preto">2</span>
                         <span data-render-button-label>Gerar render</span>
                     </button>
                 </div>

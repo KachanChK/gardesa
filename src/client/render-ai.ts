@@ -8,6 +8,21 @@ const QUALITY_BY_SLIDER_VALUE = new Map([
     ['2', '2K'],
     ['3', '4K']
 ])
+const CREDIT_COST_BY_QUALITY = new Map([
+    ['1K', 2],
+    ['2K', 3],
+    ['4K', 5]
+])
+
+class RenderRequestError extends Error {
+    readonly upgradeUrl: string | null
+
+    constructor(message: string, upgradeUrl: string | null) {
+        super(message)
+        this.name = 'RenderRequestError'
+        this.upgradeUrl = upgradeUrl
+    }
+}
 
 type RenderViewMode = 'compare' | 'rendered'
 type RenderAspectRatio = 'match_input_image' | '1:1' | '3:4' | '16:9' | '9:16'
@@ -22,6 +37,7 @@ interface UploadIntentResponse {
 }
 
 interface GenerateResponse {
+    balance?: number
     id: string
     originalImageUrl: string
     renderedImageUrl: string
@@ -34,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
         aspectRatioSelect: document.querySelector<HTMLSelectElement>('[data-render-aspect-ratio]'),
         compareHandle: document.querySelector<HTMLElement>('[data-render-compare-handle]'),
         compareRange: document.querySelector<HTMLInputElement>('[data-render-compare-range]'),
+        costBadge: document.querySelector<HTMLElement>('[data-render-cost]'),
+        creditBalance: document.querySelector<HTMLElement>('[data-credit-balance]'),
         downloadButton: document.querySelector<HTMLButtonElement>('[data-render-download]'),
         emptyState: document.querySelector<HTMLElement>('[data-render-empty-state]'),
         environmentButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-environment-option]')),
@@ -317,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality, aspectRatio)
 
+            updateCreditBalance(rendered.balance)
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl)
             state.viewMode = 'compare'
             state.comparePosition = 50
@@ -324,7 +343,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderUi()
         } catch (error) {
-            showError(getErrorMessage(error))
+            if (error instanceof RenderRequestError && error.upgradeUrl) {
+                showUpgradeError(error.message, error.upgradeUrl)
+            } else {
+                showError(getErrorMessage(error))
+            }
+
             setStatus('')
         } finally {
             setLoading(false)
@@ -368,10 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function parseJsonResponse<T>(response: Response): Promise<T> {
-        const payload = await response.json().catch(() => null) as { message?: string } | null
+        const payload = await response.json().catch(() => null) as { message?: string, upgradeUrl?: string } | null
 
         if (!response.ok) {
-            throw new Error(payload?.message ?? 'Nao foi possivel concluir a acao.')
+            const message = payload?.message ?? 'Nao foi possivel concluir a acao.'
+            throw new RenderRequestError(message, payload?.upgradeUrl ?? null)
         }
 
         return payload as T
@@ -502,6 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
             label.classList.toggle('text-preto', selected)
             label.classList.toggle('text-preto/55', !selected)
         })
+
+        if (elements.costBadge && quality) {
+            elements.costBadge.textContent = String(CREDIT_COST_BY_QUALITY.get(quality) ?? '')
+        }
+    }
+
+    function updateCreditBalance(balance: number | undefined) {
+        if (typeof balance === 'number' && elements.creditBalance) {
+            elements.creditBalance.textContent = String(balance)
+        }
     }
 
     function setFullscreen(value: boolean) {
@@ -599,6 +634,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         elements.error.textContent = message
+        elements.error.classList.remove('hidden')
+    }
+
+    function showUpgradeError(message: string, upgradeUrl: string) {
+        if (!elements.error) {
+            return
+        }
+
+        elements.error.textContent = `${message} `
+        const link = document.createElement('a')
+        link.href = upgradeUrl
+        link.textContent = 'Ver planos'
+        link.className = 'font-semibold underline'
+        elements.error.appendChild(link)
         elements.error.classList.remove('hidden')
     }
 

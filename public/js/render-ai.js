@@ -2023,12 +2023,26 @@
         ["2", "2K"],
         ["3", "4K"]
       ]);
+      var CREDIT_COST_BY_QUALITY = /* @__PURE__ */ new Map([
+        ["1K", 2],
+        ["2K", 3],
+        ["4K", 5]
+      ]);
+      var RenderRequestError = class extends Error {
+        constructor(message, upgradeUrl) {
+          super(message);
+          this.name = "RenderRequestError";
+          this.upgradeUrl = upgradeUrl;
+        }
+      };
       document.addEventListener("DOMContentLoaded", () => {
         const elements = {
           actionMenu: document.querySelector("[data-render-actions]"),
           aspectRatioSelect: document.querySelector("[data-render-aspect-ratio]"),
           compareHandle: document.querySelector("[data-render-compare-handle]"),
           compareRange: document.querySelector("[data-render-compare-range]"),
+          costBadge: document.querySelector("[data-render-cost]"),
+          creditBalance: document.querySelector("[data-credit-balance]"),
           downloadButton: document.querySelector("[data-render-download]"),
           emptyState: document.querySelector("[data-render-empty-state]"),
           environmentButtons: Array.from(document.querySelectorAll("[data-environment-option]")),
@@ -2205,7 +2219,7 @@
         async function generateRender() {
           clearError();
           if (!state.file) {
-            showError("Envie uma imagem do seu projeto para criar o render.");
+            showError("Envie uma imagem PNG ou JPG antes de gerar o render.");
             return;
           }
           if (!state.environment) {
@@ -2249,13 +2263,18 @@
             setProgress("");
             setStatus("Gerando render...");
             const rendered = await requestRenderGeneration(intent.renderId, state.environment, state.weather, quality, aspectRatio);
+            updateCreditBalance(rendered.balance);
             state.renderedUrl = withCacheBust(rendered.renderedImageUrl);
             state.viewMode = "compare";
             state.comparePosition = 50;
             state.fullscreen = false;
             renderUi();
           } catch (error) {
-            showError(getErrorMessage(error));
+            if (error instanceof RenderRequestError && error.upgradeUrl) {
+              showUpgradeError(error.message, error.upgradeUrl);
+            } else {
+              showError(getErrorMessage(error));
+            }
             setStatus("");
           } finally {
             setLoading(false);
@@ -2296,7 +2315,8 @@
         async function parseJsonResponse(response) {
           const payload = await response.json().catch(() => null);
           if (!response.ok) {
-            throw new Error(payload?.message ?? "Não foi possivel concluir a ação.");
+            const message = payload?.message ?? "Nao foi possivel concluir a acao.";
+            throw new RenderRequestError(message, payload?.upgradeUrl ?? null);
           }
           return payload;
         }
@@ -2400,6 +2420,14 @@
             label.classList.toggle("text-preto", selected);
             label.classList.toggle("text-preto/55", !selected);
           });
+          if (elements.costBadge && quality) {
+            elements.costBadge.textContent = String(CREDIT_COST_BY_QUALITY.get(quality) ?? "");
+          }
+        }
+        function updateCreditBalance(balance) {
+          if (typeof balance === "number" && elements.creditBalance) {
+            elements.creditBalance.textContent = String(balance);
+          }
         }
         function setFullscreen(value) {
           if (!state.renderedUrl) {
@@ -2434,10 +2462,10 @@
         }
         function validateFile(file) {
           if (!ALLOWED_CONTENT_TYPES.has(file.type)) {
-            return "Formatos aceitos: PNG e JPG.";
+            return "Envie apenas imagens PNG ou JPG.";
           }
           if (file.size > MAX_UPLOAD_BYTES) {
-            return "A imagem deve ter até 5 MB.";
+            return "A imagem deve ter ate 5 MB.";
           }
           return null;
         }
@@ -2474,6 +2502,18 @@
           elements.error.textContent = message;
           elements.error.classList.remove("hidden");
         }
+        function showUpgradeError(message, upgradeUrl) {
+          if (!elements.error) {
+            return;
+          }
+          elements.error.textContent = `${message} `;
+          const link = document.createElement("a");
+          link.href = upgradeUrl;
+          link.textContent = "Ver planos";
+          link.className = "font-semibold underline";
+          elements.error.appendChild(link);
+          elements.error.classList.remove("hidden");
+        }
         function clearError() {
           if (!elements.error) {
             return;
@@ -2485,7 +2525,7 @@
           if (error instanceof Error && error.message) {
             return error.message;
           }
-          return "Não foi possivel gerar o render. Tente novamente.";
+          return "Nao foi possivel gerar o render. Tente novamente.";
         }
         function withCacheBust(url) {
           const separator = url.includes("?") ? "&" : "?";

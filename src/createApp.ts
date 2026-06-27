@@ -7,6 +7,7 @@ import { getWaitlistCount } from './services/waitlist'
 import { attachAuthenticatedUser } from './middlewares/auth'
 import waitlistRouter from './routes/waitlist'
 import legalRouter from './routes/legal'
+import abacatepayRouter from './routes/abacatepay'
 
 export function createApp(): Express {
   const app = express()
@@ -14,6 +15,8 @@ export function createApp(): Express {
 
   app.use(helmet({ contentSecurityPolicy: false }))
   app.set('trust proxy', 1)
+
+  app.use(abacatepayRouter)
 
   app.use(express.urlencoded({ extended: true, limit: '2mb' }))
   app.use(express.json({ limit: '2mb' }))
